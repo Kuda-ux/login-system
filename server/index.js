@@ -86,11 +86,32 @@ app.use('/api/buildings', buildingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+// Serve static files in production (only if client/build exists)
+// For API-only deployment (Render), this is skipped
+const clientBuildPath = path.join(__dirname, '../client/build');
+const fs = require('fs');
+if (process.env.NODE_ENV === 'production' && fs.existsSync(clientBuildPath)) {
+  app.use(express.static(clientBuildPath));
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+} else {
+  // API-only mode - return JSON for root
+  app.get('/', (req, res) => {
+    res.json({ 
+      message: 'Building Management API',
+      version: '1.0.0',
+      endpoints: {
+        health: '/api/health',
+        auth: '/api/auth',
+        visitors: '/api/visitors',
+        staff: '/api/staff',
+        buildings: '/api/buildings',
+        tenants: '/api/tenants',
+        payments: '/api/payments',
+        dashboard: '/api/dashboard'
+      }
+    });
   });
 }
 
