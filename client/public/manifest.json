@@ -4,27 +4,16 @@
   "description": "Offline-First Visitor Access & Rent Payment System",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
+      "src": "logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#1e40af",
-  "background_color": "#f8fafc",
+  "theme_color": "#6366F1",
+  "background_color": "#0f172a",
   "orientation": "portrait-primary",
   "scope": "/",
   "categories": ["business", "productivity"],
@@ -33,15 +22,25 @@
       "name": "Check In",
       "short_name": "Check In",
       "description": "Visitor check-in",
-      "url": "/visitor/check-in",
-      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+      "url": "/checkin"
     },
     {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
+      "name": "Admin Dashboard",
+      "short_name": "Admin",
       "description": "Admin Dashboard",
-      "url": "/dashboard",
-      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+      "url": "/admin"
+    },
+    {
+      "name": "Security Portal",
+      "short_name": "Security",
+      "description": "Security Portal",
+      "url": "/security"
+    },
+    {
+      "name": "Staff Portal",
+      "short_name": "Staff",
+      "description": "Staff Portal",
+      "url": "/staff"
     }
   ]
 }
