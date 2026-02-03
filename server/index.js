@@ -78,13 +78,18 @@ app.use((req, res, next) => {
 // Health check endpoint for monitoring
 app.get('/api/health', async (req, res) => {
   try {
-    const { getOne } = require('./database/init');
-    const adminExists = await getOne("SELECT id, email FROM users WHERE role = ?", ['admin']);
+    const { getOne, runQuery } = require('./database/init');
+    
+    // Test raw query first
+    const testResult = await runQuery("SELECT 1 as test", []);
+    
+    const adminExists = await getOne("SELECT id, email FROM users WHERE role = $1", ['admin']);
     const userCount = await getOne("SELECT COUNT(*) as count FROM users", []);
     res.json({ 
       status: 'ok', 
       timestamp: new Date().toISOString(),
       database: {
+        testQuery: testResult,
         adminExists: !!adminExists,
         adminEmail: adminExists?.email || null,
         totalUsers: userCount?.count || 0,
@@ -96,7 +101,8 @@ app.get('/api/health', async (req, res) => {
     res.json({ 
       status: 'error', 
       timestamp: new Date().toISOString(),
-      error: err.message
+      error: err.message,
+      stack: err.stack
     });
   }
 });
