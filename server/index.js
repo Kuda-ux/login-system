@@ -128,9 +128,10 @@ if (process.env.NODE_ENV === 'production' && fs.existsSync(clientBuildPath)) {
 } else {
   // API-only mode - return JSON for root
   app.get('/', (req, res) => {
-    res.json({ 
+    res.json({
       message: 'Building Management API',
-      version: '1.0.0',
+      version: '1.0.1',
+      deployedAt: '2026-02-03T19:50:00Z',
       endpoints: {
         health: '/api/health',
         auth: '/api/auth',
