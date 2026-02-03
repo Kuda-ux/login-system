@@ -76,19 +76,28 @@ app.use((req, res, next) => {
 });
 
 // Health check endpoint for monitoring
-app.get('/api/health', (req, res) => {
-  const { getOne } = require('./database/init');
-  const adminExists = getOne("SELECT id, email FROM users WHERE role = 'admin'");
-  const userCount = getOne("SELECT COUNT(*) as count FROM users");
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    database: {
-      adminExists: !!adminExists,
-      adminEmail: adminExists?.email || null,
-      totalUsers: userCount?.count || 0
-    }
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    const { getOne } = require('./database/init');
+    const adminExists = await getOne("SELECT id, email FROM users WHERE role = ?", ['admin']);
+    const userCount = await getOne("SELECT COUNT(*) as count FROM users", []);
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      database: {
+        adminExists: !!adminExists,
+        adminEmail: adminExists?.email || null,
+        totalUsers: userCount?.count || 0
+      }
+    });
+  } catch (err) {
+    console.error('Health check error:', err);
+    res.json({ 
+      status: 'error', 
+      timestamp: new Date().toISOString(),
+      error: err.message
+    });
+  }
 });
 
 // API Routes

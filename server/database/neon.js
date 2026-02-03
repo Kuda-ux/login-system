@@ -27,10 +27,13 @@ async function runQuery(query, params = []) {
     let paramIndex = 0;
     pgQuery = query.replace(/\?/g, () => `$${++paramIndex}`);
     
+    console.log('Executing query:', pgQuery.substring(0, 100) + '...');
     const result = await sql(pgQuery, params);
     return result;
   } catch (err) {
     console.error('Query error:', err.message);
+    console.error('Query was:', query.substring(0, 200));
+    console.error('Params:', JSON.stringify(params));
     throw err;
   }
 }
@@ -40,8 +43,9 @@ async function getOne(query, params = []) {
     const results = await runQuery(query, params);
     return results[0] || null;
   } catch (err) {
-    console.error('Query error:', err.message);
-    return null;
+    console.error('getOne error:', err.message);
+    console.error('Query:', query.substring(0, 200));
+    throw err; // Re-throw to let route handler catch it
   }
 }
 
