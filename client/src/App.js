@@ -3,23 +3,61 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { OfflineProvider } from './context/OfflineContext';
 
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import VisitorCheckIn from './pages/VisitorCheckIn';
-import StaffAttendance from './pages/StaffAttendance';
+// Visitor Interface
+import VisitorCheckInPage from './pages/visitor/VisitorCheckInPage';
+
+// Security Interface
+import SecurityLogin from './pages/security/SecurityLogin';
+import SecurityDashboard from './pages/security/SecurityDashboard';
+
+// Staff Interface
+import StaffLogin from './pages/staff/StaffLogin';
+import StaffPortal from './pages/staff/StaffPortal';
+
+// Admin Interface
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import Buildings from './pages/Buildings';
 import Tenants from './pages/Tenants';
 import Payments from './pages/Payments';
 import Visitors from './pages/Visitors';
-import Layout from './components/Layout';
 
-function PrivateRoute({ children, roles }) {
+// Landing Page
+import LandingPage from './pages/LandingPage';
+
+// Loading Spinner Component
+function LoadingSpinner() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
+    </div>
+  );
+}
+
+// Protected Route for Security
+function SecurityRoute({ children }) {
   const { user, loading } = useAuth();
-  
-  if (loading) return <div className="loading"><div className="spinner"></div></div>;
-  if (!user) return <Navigate to="/login" />;
-  if (roles && !roles.includes(user.role)) return <Navigate to="/dashboard" />;
-  
+  if (loading) return <LoadingSpinner />;
+  if (!user) return <Navigate to="/security/login" />;
+  if (!['security', 'staff', 'admin', 'owner'].includes(user.role)) return <Navigate to="/security/login" />;
+  return children;
+}
+
+// Protected Route for Staff
+function StaffRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <LoadingSpinner />;
+  if (!user) return <Navigate to="/staff/login" />;
+  if (!['staff', 'admin', 'owner'].includes(user.role)) return <Navigate to="/staff/login" />;
+  return children;
+}
+
+// Protected Route for Admin
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <LoadingSpinner />;
+  if (!user) return <Navigate to="/admin/login" />;
+  if (!['admin', 'owner'].includes(user.role)) return <Navigate to="/admin/login" />;
   return children;
 }
 
@@ -29,10 +67,8 @@ function App() {
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -43,24 +79,36 @@ function App() {
     <AuthProvider>
       <OfflineProvider>
         <Router>
-          {!isOnline && (
-            <div className="offline-banner">
-              You are currently offline. Changes will sync when connection is restored.
-            </div>
-          )}
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/visitor/check-in/:buildingId?" element={<VisitorCheckIn />} />
+            {/* ========== VISITOR INTERFACE ========== */}
+            {/* Public - No login required */}
+            <Route path="/checkin/:buildingId" element={<VisitorCheckInPage />} />
+            <Route path="/visitor/:buildingId" element={<VisitorCheckInPage />} />
             
-            <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-              <Route index element={<Navigate to="/dashboard" />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="buildings" element={<PrivateRoute roles={['admin', 'owner']}><Buildings /></PrivateRoute>} />
-              <Route path="visitors" element={<PrivateRoute roles={['admin', 'owner']}><Visitors /></PrivateRoute>} />
-              <Route path="tenants" element={<PrivateRoute roles={['admin', 'owner']}><Tenants /></PrivateRoute>} />
-              <Route path="payments" element={<PrivateRoute roles={['admin', 'owner']}><Payments /></PrivateRoute>} />
-              <Route path="staff-attendance" element={<StaffAttendance />} />
+            {/* ========== SECURITY INTERFACE ========== */}
+            <Route path="/security/login" element={<SecurityLogin />} />
+            <Route path="/security" element={<SecurityRoute><SecurityDashboard /></SecurityRoute>} />
+            
+            {/* ========== STAFF INTERFACE ========== */}
+            <Route path="/staff/login" element={<StaffLogin />} />
+            <Route path="/staff" element={<StaffRoute><StaffPortal /></StaffRoute>} />
+            
+            {/* ========== ADMIN INTERFACE ========== */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>}>
+              <Route path="buildings" element={<Buildings />} />
+              <Route path="visitors" element={<Visitors />} />
+              <Route path="tenants" element={<Tenants />} />
+              <Route path="payments" element={<Payments />} />
+              <Route path="staff" element={<div className="p-6"><h1 className="text-2xl font-bold">Staff Management</h1><p className="text-gray-500 mt-2">Coming soon...</p></div>} />
+              <Route path="reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Reports</h1><p className="text-gray-500 mt-2">Coming soon...</p></div>} />
+              <Route path="settings" element={<div className="p-6"><h1 className="text-2xl font-bold">Settings</h1><p className="text-gray-500 mt-2">Coming soon...</p></div>} />
             </Route>
+            
+            {/* ========== DEFAULT ROUTES ========== */}
+            <Route path="/login" element={<Navigate to="/admin/login" />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Router>
       </OfflineProvider>
