@@ -29,8 +29,8 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'owner'), async (req
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
     const entryQRCode = await generateEntryQRCode(buildingId, baseUrl);
     const now = new Date().toISOString();
-    runQuery(`INSERT INTO buildings (id, name, address, owner_id, entry_qr_code, created_at, updated_at, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)`, [buildingId, name, address, ownerId, entryQRCode, now, now]);
-    const building = getOne('SELECT * FROM buildings WHERE id = ?', [buildingId]);
+    await runQuery(`INSERT INTO buildings (id, name, address, owner_id, entry_qr_code, created_at, updated_at, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)`, [buildingId, name, address, ownerId, entryQRCode, now, now]);
+    const building = await getOne('SELECT * FROM buildings WHERE id = ?', [buildingId]);
 
     res.status(201).json({
       message: 'Building created successfully',
@@ -43,15 +43,15 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'owner'), async (req
 });
 
 // Get all buildings (admin sees all, owner sees theirs)
-router.get('/', authenticateToken, (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
     let buildings;
     if (req.user.role === 'admin') {
-      buildings = getAll(`SELECT b.*, u.full_name as owner_name, u.email as owner_email FROM buildings b JOIN users u ON b.owner_id = u.id WHERE b.is_active = 1 ORDER BY b.name`, []);
+      buildings = await getAll(`SELECT b.*, u.full_name as owner_name, u.email as owner_email FROM buildings b JOIN users u ON b.owner_id = u.id WHERE b.is_active = 1 ORDER BY b.name`, []);
     } else if (req.user.role === 'owner') {
-      buildings = getAll(`SELECT * FROM buildings WHERE owner_id = ? AND is_active = 1 ORDER BY name`, [req.user.id]);
+      buildings = await getAll(`SELECT * FROM buildings WHERE owner_id = ? AND is_active = 1 ORDER BY name`, [req.user.id]);
     } else {
-      buildings = req.user.building_id ? getAll(`SELECT id, name, address FROM buildings WHERE id = ? AND is_active = 1`, [req.user.building_id]) : [];
+      buildings = req.user.building_id ? await getAll(`SELECT id, name, address FROM buildings WHERE id = ? AND is_active = 1`, [req.user.building_id]) : [];
     }
     res.json({ buildings });
   } catch (err) {
@@ -61,14 +61,14 @@ router.get('/', authenticateToken, (req, res) => {
 });
 
 // Get building by ID
-router.get('/:id', authenticateToken, (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const building = getOne(`SELECT b.*, u.full_name as owner_name, u.email as owner_email FROM buildings b JOIN users u ON b.owner_id = u.id WHERE b.id = ?`, [id]);
+    const building = await getOne(`SELECT b.*, u.full_name as owner_name, u.email as owner_email FROM buildings b JOIN users u ON b.owner_id = u.id WHERE b.id = ?`, [id]);
     if (!building) { return res.status(404).json({ error: 'Building not found' }); }
-    const visitorCount = getOne(`SELECT COUNT(*) as count FROM visitors WHERE building_id = ?`, [id]) || { count: 0 };
-    const tenantCount = getOne(`SELECT COUNT(*) as count FROM tenants WHERE building_id = ? AND is_active = 1`, [id]) || { count: 0 };
-    const staffCount = getOne(`SELECT COUNT(*) as count FROM users WHERE building_id = ? AND role = 'staff' AND is_active = 1`, [id]) || { count: 0 };
+    const visitorCount = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE building_id = ?`, [id]) || { count: 0 };
+    const tenantCount = await getOne(`SELECT COUNT(*) as count FROM tenants WHERE building_id = ? AND is_active = 1`, [id]) || { count: 0 };
+    const staffCount = await getOne(`SELECT COUNT(*) as count FROM users WHERE building_id = ? AND role = 'staff' AND is_active = 1`, [id]) || { count: 0 };
 
     res.json({
       building,
@@ -85,10 +85,10 @@ router.get('/:id', authenticateToken, (req, res) => {
 });
 
 // Get building info (public - for visitor check-in)
-router.get('/:id/public', (req, res) => {
+router.get('/:id/public', async (req, res) => {
   try {
     const { id } = req.params;
-    const building = getOne(`SELECT id, name, address FROM buildings WHERE id = ? AND is_active = 1`, [id]);
+    const building = await getOne(`SELECT id, name, address FROM buildings WHERE id = ? AND is_active = 1`, [id]);
 
     if (!building) {
       return res.status(404).json({ error: 'Building not found' });
@@ -107,14 +107,14 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'owner'), async (r
     const { id } = req.params;
     const { name, address } = req.body;
 
-    const building = getOne('SELECT * FROM buildings WHERE id = ?', [id]);
+    const building = await getOne('SELECT * FROM buildings WHERE id = ?', [id]);
     if (!building) { return res.status(404).json({ error: 'Building not found' }); }
     if (req.user.role === 'owner' && building.owner_id !== req.user.id) {
       return res.status(403).json({ error: 'Not authorized to update this building' });
     }
     const now = new Date().toISOString();
-    runQuery(`UPDATE buildings SET name = COALESCE(?, name), address = COALESCE(?, address), updated_at = ? WHERE id = ?`, [name, address, now, id]);
-    const updatedBuilding = getOne('SELECT * FROM buildings WHERE id = ?', [id]);
+    await runQuery(`UPDATE buildings SET name = COALESCE(?, name), address = COALESCE(?, address), updated_at = ? WHERE id = ?`, [name, address, now, id]);
+    const updatedBuilding = await getOne('SELECT * FROM buildings WHERE id = ?', [id]);
 
     res.json({
       message: 'Building updated successfully',
@@ -130,7 +130,7 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'owner'), async (r
 router.post('/:id/regenerate-qr', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
   try {
     const { id } = req.params;
-    const building = getOne('SELECT * FROM buildings WHERE id = ?', [id]);
+    const building = await getOne('SELECT * FROM buildings WHERE id = ?', [id]);
     if (!building) { return res.status(404).json({ error: 'Building not found' }); }
     if (req.user.role === 'owner' && building.owner_id !== req.user.id) {
       return res.status(403).json({ error: 'Not authorized' });
@@ -138,7 +138,7 @@ router.post('/:id/regenerate-qr', authenticateToken, authorizeRoles('admin', 'ow
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
     const entryQRCode = await generateEntryQRCode(id, baseUrl);
     const now = new Date().toISOString();
-    runQuery('UPDATE buildings SET entry_qr_code = ?, updated_at = ? WHERE id = ?', [entryQRCode, now, id]);
+    await runQuery('UPDATE buildings SET entry_qr_code = ?, updated_at = ? WHERE id = ?', [entryQRCode, now, id]);
 
     res.json({
       message: 'QR code regenerated successfully',
@@ -151,16 +151,16 @@ router.post('/:id/regenerate-qr', authenticateToken, authorizeRoles('admin', 'ow
 });
 
 // Deactivate building
-router.delete('/:id', authenticateToken, authorizeRoles('admin', 'owner'), (req, res) => {
+router.delete('/:id', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
   try {
     const { id } = req.params;
-    const building = getOne('SELECT * FROM buildings WHERE id = ?', [id]);
+    const building = await getOne('SELECT * FROM buildings WHERE id = ?', [id]);
     if (!building) { return res.status(404).json({ error: 'Building not found' }); }
     if (req.user.role === 'owner' && building.owner_id !== req.user.id) {
       return res.status(403).json({ error: 'Not authorized' });
     }
     const now = new Date().toISOString();
-    runQuery('UPDATE buildings SET is_active = 0, updated_at = ? WHERE id = ?', [now, id]);
+    await runQuery('UPDATE buildings SET is_active = 0, updated_at = ? WHERE id = ?', [now, id]);
 
     res.json({ message: 'Building deactivated successfully' });
   } catch (err) {

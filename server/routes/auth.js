@@ -16,7 +16,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = getOne('SELECT * FROM users WHERE email = ? AND is_active = 1', [email]);
+    const user = await getOne('SELECT * FROM users WHERE email = ? AND is_active = 1', [email]);
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -68,7 +68,7 @@ router.post('/register', authenticateToken, authorizeRoles('admin', 'owner'), as
       return res.status(403).json({ error: 'Owners can only create staff or security accounts' });
     }
 
-    const existingUser = getOne('SELECT id FROM users WHERE email = ?', [email]);
+    const existingUser = await getOne('SELECT id FROM users WHERE email = ?', [email]);
     
     if (existingUser) {
       return res.status(400).json({ error: 'Email already exists' });
@@ -78,7 +78,7 @@ router.post('/register', authenticateToken, authorizeRoles('admin', 'owner'), as
     const userId = uuidv4();
     const now = new Date().toISOString();
 
-    runQuery(`INSERT INTO users (id, email, password, full_name, role, phone, building_id, created_at, updated_at, is_active)
+    await runQuery(`INSERT INTO users (id, email, password, full_name, role, phone, building_id, created_at, updated_at, is_active)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`, [userId, email, hashedPassword, full_name, role, phone || null, building_id || null, now, now]);
 
     res.status(201).json({
@@ -92,9 +92,9 @@ router.post('/register', authenticateToken, authorizeRoles('admin', 'owner'), as
 });
 
 // Get current user profile
-router.get('/me', authenticateToken, (req, res) => {
+router.get('/me', authenticateToken, async (req, res) => {
   try {
-    const user = getOne('SELECT id, email, full_name, role, phone, building_id, created_at FROM users WHERE id = ?', [req.user.id]);
+    const user = await getOne('SELECT id, email, full_name, role, phone, building_id, created_at FROM users WHERE id = ?', [req.user.id]);
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -116,7 +116,7 @@ router.put('/password', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Current and new password are required' });
     }
 
-    const user = getOne('SELECT password FROM users WHERE id = ?', [req.user.id]);
+    const user = await getOne('SELECT password FROM users WHERE id = ?', [req.user.id]);
 
     const validPassword = await bcrypt.compare(currentPassword, user.password);
     if (!validPassword) {
@@ -125,7 +125,7 @@ router.put('/password', authenticateToken, async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     const now = new Date().toISOString();
-    runQuery('UPDATE users SET password = ?, updated_at = ? WHERE id = ?', [hashedPassword, now, req.user.id]);
+    await runQuery('UPDATE users SET password = ?, updated_at = ? WHERE id = ?', [hashedPassword, now, req.user.id]);
 
     res.json({ message: 'Password updated successfully' });
   } catch (err) {

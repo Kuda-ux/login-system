@@ -18,7 +18,7 @@ router.post('/clock-in', authenticateToken, authorizeRoles('staff'), async (req,
     }
 
     // Check if already clocked in today
-    const existingRecord = getOne(`SELECT id, clock_in_time FROM staff_attendance WHERE staff_id = ? AND work_date = ? AND clock_out_time IS NULL`, [staffId, today]);
+    const existingRecord = await getOne(`SELECT id, clock_in_time FROM staff_attendance WHERE staff_id = ? AND work_date = ? AND clock_out_time IS NULL`, [staffId, today]);
 
     if (existingRecord) {
       return res.status(400).json({ 
@@ -29,8 +29,8 @@ router.post('/clock-in', authenticateToken, authorizeRoles('staff'), async (req,
 
     const attendanceId = uuidv4();
     const now = new Date().toISOString();
-    runQuery(`INSERT INTO staff_attendance (id, staff_id, building_id, clock_in_time, ip_address, work_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [attendanceId, staffId, buildingId, now, ipAddress, today, now]);
-    const record = getOne('SELECT * FROM staff_attendance WHERE id = ?', [attendanceId]);
+    await runQuery(`INSERT INTO staff_attendance (id, staff_id, building_id, clock_in_time, ip_address, work_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [attendanceId, staffId, buildingId, now, ipAddress, today, now]);
+    const record = await getOne('SELECT * FROM staff_attendance WHERE id = ?', [attendanceId]);
 
     res.status(201).json({
       message: 'Clock-in successful',
@@ -50,7 +50,7 @@ router.post('/clock-out', authenticateToken, authorizeRoles('staff'), async (req
     const today = new Date().toISOString().split('T')[0];
 
     // Find today's clock-in record
-    const record = getOne(`SELECT id, clock_in_time FROM staff_attendance WHERE staff_id = ? AND work_date = ? AND clock_out_time IS NULL`, [staffId, today]);
+    const record = await getOne(`SELECT id, clock_in_time FROM staff_attendance WHERE staff_id = ? AND work_date = ? AND clock_out_time IS NULL`, [staffId, today]);
 
     if (!record) {
       return res.status(400).json({ error: 'No active clock-in found for today' });
@@ -62,8 +62,8 @@ router.post('/clock-out', authenticateToken, authorizeRoles('staff'), async (req
     const totalHours = (clockOutTime - clockInTime) / (1000 * 60 * 60);
 
     const clockOutNow = new Date().toISOString();
-    runQuery(`UPDATE staff_attendance SET clock_out_time = ?, total_hours = ?, notes = ? WHERE id = ?`, [clockOutNow, totalHours.toFixed(2), notes || null, record.id]);
-    const updatedRecord = getOne('SELECT * FROM staff_attendance WHERE id = ?', [record.id]);
+    await runQuery(`UPDATE staff_attendance SET clock_out_time = ?, total_hours = ?, notes = ? WHERE id = ?`, [clockOutNow, totalHours.toFixed(2), notes || null, record.id]);
+    const updatedRecord = await getOne('SELECT * FROM staff_attendance WHERE id = ?', [record.id]);
 
     res.json({
       message: 'Clock-out successful',
@@ -76,12 +76,12 @@ router.post('/clock-out', authenticateToken, authorizeRoles('staff'), async (req
 });
 
 // Get staff attendance status
-router.get('/status', authenticateToken, authorizeRoles('staff'), (req, res) => {
+router.get('/status', authenticateToken, authorizeRoles('staff'), async (req, res) => {
   try {
     const staffId = req.user.id;
     const today = new Date().toISOString().split('T')[0];
 
-    const record = getOne(`SELECT * FROM staff_attendance WHERE staff_id = ? AND work_date = ? ORDER BY clock_in_time DESC LIMIT 1`, [staffId, today]);
+    const record = await getOne(`SELECT * FROM staff_attendance WHERE staff_id = ? AND work_date = ? ORDER BY clock_in_time DESC LIMIT 1`, [staffId, today]);
 
     if (!record) {
       return res.json({ status: 'not_clocked_in', action: 'clock_in' });
@@ -107,7 +107,7 @@ router.get('/status', authenticateToken, authorizeRoles('staff'), (req, res) => 
 });
 
 // Get staff attendance history
-router.get('/history', authenticateToken, authorizeRoles('staff'), (req, res) => {
+router.get('/history', authenticateToken, authorizeRoles('staff'), async (req, res) => {
   try {
     const staffId = req.user.id;
     const { start_date, end_date, page = 1, limit = 30 } = req.query;
@@ -119,7 +119,7 @@ router.get('/history', authenticateToken, authorizeRoles('staff'), (req, res) =>
     if (end_date) { query += ' AND work_date <= ?'; params.push(end_date); }
     query += ' ORDER BY work_date DESC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), offset);
-    const records = getAll(query, params);
+    const records = await getAll(query, params);
 
     res.json({ attendance: records });
   } catch (err) {
@@ -129,7 +129,7 @@ router.get('/history', authenticateToken, authorizeRoles('staff'), (req, res) =>
 });
 
 // Get all staff attendance for a building (admin/owner)
-router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', 'owner'), (req, res) => {
+router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
   try {
     const { buildingId } = req.params;
     const { date, start_date, end_date, staff_id, page = 1, limit = 50 } = req.query;
@@ -143,11 +143,11 @@ router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', '
     if (staff_id) { query += ' AND sa.staff_id = ?'; params.push(staff_id); }
     query += ' ORDER BY sa.work_date DESC, sa.clock_in_time DESC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), offset);
-    const records = getAll(query, params);
+    const records = await getAll(query, params);
     let countQuery = 'SELECT COUNT(*) as count FROM staff_attendance WHERE building_id = ?';
     const countParams = [buildingId];
     if (date) { countQuery += ' AND work_date = ?'; countParams.push(date); }
-    const countResult = getOne(countQuery, countParams);
+    const countResult = await getOne(countQuery, countParams);
     const count = countResult ? countResult.count : 0;
 
     res.json({
@@ -166,10 +166,10 @@ router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', '
 });
 
 // Get staff members for a building
-router.get('/members/:buildingId', authenticateToken, authorizeRoles('admin', 'owner'), (req, res) => {
+router.get('/members/:buildingId', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
   try {
     const { buildingId } = req.params;
-    const staff = getAll(`SELECT id, email, full_name, phone, created_at, is_active FROM users WHERE building_id = ? AND role = 'staff'`, [buildingId]);
+    const staff = await getAll(`SELECT id, email, full_name, phone, created_at, is_active FROM users WHERE building_id = ? AND role = 'staff'`, [buildingId]);
 
     res.json({ staff });
   } catch (err) {
@@ -185,7 +185,7 @@ router.post('/sync', authenticateToken, async (req, res) => {
     const results = [];
     for (const record of attendance) {
       try {
-        runQuery(`INSERT OR REPLACE INTO staff_attendance (id, staff_id, building_id, clock_in_time, clock_out_time, ip_address, work_date, total_hours, notes, synced) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`, [record.id, record.staff_id, record.building_id, record.clock_in_time, record.clock_out_time, record.ip_address, record.work_date, record.total_hours, record.notes]);
+        await runQuery(`INSERT OR REPLACE INTO staff_attendance (id, staff_id, building_id, clock_in_time, clock_out_time, ip_address, work_date, total_hours, notes, synced) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`, [record.id, record.staff_id, record.building_id, record.clock_in_time, record.clock_out_time, record.ip_address, record.work_date, record.total_hours, record.notes]);
         results.push({ id: record.id, synced: true });
       } catch (err) { results.push({ id: record.id, synced: false, error: err.message }); }
     }

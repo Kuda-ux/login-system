@@ -17,7 +17,7 @@ router.post('/check-in', async (req, res) => {
     }
 
     // Verify building exists
-    const building = getOne('SELECT id, name FROM buildings WHERE id = ? AND is_active = 1', [building_id]);
+    const building = await getOne('SELECT id, name FROM buildings WHERE id = ? AND is_active = 1', [building_id]);
     if (!building) {
       return res.status(404).json({ error: 'Building not found' });
     }
@@ -25,7 +25,7 @@ router.post('/check-in', async (req, res) => {
     // Check if visitor already checked in (same device fingerprint)
     if (device_fingerprint) {
       const hashedFingerprint = hashFingerprint(device_fingerprint);
-      const existingVisit = getOne(`SELECT id, full_name FROM visitors WHERE device_fingerprint = ? AND building_id = ? AND status = 'checked_in'`, [hashedFingerprint, building_id]);
+      const existingVisit = await getOne(`SELECT id, full_name FROM visitors WHERE device_fingerprint = ? AND building_id = ? AND status = 'checked_in'`, [hashedFingerprint, building_id]);
 
       if (existingVisit) {
         return res.status(400).json({ 
@@ -43,7 +43,7 @@ router.post('/check-in', async (req, res) => {
     const visitorId = uuidv4();
     
     const now = new Date().toISOString();
-    runQuery(`INSERT INTO visitors (id, full_name, phone, id_number_encrypted, purpose, building_id, device_fingerprint, ip_address, status, check_in_time, created_at)
+    await runQuery(`INSERT INTO visitors (id, full_name, phone, id_number_encrypted, purpose, building_id, device_fingerprint, ip_address, status, check_in_time, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'checked_in', ?, ?)`, [visitorId, full_name, phone, encryptedIdNumber, purpose, building_id, hashedFP, ipAddress, now, now]);
 
     res.status(201).json({
@@ -69,9 +69,9 @@ router.post('/check-out', async (req, res) => {
     // Find visitor by device fingerprint or visitor ID
     if (device_fingerprint) {
       const hashedFingerprint = hashFingerprint(device_fingerprint);
-      visitor = getOne(`SELECT id, full_name, check_in_time FROM visitors WHERE device_fingerprint = ? AND building_id = ? AND status = 'checked_in' ORDER BY check_in_time DESC LIMIT 1`, [hashedFingerprint, building_id]);
+      visitor = await getOne(`SELECT id, full_name, check_in_time FROM visitors WHERE device_fingerprint = ? AND building_id = ? AND status = 'checked_in' ORDER BY check_in_time DESC LIMIT 1`, [hashedFingerprint, building_id]);
     } else if (visitor_id) {
-      visitor = getOne(`SELECT id, full_name, check_in_time FROM visitors WHERE id = ? AND status = 'checked_in'`, [visitor_id]);
+      visitor = await getOne(`SELECT id, full_name, check_in_time FROM visitors WHERE id = ? AND status = 'checked_in'`, [visitor_id]);
     }
 
     if (!visitor) {
@@ -80,7 +80,7 @@ router.post('/check-out', async (req, res) => {
 
     // Update visitor record
     const checkOutNow = new Date().toISOString();
-    runQuery(`UPDATE visitors SET check_out_time = ?, status = 'checked_out' WHERE id = ?`, [checkOutNow, visitor.id]);
+    await runQuery(`UPDATE visitors SET check_out_time = ?, status = 'checked_out' WHERE id = ?`, [checkOutNow, visitor.id]);
 
     const checkInTime = new Date(visitor.check_in_time);
     const checkOutTime = new Date();
@@ -110,7 +110,7 @@ router.post('/status', async (req, res) => {
     }
 
     const hashedFingerprint = hashFingerprint(device_fingerprint);
-    const visitor = getOne(`SELECT id, full_name, status, check_in_time FROM visitors WHERE device_fingerprint = ? AND building_id = ? AND status = 'checked_in' ORDER BY check_in_time DESC LIMIT 1`, [hashedFingerprint, building_id]);
+    const visitor = await getOne(`SELECT id, full_name, status, check_in_time FROM visitors WHERE device_fingerprint = ? AND building_id = ? AND status = 'checked_in' ORDER BY check_in_time DESC LIMIT 1`, [hashedFingerprint, building_id]);
 
     if (visitor) {
       res.json({
@@ -133,7 +133,7 @@ router.post('/status', async (req, res) => {
 });
 
 // Get all visitors for a building (admin/owner)
-router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', 'owner'), (req, res) => {
+router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
   try {
     const { buildingId } = req.params;
     const { date, status, page = 1, limit = 50 } = req.query;
@@ -145,13 +145,13 @@ router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', '
     if (status) { query += ' AND status = ?'; params.push(status); }
     query += ' ORDER BY check_in_time DESC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), offset);
-    const visitors = getAll(query, params);
+    const visitors = await getAll(query, params);
     const decryptedVisitors = visitors.map(v => ({ ...v, id_number: decrypt(v.id_number_encrypted), id_number_encrypted: undefined }));
     let countQuery = 'SELECT COUNT(*) as count FROM visitors WHERE building_id = ?';
     const countParams = [buildingId];
     if (date) { countQuery += " AND date(check_in_time) = ?"; countParams.push(date); }
     if (status) { countQuery += ' AND status = ?'; countParams.push(status); }
-    const countResult = getOne(countQuery, countParams);
+    const countResult = await getOne(countQuery, countParams);
     const count = countResult ? countResult.count : 0;
 
     res.json({
@@ -170,10 +170,10 @@ router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', '
 });
 
 // Get visitor by ID
-router.get('/:id', authenticateToken, (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const visitor = getOne('SELECT * FROM visitors WHERE id = ?', [id]);
+    const visitor = await getOne('SELECT * FROM visitors WHERE id = ?', [id]);
     
     if (!visitor) {
       return res.status(404).json({ error: 'Visitor not found' });
@@ -199,7 +199,7 @@ router.post('/sync', authenticateToken, async (req, res) => {
       try {
         const encryptedIdNumber = encrypt(visitor.id_number);
         const hashedFP = visitor.device_fingerprint ? hashFingerprint(visitor.device_fingerprint) : null;
-        runQuery(`INSERT OR REPLACE INTO visitors (id, full_name, phone, id_number_encrypted, purpose, building_id, device_fingerprint, ip_address, check_in_time, check_out_time, status, synced)
+        await runQuery(`INSERT OR REPLACE INTO visitors (id, full_name, phone, id_number_encrypted, purpose, building_id, device_fingerprint, ip_address, check_in_time, check_out_time, status, synced)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`, [visitor.id, visitor.full_name, visitor.phone, encryptedIdNumber, visitor.purpose, visitor.building_id, hashedFP, visitor.ip_address, visitor.check_in_time, visitor.check_out_time, visitor.status]);
         results.push({ id: visitor.id, synced: true });
       } catch (err) { results.push({ id: visitor.id, synced: false, error: err.message }); }
