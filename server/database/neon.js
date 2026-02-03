@@ -8,7 +8,8 @@ function initNeon() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is required for Neon PostgreSQL');
   }
-  sql = neon(process.env.DATABASE_URL);
+  // Enable fullResults to get proper row data
+  sql = neon(process.env.DATABASE_URL, { fullResults: true });
   return sql;
 }
 
@@ -27,9 +28,9 @@ async function runQuery(query, params = []) {
     let paramIndex = 0;
     pgQuery = query.replace(/\?/g, () => `$${++paramIndex}`);
     
-    // Use sql.query() for parameterized queries (not sql() directly)
-    const result = await sql.query(pgQuery, params);
-    return result.rows || result;
+    // Execute query - with fullResults: true, result has { rows, fields, ... }
+    const result = await sql(pgQuery, params);
+    return result.rows || result || [];
   } catch (err) {
     console.error('Query error:', err.message);
     console.error('Query was:', query.substring(0, 200));
