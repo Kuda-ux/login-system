@@ -28,10 +28,16 @@ async function runQuery(query, params = []) {
     pgQuery = query.replace(/\?/g, () => `$${++paramIndex}`);
     
     console.log('Executing query:', pgQuery.substring(0, 100) + '...');
+    console.log('With params:', JSON.stringify(params));
+    
+    // Neon's sql() function expects query as first arg, params as second
+    // It returns an array of rows
     const result = await sql(pgQuery, params);
+    console.log('Query result rows:', result?.length || 0);
     return result;
   } catch (err) {
     console.error('Query error:', err.message);
+    console.error('Full error:', err);
     console.error('Query was:', query.substring(0, 200));
     console.error('Params:', JSON.stringify(params));
     throw err;
