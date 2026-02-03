@@ -23,7 +23,7 @@ This guide explains how to deploy the full-stack application with:
 | **Root Directory** | Leave empty |
 | **Runtime** | Node |
 | **Build Command** | `npm install` |
-| **Start Command** | `npm start` |
+| **Start Command** | `node server/index.js` |
 | **Plan** | Free |
 
 5. Add Environment Variables:
