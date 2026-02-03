@@ -74,7 +74,18 @@ app.use((req, res, next) => {
 
 // Health check endpoint for monitoring
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const { getOne } = require('./database/init');
+  const adminExists = getOne("SELECT id, email FROM users WHERE role = 'admin'");
+  const userCount = getOne("SELECT COUNT(*) as count FROM users");
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    database: {
+      adminExists: !!adminExists,
+      adminEmail: adminExists?.email || null,
+      totalUsers: userCount?.count || 0
+    }
+  });
 });
 
 // API Routes
