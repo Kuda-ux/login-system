@@ -1,8 +1,21 @@
 import axios from 'axios';
 
+// Use environment variable, or Render URL for production, or localhost for development
+const getApiUrl = () => {
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  // In production (Vercel), use Render backend
+  if (window.location.hostname !== 'localhost') {
+    return 'https://building-management-api-5gn4.onrender.com/api';
+  }
+  // Local development
+  return 'http://localhost:5000/api';
+};
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
-  timeout: 10000,
+  baseURL: getApiUrl(),
+  timeout: 30000, // Increased timeout for Render cold starts
   headers: { 'Content-Type': 'application/json' }
 });
 
