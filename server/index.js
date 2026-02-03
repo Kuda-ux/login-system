@@ -87,7 +87,8 @@ app.get('/api/health', async (req, res) => {
       database: {
         adminExists: !!adminExists,
         adminEmail: adminExists?.email || null,
-        totalUsers: userCount?.count || 0
+        totalUsers: userCount?.count || 0,
+        debug: { adminRow: adminExists, countRow: userCount }
       }
     });
   } catch (err) {
