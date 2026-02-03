@@ -17,6 +17,9 @@ const dashboardRoutes = require('./routes/dashboard');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for Render/Vercel deployment (required for rate limiting)
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: false,
