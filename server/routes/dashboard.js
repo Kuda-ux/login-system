@@ -26,20 +26,20 @@ async function getAdminStats(buildingId) {
   const params = buildingId ? [buildingId] : [];
   const totalBuildings = await getOne('SELECT COUNT(*) as count FROM buildings WHERE is_active = 1', []) || { count: 0 };
   const totalOwners = await getOne("SELECT COUNT(*) as count FROM users WHERE role = 'owner' AND is_active = 1", []) || { count: 0 };
-  const todayVisitors = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE date(check_in_time) = date('now') ${buildingFilter}`, params) || { count: 0 };
+  const todayVisitors = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE check_in_time::date = CURRENT_DATE ${buildingFilter}`, params) || { count: 0 };
   const activeVisitors = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE status = 'checked_in' ${buildingFilter}`, params) || { count: 0 };
   const totalTenants = await getOne(`SELECT COUNT(*) as count FROM tenants WHERE is_active = 1 ${buildingFilter}`, params) || { count: 0 };
-  const monthlyRevenue = await getOne(`SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'completed' AND strftime('%Y-%m', payment_date) = strftime('%Y-%m', 'now') ${buildingFilter}`, params) || { total: 0 };
+  const monthlyRevenue = await getOne(`SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'completed' AND TO_CHAR(payment_date, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM') ${buildingFilter}`, params) || { total: 0 };
   const pendingPayments = await getOne(`SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'pending' ${buildingFilter}`, params) || { count: 0, total: 0 };
   return {
-    total_buildings: totalBuildings.count,
-    total_owners: totalOwners.count,
-    today_visitors: todayVisitors.count,
-    active_visitors: activeVisitors.count,
-    total_tenants: totalTenants.count,
-    monthly_revenue: monthlyRevenue.total,
-    pending_payments_count: pendingPayments.count,
-    pending_payments_total: pendingPayments.total
+    total_buildings: parseInt(totalBuildings.count) || 0,
+    total_owners: parseInt(totalOwners.count) || 0,
+    today_visitors: parseInt(todayVisitors.count) || 0,
+    active_visitors: parseInt(activeVisitors.count) || 0,
+    total_tenants: parseInt(totalTenants.count) || 0,
+    monthly_revenue: parseFloat(monthlyRevenue.total) || 0,
+    pending_payments_count: parseInt(pendingPayments.count) || 0,
+    pending_payments_total: parseFloat(pendingPayments.total) || 0
   };
 }
 
@@ -47,25 +47,25 @@ async function getOwnerStats(ownerId, buildingId) {
   const buildings = await getAll('SELECT id FROM buildings WHERE owner_id = ? AND is_active = 1', [ownerId]);
   const buildingIds = buildings.map(b => b.id);
   if (buildingIds.length === 0) {
-    return { total_buildings: 0, today_visitors: 0, active_visitors: 0, total_tenants: 0, monthly_revenue: 0, pending_payments_count: 0, pending_payments_total: 0 };
+    return { total_buildings: 0, today_visitors: 0, active_visitors: 0, total_tenants: 0, total_staff: 0, monthly_revenue: 0, pending_payments_count: 0, pending_payments_total: 0 };
   }
   const filterIds = buildingId ? [buildingId] : buildingIds;
   const placeholders = filterIds.map(() => '?').join(',');
-  const todayVisitors = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE date(check_in_time) = date('now') AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
+  const todayVisitors = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE check_in_time::date = CURRENT_DATE AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
   const activeVisitors = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE status = 'checked_in' AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
   const totalTenants = await getOne(`SELECT COUNT(*) as count FROM tenants WHERE is_active = 1 AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
   const totalStaff = await getOne(`SELECT COUNT(*) as count FROM users WHERE role = 'staff' AND is_active = 1 AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
-  const monthlyRevenue = await getOne(`SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'completed' AND strftime('%Y-%m', payment_date) = strftime('%Y-%m', 'now') AND building_id IN (${placeholders})`, filterIds) || { total: 0 };
+  const monthlyRevenue = await getOne(`SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'completed' AND TO_CHAR(payment_date, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM') AND building_id IN (${placeholders})`, filterIds) || { total: 0 };
   const pendingPayments = await getOne(`SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'pending' AND building_id IN (${placeholders})`, filterIds) || { count: 0, total: 0 };
   return {
     total_buildings: buildingIds.length,
-    today_visitors: todayVisitors.count,
-    active_visitors: activeVisitors.count,
-    total_tenants: totalTenants.count,
-    total_staff: totalStaff.count,
-    monthly_revenue: monthlyRevenue.total,
-    pending_payments_count: pendingPayments.count,
-    pending_payments_total: pendingPayments.total
+    today_visitors: parseInt(todayVisitors.count) || 0,
+    active_visitors: parseInt(activeVisitors.count) || 0,
+    total_tenants: parseInt(totalTenants.count) || 0,
+    total_staff: parseInt(totalStaff.count) || 0,
+    monthly_revenue: parseFloat(monthlyRevenue.total) || 0,
+    pending_payments_count: parseInt(pendingPayments.count) || 0,
+    pending_payments_total: parseFloat(pendingPayments.total) || 0
   };
 }
 
@@ -112,8 +112,8 @@ router.get('/charts/visitors', authenticateToken, authorizeRoles('admin', 'owner
       buildingFilter = 'AND building_id = ?';
       params.push(building_id);
     }
-    const data = await getAll(`SELECT date(check_in_time) as date, COUNT(*) as count FROM visitors WHERE date(check_in_time) >= date('now', '-' || ? || ' days') ${buildingFilter} GROUP BY date(check_in_time) ORDER BY date`, params);
-    res.json({ data });
+    const data = await getAll(`SELECT check_in_time::date as date, COUNT(*) as count FROM visitors WHERE check_in_time::date >= CURRENT_DATE - INTERVAL '1 day' * ? ${buildingFilter} GROUP BY check_in_time::date ORDER BY date`, params);
+    res.json({ data: data.map(d => ({ date: d.date, count: parseInt(d.count) || 0 })) });
   } catch (err) {
     console.error('Chart data error:', err);
     res.status(500).json({ error: 'Failed to fetch chart data' });
@@ -137,8 +137,8 @@ router.get('/charts/revenue', authenticateToken, authorizeRoles('admin', 'owner'
       buildingFilter = 'AND building_id = ?';
       params.push(building_id);
     }
-    const data = await getAll(`SELECT strftime('%Y-%m', payment_date) as month, SUM(amount) as total FROM payments WHERE payment_status = 'completed' AND payment_date >= date('now', '-' || ? || ' months') ${buildingFilter} GROUP BY strftime('%Y-%m', payment_date) ORDER BY month`, params);
-    res.json({ data });
+    const data = await getAll(`SELECT TO_CHAR(payment_date, 'YYYY-MM') as month, SUM(amount) as total FROM payments WHERE payment_status = 'completed' AND payment_date >= CURRENT_DATE - INTERVAL '1 month' * ? ${buildingFilter} GROUP BY TO_CHAR(payment_date, 'YYYY-MM') ORDER BY month`, params);
+    res.json({ data: data.map(d => ({ month: d.month, total: parseFloat(d.total) || 0 })) });
   } catch (err) {
     console.error('Revenue chart error:', err);
     res.status(500).json({ error: 'Failed to fetch revenue data' });

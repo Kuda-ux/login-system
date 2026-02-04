@@ -17,12 +17,11 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'owner'), async (req
     }
 
     // If user is owner, they create building for themselves
+    // If user is admin and no owner_id provided, admin becomes the owner
     if (req.user.role === 'owner') {
       ownerId = req.user.id;
-    }
-
-    if (!ownerId) {
-      return res.status(400).json({ error: 'Owner ID is required' });
+    } else if (req.user.role === 'admin' && !ownerId) {
+      ownerId = req.user.id;
     }
 
     const buildingId = uuidv4();
