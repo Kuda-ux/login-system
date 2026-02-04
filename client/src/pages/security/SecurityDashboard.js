@@ -32,17 +32,30 @@ function SecurityDashboard() {
   }, []);
 
   useEffect(() => {
-    if (user?.building_id) {
-      fetchVisitors();
-      const interval = setInterval(fetchVisitors, 30000); // Refresh every 30 seconds
-      return () => clearInterval(interval);
-    }
+    fetchVisitors();
+    const interval = setInterval(fetchVisitors, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
   }, [user]);
 
   const fetchVisitors = async () => {
     try {
       const today = new Date().toISOString().split('T')[0];
-      const res = await api.get(`/visitors/building/${user.building_id}?date=${today}&limit=100`);
+      let res;
+      
+      // If user has a building_id, fetch visitors for that building
+      // If admin without building_id, fetch all visitors
+      if (user?.building_id) {
+        res = await api.get(`/visitors/building/${user.building_id}?date=${today}&limit=100`);
+      } else if (user?.role === 'admin') {
+        res = await api.get(`/visitors/all?date=${today}&limit=100`);
+      } else {
+        // No building assigned and not admin - show empty
+        setVisitors([]);
+        setStats({ checked_in: 0, checked_out_today: 0, total_today: 0 });
+        setLoading(false);
+        return;
+      }
+      
       const visitorList = res.data.visitors || [];
       setVisitors(visitorList);
       

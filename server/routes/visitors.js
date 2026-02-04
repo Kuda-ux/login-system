@@ -145,14 +145,51 @@ router.post('/status', async (req, res) => {
   }
 });
 
-// Get all visitors for a building (admin/owner)
-router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
+// Get all visitors (for admins without building_id - returns all visitors)
+router.get('/all', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+  try {
+    const { date, status, page = 1, limit = 50 } = req.query;
+    
+    const offset = (page - 1) * limit;
+    let query = 'SELECT v.*, b.name as building_name FROM visitors v LEFT JOIN buildings b ON v.building_id = b.id WHERE 1=1';
+    const params = [];
+    if (date) { query += " AND v.check_in_time::date = ?"; params.push(date); }
+    if (status) { query += ' AND v.status = ?'; params.push(status); }
+    query += ' ORDER BY v.check_in_time DESC LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), offset);
+    const visitors = await getAll(query, params);
+    const decryptedVisitors = visitors.map(v => ({ ...v, id_number: decrypt(v.id_number_encrypted), id_number_encrypted: undefined }));
+    
+    let countQuery = 'SELECT COUNT(*) as count FROM visitors WHERE 1=1';
+    const countParams = [];
+    if (date) { countQuery += " AND check_in_time::date = ?"; countParams.push(date); }
+    if (status) { countQuery += ' AND status = ?'; countParams.push(status); }
+    const countResult = await getOne(countQuery, countParams);
+    const count = countResult ? parseInt(countResult.count) : 0;
+
+    res.json({
+      visitors: decryptedVisitors,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(count / limit)
+      }
+    });
+  } catch (err) {
+    console.error('Fetch all visitors error:', err);
+    res.status(500).json({ error: 'Failed to fetch visitors' });
+  }
+});
+
+// Get all visitors for a building (admin/owner/security/staff)
+router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', 'owner', 'security', 'staff'), async (req, res) => {
   try {
     const { buildingId } = req.params;
     const { date, status, page = 1, limit = 50 } = req.query;
     
     const offset = (page - 1) * limit;
-    let query = 'SELECT * FROM visitors WHERE building_id = ?';
+    let query = 'SELECT v.*, b.name as building_name FROM visitors v LEFT JOIN buildings b ON v.building_id = b.id WHERE v.building_id = ?';
     const params = [buildingId];
     if (date) { query += " AND date(check_in_time) = ?"; params.push(date); }
     if (status) { query += ' AND status = ?'; params.push(status); }
