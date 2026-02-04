@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { OfflineProvider } from './context/OfflineContext';
 
@@ -27,6 +27,12 @@ import Visitors from './pages/Visitors';
 
 // Landing Page
 import LandingPage from './pages/LandingPage';
+
+// Redirect component for old QR code URL format
+function VisitorCheckInRedirect() {
+  const { buildingId } = useParams();
+  return <Navigate to={`/checkin/${buildingId}`} replace />;
+}
 
 // Loading Spinner Component
 function LoadingSpinner() {
@@ -87,6 +93,8 @@ function App() {
             {/* Public - No login required */}
             <Route path="/checkin/:buildingId" element={<VisitorCheckInPage />} />
             <Route path="/visitor/:buildingId" element={<VisitorCheckInPage />} />
+            {/* Redirect old QR code URL format to new format */}
+            <Route path="/visitor/check-in/:buildingId" element={<VisitorCheckInRedirect />} />
             
             {/* ========== SECURITY INTERFACE ========== */}
             <Route path="/security/login" element={<SecurityLogin />} />
