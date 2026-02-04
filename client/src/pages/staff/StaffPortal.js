@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Clock, LogIn, LogOut, User, Calendar, Timer, CheckCircle, 
-  AlertCircle, Wifi, WifiOff, Building2, History
+  AlertCircle, WifiOff, History, Briefcase, TrendingUp, ChevronDown, ChevronUp
 } from 'lucide-react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
@@ -10,7 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 function StaffPortal() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [status, setStatus] = useState(null); // 'not_clocked_in', 'clocked_in', 'clocked_out'
+  const [status, setStatus] = useState(null);
   const [clockInTime, setClockInTime] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -51,6 +51,7 @@ function StaffPortal() {
       }
     } catch (err) {
       console.error('Failed to fetch status:', err);
+      setStatus('not_clocked_in');
     } finally {
       setLoading(false);
     }
@@ -115,66 +116,97 @@ function StaffPortal() {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const getTotalHoursThisWeek = () => {
+    const total = history.reduce((sum, record) => sum + (parseFloat(record.total_hours) || 0), 0);
+    return total.toFixed(1);
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent"></div>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-violet-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
+    <div className="min-h-screen bg-slate-950">
       {/* Offline Banner */}
       {!isOnline && (
-        <div className="bg-yellow-500 text-yellow-900 px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2">
+        <div className="bg-amber-500 text-amber-950 px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2">
           <WifiOff className="w-4 h-4" />
           Offline Mode - Attendance will sync when connected
         </div>
       )}
 
       {/* Header */}
-      <header className="p-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
-            <User className="w-6 h-6 text-white" />
+      <header className="bg-slate-900 border-b border-slate-800 p-4">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+              <User className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="font-semibold text-white">{user?.full_name}</p>
+              <p className="text-slate-500 text-sm flex items-center gap-1">
+                <Briefcase className="w-3 h-3" />
+                Staff Member
+              </p>
+            </div>
           </div>
-          <div className="text-white">
-            <p className="font-semibold">{user?.full_name}</p>
-            <p className="text-white/70 text-sm">Staff Member</p>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="p-3 bg-slate-800 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
         </div>
-        <button
-          onClick={handleLogout}
-          className="p-3 bg-white/20 backdrop-blur rounded-xl text-white hover:bg-white/30 transition"
-        >
-          <LogOut className="w-5 h-5" />
-        </button>
       </header>
 
       {/* Main Content */}
-      <main className="px-6 pb-6">
-        {/* Date & Time Card */}
-        <div className="bg-white/10 backdrop-blur rounded-3xl p-6 mb-6 text-center text-white">
-          <p className="text-white/70 text-sm mb-1">
+      <main className="max-w-lg mx-auto px-4 py-6">
+        {/* Live Clock Card */}
+        <div className="bg-gradient-to-br from-violet-600 to-purple-700 rounded-3xl p-6 mb-6 text-center shadow-xl shadow-violet-500/20">
+          <p className="text-violet-200 text-sm mb-2">
             {currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
-          <p className="text-5xl font-bold tracking-tight">
-            {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+          <p className="text-5xl font-bold text-white tracking-tight font-mono">
+            {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </p>
         </div>
 
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <span className="text-slate-500 text-xs">This Week</span>
+            </div>
+            <p className="text-2xl font-bold text-white">{getTotalHoursThisWeek()} <span className="text-sm text-slate-500 font-normal">hrs</span></p>
+          </div>
+          <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="w-4 h-4 text-violet-400" />
+              <span className="text-slate-500 text-xs">Records</span>
+            </div>
+            <p className="text-2xl font-bold text-white">{history.length} <span className="text-sm text-slate-500 font-normal">days</span></p>
+          </div>
+        </div>
+
         {/* Status Card */}
-        <div className="bg-white rounded-3xl p-6 shadow-xl mb-6">
+        <div className="bg-slate-900 rounded-3xl p-6 border border-slate-800 mb-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
               <AlertCircle className="w-5 h-5" />
               {error}
             </div>
           )}
 
           {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
               <CheckCircle className="w-5 h-5" />
               {success}
             </div>
@@ -182,31 +214,33 @@ function StaffPortal() {
 
           <div className="text-center mb-6">
             <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 ${
-              status === 'clocked_in' ? 'bg-green-100' : 'bg-gray-100'
+              status === 'clocked_in' 
+                ? 'bg-emerald-500/20 ring-4 ring-emerald-500/30' 
+                : 'bg-slate-800'
             }`}>
               {status === 'clocked_in' ? (
-                <Timer className="w-12 h-12 text-green-600" />
+                <Timer className="w-12 h-12 text-emerald-400" />
               ) : (
-                <Clock className="w-12 h-12 text-gray-400" />
+                <Clock className="w-12 h-12 text-slate-600" />
               )}
             </div>
 
             {status === 'clocked_in' ? (
               <>
-                <h2 className="text-xl font-bold text-gray-800 mb-1">Currently Working</h2>
-                <p className="text-gray-500 mb-4">Clocked in at {clockInTime?.toLocaleTimeString()}</p>
-                <div className="bg-green-50 rounded-2xl p-4 mb-6">
-                  <p className="text-sm text-green-600 mb-1">Time Elapsed</p>
-                  <p className="text-3xl font-bold text-green-700 font-mono">{getElapsedTime()}</p>
+                <h2 className="text-xl font-bold text-white mb-1">Currently Working</h2>
+                <p className="text-slate-500 mb-4">Clocked in at {clockInTime?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 mb-6">
+                  <p className="text-sm text-emerald-400 mb-1">Time Elapsed</p>
+                  <p className="text-4xl font-bold text-emerald-400 font-mono">{getElapsedTime()}</p>
                 </div>
               </>
             ) : (
               <>
-                <h2 className="text-xl font-bold text-gray-800 mb-1">
+                <h2 className="text-xl font-bold text-white mb-1">
                   {status === 'clocked_out' ? 'Shift Completed' : 'Ready to Start'}
                 </h2>
-                <p className="text-gray-500 mb-6">
-                  {status === 'clocked_out' ? 'You have clocked out for today' : 'Clock in to start your shift'}
+                <p className="text-slate-500 mb-6">
+                  {status === 'clocked_out' ? 'Great work today! See you tomorrow.' : 'Clock in to start your shift'}
                 </p>
               </>
             )}
@@ -216,7 +250,7 @@ function StaffPortal() {
             <button
               onClick={handleClockOut}
               disabled={actionLoading}
-              className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
             >
               {actionLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
@@ -231,7 +265,7 @@ function StaffPortal() {
             <button
               onClick={handleClockIn}
               disabled={actionLoading}
-              className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
             >
               {actionLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
@@ -242,50 +276,58 @@ function StaffPortal() {
                 </>
               )}
             </button>
-          ) : null}
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-slate-500 text-sm">You've completed your shift for today</p>
+            </div>
+          )}
         </div>
 
         {/* History Toggle */}
         <button
           onClick={() => setShowHistory(!showHistory)}
-          className="w-full flex items-center justify-between bg-white/10 backdrop-blur text-white rounded-2xl p-4 mb-4"
+          className="w-full flex items-center justify-between bg-slate-900 border border-slate-800 text-white rounded-2xl p-4 mb-4 hover:border-slate-700 transition"
         >
           <div className="flex items-center gap-3">
-            <History className="w-5 h-5" />
+            <History className="w-5 h-5 text-violet-400" />
             <span className="font-medium">Attendance History</span>
           </div>
-          <span className="text-white/70">{showHistory ? '▲' : '▼'}</span>
+          {showHistory ? (
+            <ChevronUp className="w-5 h-5 text-slate-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-slate-500" />
+          )}
         </button>
 
         {/* History List */}
         {showHistory && (
-          <div className="bg-white rounded-2xl overflow-hidden shadow-lg">
+          <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
             {history.length === 0 ? (
-              <div className="p-6 text-center text-gray-500">
-                <Calendar className="w-10 h-10 mx-auto mb-2 text-gray-300" />
-                <p>No attendance records yet</p>
+              <div className="p-8 text-center">
+                <Calendar className="w-12 h-12 mx-auto mb-3 text-slate-700" />
+                <p className="text-slate-500">No attendance records yet</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-slate-800">
                 {history.map((record) => (
-                  <div key={record.id} className="p-4">
+                  <div key={record.id} className="p-4 hover:bg-slate-800/50 transition">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-gray-800">
+                      <span className="font-medium text-white">
                         {new Date(record.work_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                       </span>
                       {record.total_hours && (
-                        <span className="text-sm bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                        <span className="text-sm bg-violet-500/20 text-violet-400 px-3 py-1 rounded-full font-medium">
                           {parseFloat(record.total_hours).toFixed(1)} hrs
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-4 text-sm text-slate-500">
                       <span className="flex items-center gap-1">
-                        <LogIn className="w-3 h-3" />
+                        <LogIn className="w-3 h-3 text-emerald-400" />
                         {record.clock_in_time ? new Date(record.clock_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
                       </span>
                       <span className="flex items-center gap-1">
-                        <LogOut className="w-3 h-3" />
+                        <LogOut className="w-3 h-3 text-amber-400" />
                         {record.clock_out_time ? new Date(record.clock_out_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
                       </span>
                     </div>

@@ -25,8 +25,22 @@ async function generateQRCode(data, options = {}) {
 }
 
 async function generateEntryQRCode(buildingId, baseUrl) {
-  const entryUrl = `${baseUrl}/visitor/check-in/${buildingId}`;
-  return await generateQRCode({ type: 'entry', buildingId, url: entryUrl });
+  const entryUrl = `${baseUrl}/checkin/${buildingId}`;
+  // Return just the URL string for direct scanning, not JSON
+  try {
+    const qrDataUrl = await QRCode.toDataURL(entryUrl, {
+      errorCorrectionLevel: 'M',
+      type: 'image/png',
+      quality: 0.92,
+      margin: 2,
+      color: { dark: '#000000', light: '#FFFFFF' },
+      width: 300
+    });
+    return qrDataUrl;
+  } catch (err) {
+    console.error('QR Code generation error:', err);
+    throw err;
+  }
 }
 
 async function generatePaymentQRCode(paymentData) {
