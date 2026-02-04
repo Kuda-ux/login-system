@@ -30,7 +30,10 @@ router.post('/check-in', async (req, res) => {
       if (existingVisit) {
         return res.status(400).json({ 
           error: 'You are already checked in',
-          visitor_id: existingVisit.id,
+          existing_visit: {
+            id: existingVisit.id,
+            full_name: existingVisit.full_name
+          },
           action: 'already_checked_in'
         });
       }
@@ -48,9 +51,16 @@ router.post('/check-in', async (req, res) => {
 
     res.status(201).json({
       message: 'Check-in successful',
-      visitor_id: visitorId,
-      building_name: building.name,
-      check_in_time: new Date().toISOString()
+      visitor: {
+        id: visitorId,
+        full_name,
+        phone,
+        purpose,
+        building_id,
+        building_name: building.name,
+        check_in_time: now,
+        status: 'checked_in'
+      }
     });
   } catch (err) {
     console.error('Check-in error:', err);
@@ -115,9 +125,12 @@ router.post('/status', async (req, res) => {
     if (visitor) {
       res.json({
         status: 'checked_in',
-        visitor_id: visitor.id,
-        visitor_name: visitor.full_name,
-        check_in_time: visitor.check_in_time,
+        visitor: {
+          id: visitor.id,
+          full_name: visitor.full_name,
+          check_in_time: visitor.check_in_time,
+          status: visitor.status
+        },
         action: 'checkout'
       });
     } else {
