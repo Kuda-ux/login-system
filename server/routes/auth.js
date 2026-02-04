@@ -139,4 +139,88 @@ router.get('/verify', authenticateToken, (req, res) => {
   res.json({ valid: true, user: req.user });
 });
 
+// Get users by role (admin/owner only)
+router.get('/users', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
+  try {
+    const { role } = req.query;
+    let query = `SELECT u.id, u.email, u.full_name, u.role, u.phone, u.building_id, u.is_active, u.created_at, b.name as building_name 
+                 FROM users u LEFT JOIN buildings b ON u.building_id = b.id WHERE u.is_active = 1`;
+    const params = [];
+    
+    if (role) {
+      const roles = role.split(',');
+      query += ` AND u.role IN (${roles.map(() => '?').join(',')})`;
+      params.push(...roles);
+    }
+    
+    if (req.user.role === 'owner') {
+      const buildings = await getAll('SELECT id FROM buildings WHERE owner_id = ?', [req.user.id]);
+      const buildingIds = buildings.map(b => b.id);
+      if (buildingIds.length > 0) {
+        query += ` AND u.building_id IN (${buildingIds.map(() => '?').join(',')})`;
+        params.push(...buildingIds);
+      } else {
+        return res.json({ users: [] });
+      }
+    }
+    
+    query += ' ORDER BY u.created_at DESC';
+    const users = await getAll(query, params);
+    res.json({ users });
+  } catch (err) {
+    console.error('Fetch users error:', err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// Update user (admin/owner only)
+router.put('/users/:id', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { full_name, phone, role, building_id } = req.body;
+    
+    const user = await getOne('SELECT * FROM users WHERE id = ?', [id]);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const now = new Date().toISOString();
+    await runQuery(`UPDATE users SET full_name = COALESCE(?, full_name), phone = COALESCE(?, phone), 
+                    role = COALESCE(?, role), building_id = COALESCE(?, building_id), updated_at = ? WHERE id = ?`,
+      [full_name, phone, role, building_id, now, id]);
+    
+    res.json({ message: 'User updated successfully' });
+  } catch (err) {
+    console.error('Update user error:', err);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+// Deactivate user (admin/owner only)
+router.delete('/users/:id', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const now = new Date().toISOString();
+    await runQuery('UPDATE users SET is_active = 0, updated_at = ? WHERE id = ?', [now, id]);
+    res.json({ message: 'User deactivated successfully' });
+  } catch (err) {
+    console.error('Deactivate user error:', err);
+    res.status(500).json({ error: 'Failed to deactivate user' });
+  }
+});
+
+// Update profile
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const { full_name, phone } = req.body;
+    const now = new Date().toISOString();
+    await runQuery('UPDATE users SET full_name = COALESCE(?, full_name), phone = COALESCE(?, phone), updated_at = ? WHERE id = ?',
+      [full_name, phone, now, req.user.id]);
+    res.json({ message: 'Profile updated successfully' });
+  } catch (err) {
+    console.error('Profile update error:', err);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
 module.exports = router;

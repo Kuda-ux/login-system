@@ -17,6 +17,9 @@ import StaffPortal from './pages/staff/StaffPortal';
 // Admin Interface
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import StaffManagement from './pages/admin/StaffManagement';
+import Reports from './pages/admin/Reports';
+import Settings from './pages/admin/Settings';
 import Buildings from './pages/Buildings';
 import Tenants from './pages/Tenants';
 import Payments from './pages/Payments';
@@ -100,9 +103,9 @@ function App() {
               <Route path="visitors" element={<Visitors />} />
               <Route path="tenants" element={<Tenants />} />
               <Route path="payments" element={<Payments />} />
-              <Route path="staff" element={<div className="p-6"><h1 className="text-2xl font-bold">Staff Management</h1><p className="text-gray-500 mt-2">Coming soon...</p></div>} />
-              <Route path="reports" element={<div className="p-6"><h1 className="text-2xl font-bold">Reports</h1><p className="text-gray-500 mt-2">Coming soon...</p></div>} />
-              <Route path="settings" element={<div className="p-6"><h1 className="text-2xl font-bold">Settings</h1><p className="text-gray-500 mt-2">Coming soon...</p></div>} />
+              <Route path="staff" element={<StaffManagement />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
             
             {/* ========== DEFAULT ROUTES ========== */}
