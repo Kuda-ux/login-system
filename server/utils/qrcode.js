@@ -43,6 +43,25 @@ async function generateEntryQRCode(buildingId, baseUrl) {
   }
 }
 
+async function generateStaffQRCode(staffId) {
+  // Encode just the staff user ID — security guard's scanner will POST this to the API
+  const qrData = `staff:${staffId}`;
+  try {
+    const qrDataUrl = await QRCode.toDataURL(qrData, {
+      errorCorrectionLevel: 'M',
+      type: 'image/png',
+      quality: 0.92,
+      margin: 2,
+      color: { dark: '#000000', light: '#FFFFFF' },
+      width: 300
+    });
+    return qrDataUrl;
+  } catch (err) {
+    console.error('Staff QR Code generation error:', err);
+    throw err;
+  }
+}
+
 async function generatePaymentQRCode(paymentData) {
   return await generateQRCode({
     type: 'payment',
@@ -50,4 +69,4 @@ async function generatePaymentQRCode(paymentData) {
   });
 }
 
-module.exports = { generateQRCode, generateEntryQRCode, generatePaymentQRCode };
+module.exports = { generateQRCode, generateEntryQRCode, generateStaffQRCode, generatePaymentQRCode };

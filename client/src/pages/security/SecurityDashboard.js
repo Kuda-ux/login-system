@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Users, Search, LogOut, UserCheck, UserX, Clock, 
   Shield, RefreshCw, Menu, X, Bell, WifiOff, Activity,
-  Eye, Phone, FileText, ChevronRight, Zap
+  Eye, Phone, FileText, ChevronRight, Zap, QrCode, Briefcase,
+  LogIn, ScanLine
 } from 'lucide-react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
@@ -20,6 +21,8 @@ function SecurityDashboard() {
   const [stats, setStats] = useState({ checked_in: 0, checked_out_today: 0, total_today: 0 });
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedVisitor, setSelectedVisitor] = useState(null);
+  const [staffEntries, setStaffEntries] = useState([]);
+  const [staffStats, setStaffStats] = useState({ inside: 0, exited: 0, total: 0 });
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -39,7 +42,8 @@ function SecurityDashboard() {
 
   useEffect(() => {
     fetchVisitors();
-    const interval = setInterval(fetchVisitors, 30000);
+    fetchStaffEntries();
+    const interval = setInterval(() => { fetchVisitors(); fetchStaffEntries(); }, 30000);
     return () => clearInterval(interval);
   }, [user]);
 
@@ -73,6 +77,23 @@ function SecurityDashboard() {
       console.error('Failed to fetch visitors:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStaffEntries = async () => {
+    try {
+      let res;
+      if (user?.building_id) {
+        res = await api.get(`/staff/entries/${user.building_id}`);
+      } else if (user?.role === 'admin') {
+        res = await api.get('/staff/entries-all');
+      } else {
+        return;
+      }
+      setStaffEntries(res.data.entries || []);
+      setStaffStats(res.data.stats || { inside: 0, exited: 0, total: 0 });
+    } catch (err) {
+      console.error('Failed to fetch staff entries:', err);
     }
   };
 
@@ -162,10 +183,26 @@ function SecurityDashboard() {
                 }`}
               >
                 <UserCheck className="w-5 h-5" />
-                Currently Inside
+                Visitors Inside
                 {stats.checked_in > 0 && (
                   <span className="ml-auto bg-cyan-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
                     {stats.checked_in}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => { setActiveTab('staff'); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+                  activeTab === 'staff' 
+                    ? 'bg-cyan-600/20 text-cyan-400' 
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Briefcase className="w-5 h-5" />
+                Staff Entries
+                {staffStats.inside > 0 && (
+                  <span className="ml-auto bg-violet-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                    {staffStats.inside}
                   </span>
                 )}
               </button>
@@ -179,6 +216,13 @@ function SecurityDashboard() {
               >
                 <Clock className="w-5 h-5" />
                 Today's Log
+              </button>
+              <button
+                onClick={() => { setSidebarOpen(false); navigate('/security/scan'); }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition font-medium mt-4"
+              >
+                <ScanLine className="w-5 h-5" />
+                Scan Staff QR
               </button>
             </nav>
 
@@ -236,10 +280,26 @@ function SecurityDashboard() {
               }`}
             >
               <UserCheck className="w-5 h-5" />
-              Currently Inside
+              Visitors Inside
               {stats.checked_in > 0 && (
                 <span className="ml-auto bg-cyan-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
                   {stats.checked_in}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('staff')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+                activeTab === 'staff' 
+                  ? 'bg-cyan-600/20 text-cyan-400 font-medium' 
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Briefcase className="w-5 h-5" />
+              Staff Entries
+              {staffStats.inside > 0 && (
+                <span className="ml-auto bg-violet-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                  {staffStats.inside}
                 </span>
               )}
             </button>
@@ -253,6 +313,13 @@ function SecurityDashboard() {
             >
               <Clock className="w-5 h-5" />
               Today's Log
+            </button>
+            <button
+              onClick={() => navigate('/security/scan')}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition font-medium mt-4"
+            >
+              <ScanLine className="w-5 h-5" />
+              Scan Staff QR
             </button>
           </nav>
 
@@ -268,49 +335,61 @@ function SecurityDashboard() {
         {/* Main Content */}
         <main className="flex-1 lg:ml-72 p-4 lg:p-8">
           {/* Stats Cards */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 hover:border-emerald-500/30 transition group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
-                  <UserCheck className="w-6 h-6 text-emerald-400" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                  <UserCheck className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white">{stats.checked_in}</p>
-                  <p className="text-slate-500 text-sm">Currently Inside</p>
+                  <p className="text-2xl font-bold text-white">{stats.checked_in}</p>
+                  <p className="text-slate-500 text-xs">Visitors In</p>
                 </div>
               </div>
-              {stats.checked_in > 0 && (
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                  <span className="text-emerald-400 text-xs">Active visitors</span>
-                </div>
-              )}
             </div>
-            
+            <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 hover:border-violet-500/30 transition group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-violet-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                  <Briefcase className="w-5 h-5 text-violet-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">{staffStats.inside}</p>
+                  <p className="text-slate-500 text-xs">Staff In</p>
+                </div>
+              </div>
+            </div>
             <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 hover:border-amber-500/30 transition group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
-                  <UserX className="w-6 h-6 text-amber-400" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                  <UserX className="w-5 h-5 text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white">{stats.checked_out_today}</p>
-                  <p className="text-slate-500 text-sm">Checked Out</p>
+                  <p className="text-2xl font-bold text-white">{stats.checked_out_today}</p>
+                  <p className="text-slate-500 text-xs">Visitors Out</p>
                 </div>
               </div>
             </div>
-            
             <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 hover:border-cyan-500/30 transition group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
-                  <Users className="w-6 h-6 text-cyan-400" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                  <Users className="w-5 h-5 text-cyan-400" />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white">{stats.total_today}</p>
-                  <p className="text-slate-500 text-sm">Total Today</p>
+                  <p className="text-2xl font-bold text-white">{stats.total_today}</p>
+                  <p className="text-slate-500 text-xs">Total Today</p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Mobile Scan Button */}
+          <button
+            onClick={() => navigate('/security/scan')}
+            className="lg:hidden w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl font-semibold mb-6 shadow-lg shadow-emerald-500/20"
+          >
+            <ScanLine className="w-5 h-5" />
+            Scan Staff QR Code
+          </button>
 
           {/* Search and Actions */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -318,14 +397,14 @@ function SecurityDashboard() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
               <input
                 type="text"
-                placeholder="Search visitors by name, phone, or purpose..."
+                placeholder={activeTab === 'staff' ? 'Search staff by name...' : 'Search visitors by name, phone, or purpose...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition"
               />
             </div>
             <button
-              onClick={fetchVisitors}
+              onClick={() => { fetchVisitors(); fetchStaffEntries(); }}
               className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50 transition"
             >
               <RefreshCw className="w-5 h-5" />
@@ -336,7 +415,7 @@ function SecurityDashboard() {
           {/* Tab Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white">
-              {activeTab === 'visitors' ? 'Currently Inside' : "Today's Visitor Log"}
+              {activeTab === 'visitors' ? 'Visitors Inside' : activeTab === 'staff' ? 'Staff Entries Today' : "Today's Visitor Log"}
             </h2>
             <div className="flex items-center gap-2 text-slate-500 text-sm">
               <Zap className="w-4 h-4 text-cyan-400" />
@@ -344,7 +423,69 @@ function SecurityDashboard() {
             </div>
           </div>
 
+          {/* Staff Entries List */}
+          {activeTab === 'staff' && (
+            <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+              {staffEntries.length === 0 ? (
+                <div className="p-12 text-center">
+                  <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Briefcase className="w-10 h-10 text-slate-600" />
+                  </div>
+                  <p className="text-slate-400 font-medium">No staff entries today</p>
+                  <p className="text-slate-600 text-sm mt-1">Scan a staff QR code to record entry</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-800">
+                  {staffEntries
+                    .filter(e => e.staff_name?.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((entry) => (
+                    <div key={entry.id} className="p-4 hover:bg-slate-800/50 transition">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${
+                            entry.status === 'inside'
+                              ? 'bg-gradient-to-br from-violet-500 to-purple-600'
+                              : 'bg-slate-700'
+                          }`}>
+                            {entry.staff_name?.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-white">{entry.staff_name}</h3>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="flex items-center gap-1 text-slate-500 text-sm capitalize">
+                                <Shield className="w-3 h-3" />
+                                {entry.staff_role}
+                              </span>
+                              <span className="flex items-center gap-1 text-slate-500 text-sm">
+                                <LogIn className="w-3 h-3 text-emerald-400" />
+                                {new Date(entry.entry_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              {entry.exit_time && (
+                                <span className="flex items-center gap-1 text-slate-500 text-sm">
+                                  <LogOut className="w-3 h-3 text-amber-400" />
+                                  {new Date(entry.exit_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+                          entry.status === 'inside'
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-slate-700 text-slate-400'
+                        }`}>
+                          {entry.status === 'inside' ? '● Inside' : 'Left'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Visitors List */}
+          {activeTab !== 'staff' && (
           <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
             {loading ? (
               <div className="p-12 text-center">
@@ -406,6 +547,7 @@ function SecurityDashboard() {
               </div>
             )}
           </div>
+          )}
         </main>
       </div>
 

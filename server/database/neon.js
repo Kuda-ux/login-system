@@ -153,6 +153,24 @@ async function initializeDatabase() {
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  // Add staff_qr_code column if it doesn't exist
+  try {
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS staff_qr_code TEXT`);
+  } catch (err) {
+    // Column may already exist
+  }
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS staff_entries (
+    id TEXT PRIMARY KEY,
+    staff_id TEXT NOT NULL,
+    building_id TEXT NOT NULL,
+    entry_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    exit_time TIMESTAMP,
+    status TEXT DEFAULT 'inside',
+    scanned_by TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
   await pool.query(`CREATE TABLE IF NOT EXISTS sync_queue (
     id TEXT PRIMARY KEY,
     table_name TEXT NOT NULL,

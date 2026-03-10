@@ -132,6 +132,20 @@ if (process.env.DATABASE_URL) {
       data TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP, synced INTEGER DEFAULT 0, synced_at TEXT
     )`);
 
+    // Add staff_qr_code column if it doesn't exist
+    try {
+      db.run(`ALTER TABLE users ADD COLUMN staff_qr_code TEXT`);
+    } catch (err) {
+      // Column may already exist
+    }
+
+    db.run(`CREATE TABLE IF NOT EXISTS staff_entries (
+      id TEXT PRIMARY KEY, staff_id TEXT NOT NULL, building_id TEXT NOT NULL,
+      entry_time TEXT DEFAULT CURRENT_TIMESTAMP, exit_time TEXT,
+      status TEXT DEFAULT 'inside', scanned_by TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
     // Check if admin exists
     const adminCheck = getOne("SELECT id FROM users WHERE role = 'admin'");
     if (!adminCheck) {

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Clock, LogIn, LogOut, User, Calendar, Timer, CheckCircle, 
-  AlertCircle, WifiOff, History, Briefcase, TrendingUp, ChevronDown, ChevronUp
+  AlertCircle, WifiOff, History, Briefcase, TrendingUp, ChevronDown, ChevronUp,
+  QrCode, Download
 } from 'lucide-react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
@@ -20,6 +21,9 @@ function StaffPortal() {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [staffQR, setStaffQR] = useState(null);
+  const [showQR, setShowQR] = useState(false);
+  const [qrLoading, setQrLoading] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -40,6 +44,7 @@ function StaffPortal() {
   useEffect(() => {
     fetchStatus();
     fetchHistory();
+    fetchMyQR();
   }, []);
 
   const fetchStatus = async () => {
@@ -63,6 +68,28 @@ function StaffPortal() {
       setHistory(res.data.attendance || []);
     } catch (err) {
       console.error('Failed to fetch history:', err);
+    }
+  };
+
+  const fetchMyQR = async () => {
+    try {
+      const res = await api.get('/staff/my-qrcode');
+      setStaffQR(res.data.qr_code);
+    } catch (err) {
+      console.error('Failed to fetch QR code:', err);
+    }
+  };
+
+  const generateQR = async () => {
+    setQrLoading(true);
+    try {
+      const res = await api.get('/staff/my-qrcode');
+      setStaffQR(res.data.qr_code);
+      setShowQR(true);
+    } catch (err) {
+      console.error('Failed to generate QR code:', err);
+    } finally {
+      setQrLoading(false);
     }
   };
 
@@ -282,6 +309,44 @@ function StaffPortal() {
             </div>
           )}
         </div>
+
+        {/* My QR Code Toggle */}
+        <button
+          onClick={() => { if (!staffQR) generateQR(); else setShowQR(!showQR); }}
+          className="w-full flex items-center justify-between bg-slate-900 border border-slate-800 text-white rounded-2xl p-4 mb-4 hover:border-violet-500/30 transition"
+        >
+          <div className="flex items-center gap-3">
+            <QrCode className="w-5 h-5 text-cyan-400" />
+            <span className="font-medium">My Building Pass QR</span>
+          </div>
+          {qrLoading ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-cyan-400 border-t-transparent"></div>
+          ) : showQR ? (
+            <ChevronUp className="w-5 h-5 text-slate-500" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-slate-500" />
+          )}
+        </button>
+
+        {/* QR Code Display */}
+        {showQR && staffQR && (
+          <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 mb-4 text-center">
+            <p className="text-slate-400 text-sm mb-4">Show this QR code to security when entering or leaving the building</p>
+            <div className="bg-white rounded-2xl p-4 inline-block mb-4">
+              <img src={staffQR} alt="Staff QR Code" className="w-56 h-56 mx-auto" />
+            </div>
+            <p className="text-white font-semibold">{user?.full_name}</p>
+            <p className="text-slate-500 text-sm capitalize">{user?.role}</p>
+            <a
+              href={staffQR}
+              download={`staff-qr-${user?.full_name?.replace(/\s/g, '-')}.png`}
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-300 rounded-xl hover:text-white transition text-sm"
+            >
+              <Download className="w-4 h-4" />
+              Save QR Code
+            </a>
+          </div>
+        )}
 
         {/* History Toggle */}
         <button

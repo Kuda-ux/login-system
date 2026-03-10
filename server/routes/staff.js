@@ -2,6 +2,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { getOne, getAll, runQuery } = require('../database/init');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const { generateStaffQRCode } = require('../utils/qrcode');
 
 const router = express.Router();
 
@@ -194,6 +195,229 @@ router.post('/sync', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error('Sync error:', err);
     res.status(500).json({ error: 'Sync failed' });
+  }
+});
+
+// ========== STAFF QR CODE ENDPOINTS ==========
+
+// Generate QR code for a staff member (staff sees their own, admin can generate for any)
+router.get('/my-qrcode', authenticateToken, authorizeRoles('staff', 'security'), async (req, res) => {
+  try {
+    const staffId = req.user.id;
+    const user = await getOne('SELECT id, staff_qr_code, full_name FROM users WHERE id = ?', [staffId]);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // If QR code already exists, return it
+    if (user.staff_qr_code) {
+      return res.json({ qr_code: user.staff_qr_code, full_name: user.full_name });
+    }
+
+    // Generate new QR code
+    const qrCode = await generateStaffQRCode(staffId);
+    await runQuery('UPDATE users SET staff_qr_code = ? WHERE id = ?', [qrCode, staffId]);
+
+    res.json({ qr_code: qrCode, full_name: user.full_name });
+  } catch (err) {
+    console.error('Staff QR generation error:', err);
+    res.status(500).json({ error: 'Failed to generate QR code' });
+  }
+});
+
+// Admin generates QR code for a staff member
+router.post('/generate-qr/:staffId', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
+  try {
+    const { staffId } = req.params;
+    const user = await getOne('SELECT id, full_name, role, building_id FROM users WHERE id = ? AND is_active = 1', [staffId]);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Staff member not found' });
+    }
+
+    if (!['staff', 'security'].includes(user.role)) {
+      return res.status(400).json({ error: 'QR codes can only be generated for staff or security roles' });
+    }
+
+    const qrCode = await generateStaffQRCode(staffId);
+    await runQuery('UPDATE users SET staff_qr_code = ? WHERE id = ?', [qrCode, staffId]);
+
+    res.json({ 
+      qr_code: qrCode, 
+      staff: { id: user.id, full_name: user.full_name, role: user.role, building_id: user.building_id }
+    });
+  } catch (err) {
+    console.error('Staff QR generation error:', err);
+    res.status(500).json({ error: 'Failed to generate QR code' });
+  }
+});
+
+// Security scans a staff QR code — toggles entry/exit
+router.post('/scan', authenticateToken, authorizeRoles('security', 'admin', 'owner'), async (req, res) => {
+  try {
+    const { qr_data } = req.body;
+    const scannedBy = req.user.id;
+    const buildingId = req.user.building_id;
+
+    if (!qr_data) {
+      return res.status(400).json({ error: 'No QR data provided' });
+    }
+
+    // Parse QR data — expects format "staff:<userId>"
+    if (!qr_data.startsWith('staff:')) {
+      return res.status(400).json({ error: 'Invalid staff QR code' });
+    }
+
+    const staffId = qr_data.replace('staff:', '');
+
+    // Look up the staff member
+    const staffMember = await getOne(
+      'SELECT id, full_name, role, phone, email, building_id FROM users WHERE id = ? AND is_active = 1',
+      [staffId]
+    );
+
+    if (!staffMember) {
+      return res.status(404).json({ error: 'Staff member not found or inactive' });
+    }
+
+    if (!['staff', 'security'].includes(staffMember.role)) {
+      return res.status(400).json({ error: 'This QR code does not belong to a staff member' });
+    }
+
+    // Use the scanner's building_id or staff's building_id
+    const entryBuildingId = buildingId || staffMember.building_id;
+    if (!entryBuildingId) {
+      return res.status(400).json({ error: 'Cannot determine building for this entry' });
+    }
+
+    // Check if staff is currently inside (has an open entry with no exit)
+    const activeEntry = await getOne(
+      "SELECT id, entry_time FROM staff_entries WHERE staff_id = ? AND building_id = ? AND status = 'inside'",
+      [staffId, entryBuildingId]
+    );
+
+    const now = new Date().toISOString();
+
+    if (activeEntry) {
+      // Staff is inside — check them OUT
+      const entryTime = new Date(activeEntry.entry_time);
+      const exitTime = new Date();
+      const hoursWorked = ((exitTime - entryTime) / (1000 * 60 * 60)).toFixed(2);
+
+      await runQuery(
+        'UPDATE staff_entries SET exit_time = ?, status = ? WHERE id = ?',
+        [now, 'exited', activeEntry.id]
+      );
+
+      return res.json({
+        action: 'exit',
+        message: `${staffMember.full_name} checked out successfully`,
+        staff: {
+          id: staffMember.id,
+          full_name: staffMember.full_name,
+          role: staffMember.role,
+          phone: staffMember.phone
+        },
+        entry: {
+          id: activeEntry.id,
+          entry_time: activeEntry.entry_time,
+          exit_time: now,
+          hours_worked: hoursWorked,
+          status: 'exited'
+        }
+      });
+    } else {
+      // Staff is not inside — check them IN
+      const entryId = uuidv4();
+      await runQuery(
+        'INSERT INTO staff_entries (id, staff_id, building_id, entry_time, status, scanned_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [entryId, staffId, entryBuildingId, now, 'inside', scannedBy, now]
+      );
+
+      return res.json({
+        action: 'entry',
+        message: `${staffMember.full_name} checked in successfully`,
+        staff: {
+          id: staffMember.id,
+          full_name: staffMember.full_name,
+          role: staffMember.role,
+          phone: staffMember.phone
+        },
+        entry: {
+          id: entryId,
+          entry_time: now,
+          status: 'inside'
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Staff scan error:', err);
+    res.status(500).json({ error: 'Scan processing failed' });
+  }
+});
+
+// Get staff entries for a building (security/admin)
+router.get('/entries/:buildingId', authenticateToken, authorizeRoles('security', 'admin', 'owner'), async (req, res) => {
+  try {
+    const { buildingId } = req.params;
+    const { date, status } = req.query;
+    const today = date || new Date().toISOString().split('T')[0];
+
+    let query = `SELECT se.*, u.full_name as staff_name, u.role as staff_role, u.phone as staff_phone
+                 FROM staff_entries se
+                 JOIN users u ON se.staff_id = u.id
+                 WHERE se.building_id = ?
+                 AND se.entry_time::date = ?::date`;
+    const params = [buildingId, today];
+
+    if (status) {
+      query += ' AND se.status = ?';
+      params.push(status);
+    }
+
+    query += ' ORDER BY se.entry_time DESC LIMIT 100';
+    const entries = await getAll(query, params);
+
+    const inside = entries.filter(e => e.status === 'inside').length;
+    const exited = entries.filter(e => e.status === 'exited').length;
+
+    res.json({
+      entries,
+      stats: { inside, exited, total: entries.length }
+    });
+  } catch (err) {
+    console.error('Fetch staff entries error:', err);
+    res.status(500).json({ error: 'Failed to fetch staff entries' });
+  }
+});
+
+// Get all staff entries across buildings (admin only)
+router.get('/entries-all', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+  try {
+    const { date } = req.query;
+    const today = date || new Date().toISOString().split('T')[0];
+
+    const entries = await getAll(
+      `SELECT se.*, u.full_name as staff_name, u.role as staff_role, u.phone as staff_phone, b.name as building_name
+       FROM staff_entries se
+       JOIN users u ON se.staff_id = u.id
+       LEFT JOIN buildings b ON se.building_id = b.id
+       WHERE se.entry_time::date = ?::date
+       ORDER BY se.entry_time DESC LIMIT 100`,
+      [today]
+    );
+
+    const inside = entries.filter(e => e.status === 'inside').length;
+    const exited = entries.filter(e => e.status === 'exited').length;
+
+    res.json({
+      entries,
+      stats: { inside, exited, total: entries.length }
+    });
+  } catch (err) {
+    console.error('Fetch all staff entries error:', err);
+    res.status(500).json({ error: 'Failed to fetch staff entries' });
   }
 });
 

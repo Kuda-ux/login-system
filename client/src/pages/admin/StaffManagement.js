@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Users, Plus, Search, Filter, MoreVertical, Mail, Phone, Building2,
-  Edit2, Trash2, UserCheck, UserX, Shield, Clock, Calendar, X
+  Edit2, Trash2, UserCheck, UserX, Shield, Clock, Calendar, X, QrCode, Download
 } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -16,6 +16,8 @@ function StaffManagement() {
   const [formData, setFormData] = useState({
     email: '', password: '', full_name: '', phone: '', role: 'staff', building_id: ''
   });
+  const [qrModal, setQrModal] = useState(null); // { id, full_name, qr_code }
+  const [qrGenerating, setQrGenerating] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -64,6 +66,18 @@ function StaffManagement() {
       building_id: member.building_id || ''
     });
     setShowModal(true);
+  };
+
+  const handleGenerateQR = async (member) => {
+    setQrGenerating(true);
+    try {
+      const res = await api.post(`/staff/generate-qr/${member.id}`);
+      setQrModal({ id: member.id, full_name: member.full_name, qr_code: res.data.qr_code });
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to generate QR code');
+    } finally {
+      setQrGenerating(false);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -181,6 +195,9 @@ function StaffManagement() {
                   </div>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                  <button onClick={() => handleGenerateQR(member)} className="p-1.5 hover:bg-indigo-50 rounded-lg" title="Generate QR Code">
+                    <QrCode className="w-4 h-4 text-indigo-500" />
+                  </button>
                   <button onClick={() => handleEdit(member)} className="p-1.5 hover:bg-gray-100 rounded-lg">
                     <Edit2 className="w-4 h-4 text-gray-500" />
                   </button>
@@ -317,6 +334,46 @@ function StaffManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* QR Code Modal */}
+      {qrModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setQrModal(null)} />
+          <div className="relative bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl text-center">
+            <button onClick={() => setQrModal(null)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg">
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+            <QrCode className="w-10 h-10 text-indigo-600 mx-auto mb-3" />
+            <h2 className="text-lg font-bold text-gray-900 mb-1">Staff QR Code</h2>
+            <p className="text-gray-500 text-sm mb-4">{qrModal.full_name}</p>
+            <div className="bg-gray-50 rounded-xl p-4 inline-block mb-4">
+              <img src={qrModal.qr_code} alt="Staff QR Code" className="w-56 h-56 mx-auto" />
+            </div>
+            <p className="text-gray-400 text-xs mb-4">Security guards scan this code to record staff entry/exit</p>
+            <div className="flex gap-3">
+              <a
+                href={qrModal.qr_code}
+                download={`staff-qr-${qrModal.full_name.replace(/\s/g, '-')}.png`}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-medium"
+              >
+                <Download className="w-4 h-4" />
+                Download
+              </a>
+              <button
+                onClick={() => {
+                  const w = window.open('', '_blank');
+                  w.document.write(`<html><head><title>QR Code - ${qrModal.full_name}</title></head><body style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;"><h2>${qrModal.full_name}</h2><img src="${qrModal.qr_code}" style="width:300px;height:300px;" /><p style="color:#666;">Staff Building Pass</p></body></html>`);
+                  w.document.close();
+                  w.print();
+                }}
+                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
+              >
+                Print
+              </button>
+            </div>
           </div>
         </div>
       )}
