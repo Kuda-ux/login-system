@@ -1,16 +1,15 @@
 import axios from 'axios';
 
-// Use environment variable, or Render URL for production, or localhost for development
+// API base URLs
+const RENDER_API = 'https://building-management-api-5gn4.onrender.com/api';
+const LOCAL_API = 'http://localhost:5000/api';
+
 const getApiUrl = () => {
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
-  }
-  // In production (Vercel), use Render backend
-  if (window.location.hostname !== 'localhost') {
-    return 'https://building-management-api-5gn4.onrender.com/api';
-  }
-  // Local development
-  return 'http://localhost:5000/api';
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+  const url = isLocal ? LOCAL_API : RENDER_API;
+  console.log('[API] Using:', url, '| Host:', hostname);
+  return url;
 };
 
 const api = axios.create({
