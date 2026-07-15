@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Clock, LogIn, LogOut, User, Calendar, Timer, CheckCircle, 
   AlertCircle, WifiOff, History, Briefcase, TrendingUp, ChevronDown, ChevronUp,
-  QrCode, Download
+  QrCode, Download, ClipboardCheck
 } from 'lucide-react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
@@ -195,6 +195,9 @@ function StaffPortal() {
 
       {/* Main Content */}
       <main className="max-w-lg mx-auto px-4 py-6">
+        <button onClick={() => navigate('/patrol')} className="w-full mb-5 py-3 bg-indigo-600/20 border border-indigo-500/40 text-indigo-200 rounded-xl flex items-center justify-center gap-2 font-medium">
+          <ClipboardCheck className="w-5 h-5" /> Start Asset Patrol
+        </button>
         {/* Live Clock Card */}
         <div className="bg-gradient-to-br from-violet-600 to-purple-700 rounded-3xl p-6 mb-6 text-center shadow-xl shadow-violet-500/20">
           <p className="text-violet-200 text-sm mb-2">

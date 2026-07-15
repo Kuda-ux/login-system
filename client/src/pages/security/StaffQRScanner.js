@@ -214,7 +214,7 @@ function StaffQRScanner() {
           </button>
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-cyan-500" />
-            <span className="font-bold text-white">Staff QR Scanner</span>
+            <span className="font-bold text-white">Guard QR Scanner</span>
           </div>
           <div className="w-9" />
         </div>
@@ -252,7 +252,7 @@ function StaffQRScanner() {
               <div className="w-24 h-24 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-cyan-500/30">
                 <Camera className="w-12 h-12 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Scan Staff QR Code</h2>
+              <h2 className="text-xl font-bold text-white mb-2">Scan Guard QR Code</h2>
               <p className="text-slate-400 text-sm mb-6">
                 Point the camera at a staff member's QR code to check them in or out of the building
               </p>

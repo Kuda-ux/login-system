@@ -45,9 +45,9 @@ export default function Buildings() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Buildings</h1>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Client Sites</h1>
         <button onClick={() => { setForm({ name: '', address: '' }); setEditing(null); setShowModal(true); }} className="btn btn-primary">
-          <Plus size={18} /> Add Building
+          <Plus size={18} /> Add Client Site
         </button>
       </div>
 

@@ -141,7 +141,7 @@ function StaffManagement() {
           onChange={(e) => setFilterBuilding(e.target.value)}
           className="px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
         >
-          <option value="">All Buildings</option>
+          <option value="">All Client Sites</option>
           {buildings.map(b => (
             <option key={b.id} value={b.id}>{b.name}</option>
           ))}
@@ -302,7 +302,8 @@ function StaffManagement() {
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
                   <option value="staff">Staff</option>
-                  <option value="security">Security</option>
+                  <option value="security">Guard</option>
+                  <option value="supervisor">Supervisor</option>
                 </select>
               </div>
               <div>

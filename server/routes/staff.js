@@ -254,7 +254,7 @@ router.post('/generate-qr/:staffId', authenticateToken, authorizeRoles('admin', 
 });
 
 // Security scans a staff QR code — toggles entry/exit
-router.post('/scan', authenticateToken, authorizeRoles('security', 'admin', 'owner'), async (req, res) => {
+router.post('/scan', authenticateToken, authorizeRoles('security', 'supervisor', 'admin', 'owner'), async (req, res) => {
   try {
     const { qr_data } = req.body;
     const scannedBy = req.user.id;
@@ -358,7 +358,7 @@ router.post('/scan', authenticateToken, authorizeRoles('security', 'admin', 'own
 });
 
 // Get staff entries for a building (security/admin)
-router.get('/entries/:buildingId', authenticateToken, authorizeRoles('security', 'admin', 'owner'), async (req, res) => {
+router.get('/entries/:buildingId', authenticateToken, authorizeRoles('security', 'supervisor', 'admin', 'owner'), async (req, res) => {
   try {
     const { buildingId } = req.params;
     const { date, status } = req.query;

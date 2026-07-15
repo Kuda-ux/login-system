@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Building2, Users, UserCheck, DollarSign, TrendingUp, Clock, 
   Calendar, Bell, Settings, LogOut, Menu, X, ChevronRight,
-  Home, CreditCard, UserPlus, BarChart3, FileText, Shield
+  Home, CreditCard, UserPlus, BarChart3, FileText, Shield, ClipboardCheck, AlertTriangle, PackageCheck
 } from 'lucide-react';
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import api from '../../utils/api';
@@ -43,7 +43,11 @@ function AdminDashboard() {
 
   const navItems = [
     { path: '/admin', icon: Home, label: 'Dashboard', exact: true },
-    { path: '/admin/buildings', icon: Building2, label: 'Buildings' },
+    { path: '/admin/operations', icon: ClipboardCheck, label: 'Operations' },
+    { path: '/admin/guards', icon: Shield, label: 'Guard E-Files' },
+    { path: '/admin/incidents', icon: AlertTriangle, label: 'Incidents' },
+    { path: '/admin/assets', icon: PackageCheck, label: 'Asset Tags' },
+    { path: '/admin/buildings', icon: Building2, label: 'Client Sites' },
     { path: '/admin/visitors', icon: UserCheck, label: 'Visitors' },
     { path: '/admin/tenants', icon: Users, label: 'Tenants' },
     { path: '/admin/payments', icon: CreditCard, label: 'Payments' },
@@ -138,7 +142,7 @@ function AdminDashboard() {
                 <Building2 className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="font-bold text-white">BuildingMS</h1>
+                <h1 className="font-bold text-white">SecureOps</h1>
                 <p className="text-xs text-slate-500">Admin Portal</p>
               </div>
             </div>

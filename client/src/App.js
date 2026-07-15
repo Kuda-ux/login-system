@@ -21,6 +21,11 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import StaffManagement from './pages/admin/StaffManagement';
 import Reports from './pages/admin/Reports';
 import Settings from './pages/admin/Settings';
+import Operations from './pages/admin/Operations';
+import GuardFiles from './pages/admin/GuardFiles';
+import Incidents from './pages/admin/Incidents';
+import Assets from './pages/admin/Assets';
+import Patrol from './pages/staff/Patrol';
 import Buildings from './pages/Buildings';
 import Tenants from './pages/Tenants';
 import Payments from './pages/Payments';
@@ -49,7 +54,7 @@ function SecurityRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <LoadingSpinner />;
   if (!user) return <Navigate to="/security/login" />;
-  if (!['security', 'staff', 'admin', 'owner'].includes(user.role)) return <Navigate to="/security/login" />;
+  if (!['security', 'supervisor', 'staff', 'admin', 'owner'].includes(user.role)) return <Navigate to="/security/login" />;
   return children;
 }
 
@@ -58,7 +63,7 @@ function StaffRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <LoadingSpinner />;
   if (!user) return <Navigate to="/staff/login" />;
-  if (!['staff', 'admin', 'owner'].includes(user.role)) return <Navigate to="/staff/login" />;
+  if (!['staff', 'security', 'admin', 'owner'].includes(user.role)) return <Navigate to="/staff/login" />;
   return children;
 }
 
@@ -101,10 +106,12 @@ function App() {
             <Route path="/security/login" element={<SecurityLogin />} />
             <Route path="/security" element={<SecurityRoute><SecurityDashboard /></SecurityRoute>} />
             <Route path="/security/scan" element={<SecurityRoute><StaffQRScanner /></SecurityRoute>} />
+            <Route path="/security/incidents" element={<SecurityRoute><Incidents /></SecurityRoute>} />
             
             {/* ========== STAFF INTERFACE ========== */}
             <Route path="/staff/login" element={<StaffLogin />} />
             <Route path="/staff" element={<StaffRoute><StaffPortal /></StaffRoute>} />
+            <Route path="/patrol" element={<StaffRoute><Patrol /></StaffRoute>} />
             
             {/* ========== ADMIN INTERFACE ========== */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -116,6 +123,10 @@ function App() {
               <Route path="staff" element={<StaffManagement />} />
               <Route path="reports" element={<Reports />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="operations" element={<Operations />} />
+              <Route path="guards" element={<GuardFiles />} />
+              <Route path="incidents" element={<Incidents />} />
+              <Route path="assets" element={<Assets />} />
             </Route>
             
             {/* ========== DEFAULT ROUTES ========== */}

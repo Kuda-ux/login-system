@@ -20,7 +20,7 @@ function StaffLogin() {
     try {
       const result = await login(email, password);
       if (result.success) {
-        if (['staff', 'admin', 'owner'].includes(result.user.role)) {
+        if (['staff', 'security', 'admin', 'owner'].includes(result.user.role)) {
           navigate('/staff');
         } else {
           setError('Access denied. Staff members only.');

@@ -64,8 +64,8 @@ router.post('/register', authenticateToken, authorizeRoles('admin', 'owner'), as
     }
 
     // Owners can only create staff or security for their buildings
-    if (req.user.role === 'owner' && !['staff', 'security'].includes(role)) {
-      return res.status(403).json({ error: 'Owners can only create staff or security accounts' });
+    if (req.user.role === 'owner' && !['staff', 'security', 'supervisor'].includes(role)) {
+      return res.status(403).json({ error: 'Owners can only create guard or supervisor accounts' });
     }
 
     const existingUser = await getOne('SELECT id FROM users WHERE email = ?', [email]);

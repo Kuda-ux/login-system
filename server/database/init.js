@@ -132,12 +132,53 @@ if (process.env.DATABASE_URL) {
       data TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP, synced INTEGER DEFAULT 0, synced_at TEXT
     )`);
 
-    // Add staff_qr_code column if it doesn't exist
-    try {
-      db.run(`ALTER TABLE users ADD COLUMN staff_qr_code TEXT`);
-    } catch (err) {
-      // Column may already exist
+    for (const column of [
+      'staff_qr_code TEXT', 'employee_number TEXT', 'date_of_birth TEXT', 'address TEXT',
+      'emergency_contact TEXT', "clearance_status TEXT DEFAULT 'not_cleared'", 'profile_photo TEXT', 'client_id TEXT'
+    ]) {
+      try { db.run(`ALTER TABLE users ADD COLUMN ${column}`); } catch (err) {}
     }
+
+    try { db.run('ALTER TABLE buildings ADD COLUMN client_id TEXT'); } catch (err) {}
+
+    db.run(`CREATE TABLE IF NOT EXISTS clients (
+      id TEXT PRIMARY KEY, name TEXT NOT NULL, contact_name TEXT, contact_phone TEXT,
+      contact_email TEXT, address TEXT, is_active INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS employee_documents (
+      id TEXT PRIMARY KEY, employee_id TEXT NOT NULL, document_type TEXT NOT NULL,
+      document_name TEXT NOT NULL, document_url TEXT NOT NULL, expires_at TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS incident_reports (
+      id TEXT PRIMARY KEY, building_id TEXT NOT NULL, reported_by TEXT NOT NULL,
+      title TEXT NOT NULL, category TEXT NOT NULL, severity TEXT NOT NULL,
+      description TEXT NOT NULL, people_involved TEXT, actions_taken TEXT,
+      status TEXT DEFAULT 'open', occurred_at TEXT NOT NULL, resolved_at TEXT,
+      resolution_notes TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS assets (
+      id TEXT PRIMARY KEY, building_id TEXT NOT NULL, name TEXT NOT NULL,
+      asset_code TEXT UNIQUE NOT NULL, category TEXT, location TEXT, description TEXT,
+      status TEXT DEFAULT 'active', qr_code TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS patrol_rounds (
+      id TEXT PRIMARY KEY, building_id TEXT NOT NULL, guard_id TEXT NOT NULL,
+      supervisor_id TEXT, status TEXT DEFAULT 'in_progress', started_at TEXT NOT NULL,
+      completed_at TEXT, notes TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS patrol_scans (
+      id TEXT PRIMARY KEY, patrol_round_id TEXT NOT NULL, asset_id TEXT NOT NULL,
+      scanned_by TEXT NOT NULL, scanned_at TEXT NOT NULL, condition_status TEXT DEFAULT 'verified',
+      notes TEXT, UNIQUE(patrol_round_id, asset_id)
+    )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS staff_entries (
       id TEXT PRIMARY KEY, staff_id TEXT NOT NULL, building_id TEXT NOT NULL,

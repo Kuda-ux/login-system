@@ -183,7 +183,7 @@ router.get('/all', authenticateToken, authorizeRoles('admin'), async (req, res) 
 });
 
 // Get all visitors for a building (admin/owner/security/staff)
-router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', 'owner', 'security', 'staff'), async (req, res) => {
+router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', 'owner', 'security', 'supervisor', 'staff'), async (req, res) => {
   try {
     const { buildingId } = req.params;
     const { date, status, page = 1, limit = 50 } = req.query;

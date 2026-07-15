@@ -21,7 +21,7 @@ function SecurityLogin() {
       const result = await login(email, password);
       if (result.success) {
         // Check if user has security/staff role
-        if (['security', 'staff', 'admin', 'owner'].includes(result.user.role)) {
+        if (['security', 'supervisor', 'staff', 'admin', 'owner'].includes(result.user.role)) {
           navigate('/security');
         } else {
           setError('Access denied. Security personnel only.');

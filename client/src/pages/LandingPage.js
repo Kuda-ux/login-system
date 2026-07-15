@@ -37,7 +37,7 @@ function LandingPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight">BuildingMS</span>
+            <span className="text-xl font-bold tracking-tight">SecureOps</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-gray-400 hover:text-white transition text-sm">Features</a>
@@ -58,7 +58,7 @@ function LandingPage() {
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-8 backdrop-blur-sm">
             <Sparkles className="w-4 h-4 text-indigo-400" />
-            <span className="text-sm text-gray-300">Next-Gen Building Management Platform</span>
+            <span className="text-sm text-gray-300">Next-Gen Security Operations Platform</span>
           </div>
           
           <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight mb-8 leading-[0.9]">
@@ -69,8 +69,8 @@ function LandingPage() {
           </h1>
           
           <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Enterprise-grade visitor management, staff attendance, and rent collection. 
-            Works offline. Syncs seamlessly. Built for Zimbabwe.
+            Security operations for visitor management, guard control, incident reporting, and patrol verification.
+            Built for trial-ready field operations.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

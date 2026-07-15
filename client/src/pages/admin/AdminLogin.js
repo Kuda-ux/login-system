@@ -43,8 +43,8 @@ function AdminLogin() {
           <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/30">
             <Building2 className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">BuildingMS</h1>
-          <p className="text-gray-400">Admin Dashboard</p>
+          <h1 className="text-3xl font-bold text-white mb-2">SecureOps</h1>
+          <p className="text-gray-400">Headquarters Dashboard</p>
         </div>
 
         {/* Login Form */}
@@ -112,11 +112,6 @@ function AdminLogin() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-white/10 text-center">
-            <p className="text-gray-400 text-sm">
-              Default credentials: <span className="text-indigo-400">admin@buildingms.com</span> / <span className="text-indigo-400">admin123</span>
-            </p>
-          </div>
         </div>
 
         <p className="text-center text-gray-500 text-sm mt-6">

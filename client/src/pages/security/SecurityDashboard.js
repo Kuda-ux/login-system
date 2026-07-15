@@ -199,7 +199,7 @@ function SecurityDashboard() {
                 }`}
               >
                 <Briefcase className="w-5 h-5" />
-                Staff Entries
+                Guard Attendance
                 {staffStats.inside > 0 && (
                   <span className="ml-auto bg-violet-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
                     {staffStats.inside}
@@ -222,7 +222,7 @@ function SecurityDashboard() {
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition font-medium mt-4"
               >
                 <ScanLine className="w-5 h-5" />
-                Scan Staff QR
+                Scan Guard QR
               </button>
             </nav>
 
@@ -296,7 +296,7 @@ function SecurityDashboard() {
               }`}
             >
               <Briefcase className="w-5 h-5" />
-              Staff Entries
+              Guard Attendance
               {staffStats.inside > 0 && (
                 <span className="ml-auto bg-violet-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
                   {staffStats.inside}
@@ -319,8 +319,9 @@ function SecurityDashboard() {
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition font-medium mt-4"
             >
               <ScanLine className="w-5 h-5" />
-              Scan Staff QR
+              Scan Guard QR
             </button>
+            {user?.role === 'supervisor' && <button onClick={() => navigate('/security/incidents')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-300 hover:bg-slate-800 transition"><FileText className="w-5 h-5" />Report Incident</button>}
           </nav>
 
           <button
@@ -388,7 +389,7 @@ function SecurityDashboard() {
             className="lg:hidden w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl font-semibold mb-6 shadow-lg shadow-emerald-500/20"
           >
             <ScanLine className="w-5 h-5" />
-            Scan Staff QR Code
+            Scan Guard QR Code
           </button>
 
           {/* Search and Actions */}
@@ -415,7 +416,7 @@ function SecurityDashboard() {
           {/* Tab Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white">
-              {activeTab === 'visitors' ? 'Visitors Inside' : activeTab === 'staff' ? 'Staff Entries Today' : "Today's Visitor Log"}
+              {activeTab === 'visitors' ? 'Visitors Inside' : activeTab === 'staff' ? 'Guard Attendance Today' : "Today's Visitor Log"}
             </h2>
             <div className="flex items-center gap-2 text-slate-500 text-sm">
               <Zap className="w-4 h-4 text-cyan-400" />
@@ -423,7 +424,7 @@ function SecurityDashboard() {
             </div>
           </div>
 
-          {/* Staff Entries List */}
+          {/* Guard Attendance List */}
           {activeTab === 'staff' && (
             <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
               {staffEntries.length === 0 ? (
