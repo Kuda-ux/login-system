@@ -85,10 +85,10 @@ function AdminDashboard() {
           <aside className="absolute left-0 top-0 bottom-0 w-72 bg-slate-900 shadow-xl">
             <div className="p-6 border-b border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-white rounded-xl p-1 flex items-center justify-center">
+                  <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
                 </div>
-                <span className="font-bold text-white">Admin Portal</span>
+                <span className="font-bold text-white">Cherubim Security HQ</span>
               </div>
               <button onClick={() => setSidebarOpen(false)}>
                 <X className="w-6 h-6 text-slate-500" />
@@ -138,12 +138,12 @@ function AdminDashboard() {
         <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-slate-900 border-r border-slate-800 fixed">
           <div className="p-6 border-b border-slate-800">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                <Building2 className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-white rounded-xl p-1 flex items-center justify-center shadow-lg shadow-[#d4ae2a]/20">
+                <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
               </div>
               <div>
-                <h1 className="font-bold text-white">SecureOps</h1>
-                <p className="text-xs text-slate-500">Admin Portal</p>
+                <h1 className="font-bold text-white">Cherubim Security</h1>
+                <p className="text-xs text-[#d4ae2a]">Headquarters Operations</p>
               </div>
             </div>
           </div>

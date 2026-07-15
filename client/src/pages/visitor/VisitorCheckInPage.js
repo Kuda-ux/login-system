@@ -174,7 +174,7 @@ function VisitorCheckInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-black via-stone-900 to-[#3f3410] flex flex-col">
       {/* Offline Banner */}
       {!isOnline && (
         <div className="bg-yellow-500 text-yellow-900 px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2">
@@ -185,8 +185,8 @@ function VisitorCheckInPage() {
 
       {/* Header */}
       <div className="p-6 text-center text-white">
-        <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Building2 className="w-8 h-8" />
+        <div className="w-16 h-16 bg-white rounded-2xl p-1 flex items-center justify-center mx-auto mb-4">
+          <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
         </div>
         <h1 className="text-2xl font-bold">{building?.name || 'Building'}</h1>
         <p className="text-white/80 text-sm mt-1">{building?.address}</p>

@@ -34,10 +34,10 @@ function LandingPage() {
       <nav className="relative z-50 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-white" />
+            <div className="w-11 h-11 bg-white rounded-xl p-1 flex items-center justify-center">
+              <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
             </div>
-            <span className="text-xl font-bold tracking-tight">SecureOps</span>
+            <span className="text-xl font-bold tracking-tight">Cherubim Security</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-gray-400 hover:text-white transition text-sm">Features</a>
@@ -57,14 +57,14 @@ function LandingPage() {
       <header className="relative z-10 px-6 pt-20 pb-32">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-8 backdrop-blur-sm">
-            <Sparkles className="w-4 h-4 text-indigo-400" />
-            <span className="text-sm text-gray-300">Next-Gen Security Operations Platform</span>
+            <Sparkles className="w-4 h-4 text-[#d4ae2a]" />
+            <span className="text-sm text-gray-300">Professional Security Operations Platform</span>
           </div>
           
           <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight mb-8 leading-[0.9]">
-            <span className="block">Smart Building</span>
-            <span className="block bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Access Control
+            <span className="block">Trusted Security.</span>
+            <span className="block text-[#d4ae2a]">
+              Total Control.
             </span>
           </h1>
           
@@ -76,7 +76,7 @@ function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link 
               to="/admin/login"
-              className="group px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full font-semibold text-lg hover:shadow-lg hover:shadow-indigo-500/25 transition-all flex items-center gap-2"
+              className="group px-8 py-4 bg-[#d4ae2a] text-black rounded-full font-semibold text-lg hover:bg-[#e5c25a] transition-all flex items-center gap-2"
             >
               Launch Dashboard
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -299,10 +299,10 @@ function LandingPage() {
               <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg font-bold">BuildingMS</span>
+              <span className="text-lg font-bold">Cherubim Security</span>
             </div>
             <div className="flex items-center gap-8 text-sm text-gray-500">
-              <span>© 2024 BuildingMS</span>
+              <span>© 2026 Cherubim Security</span>
               <span>•</span>
               <span>Built for Zimbabwe</span>
               <span>•</span>

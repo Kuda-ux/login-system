@@ -1,10 +1,10 @@
 {
-  "short_name": "BuildingMS",
-  "name": "Building Management System",
-  "description": "Offline-First Visitor Access & Rent Payment System",
+  "short_name": "Cherubim",
+  "name": "Cherubim Security Operations",
+  "description": "Guard control, visitor management, incident reporting, and patrol verification.",
   "icons": [
     {
-      "src": "logo.svg",
+      "src": "cherubim-security-logo.svg",
       "type": "image/svg+xml",
       "sizes": "any",
       "purpose": "any"
@@ -12,7 +12,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#6366F1",
+  "theme_color": "#000001",
   "background_color": "#0f172a",
   "orientation": "portrait-primary",
   "scope": "/",

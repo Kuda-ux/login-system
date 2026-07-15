@@ -41,11 +41,11 @@ function SecurityLogin() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/30">
-            <Shield className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 bg-white rounded-2xl p-1 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#d4ae2a]/30">
+            <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Security Portal</h1>
-          <p className="text-gray-400">Building Access Control System</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Cherubim Security</h1>
+          <p className="text-[#d4ae2a]">Supervisor & Guard Control</p>
         </div>
 
         {/* Login Form */}
@@ -100,14 +100,14 @@ function SecurityLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-[#d4ae2a] text-black rounded-xl font-semibold hover:bg-[#e5c25a] transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
               ) : (
                 <>
                   <Shield className="w-5 h-5" />
-                  Access Security Portal
+                  Access Control Portal
                 </>
               )}
             </button>

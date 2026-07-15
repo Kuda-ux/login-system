@@ -25,7 +25,7 @@ export default function Layout() {
     <div style={{ display: 'flex' }}>
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>BuildingMS</h1>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>Cherubim Security</h1>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{user?.role}</p>
         </div>
         <nav className="sidebar-nav">

@@ -137,8 +137,8 @@ function SecurityDashboard() {
           <Menu className="w-6 h-6 text-slate-400" />
         </button>
         <div className="flex items-center gap-2">
-          <Shield className="w-6 h-6 text-cyan-500" />
-          <span className="font-bold text-white">Security Portal</span>
+          <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-7 h-7 rounded-md bg-white object-contain" />
+          <span className="font-bold text-white">Cherubim Security</span>
         </div>
         <button className="p-2 -mr-2 relative">
           <Bell className="w-6 h-6 text-slate-400" />
@@ -157,10 +157,10 @@ function SecurityDashboard() {
           <div className="absolute left-0 top-0 bottom-0 w-72 bg-slate-900 p-6">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-white rounded-xl p-1 flex items-center justify-center">
+                  <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
                 </div>
-                <span className="font-bold text-white text-lg">Security</span>
+                <span className="font-bold text-white text-lg">Cherubim Security</span>
               </div>
               <button onClick={() => setSidebarOpen(false)}>
                 <X className="w-6 h-6 text-slate-500" />

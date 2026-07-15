@@ -213,8 +213,8 @@ function StaffQRScanner() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-cyan-500" />
-            <span className="font-bold text-white">Guard QR Scanner</span>
+            <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-6 h-6 rounded bg-white object-contain" />
+            <span className="font-bold text-white">Cherubim Guard Scanner</span>
           </div>
           <div className="w-9" />
         </div>

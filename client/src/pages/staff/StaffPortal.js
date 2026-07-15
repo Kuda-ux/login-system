@@ -173,14 +173,14 @@ function StaffPortal() {
       <header className="bg-slate-900 border-b border-slate-800 p-4">
         <div className="max-w-lg mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
-              <User className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-white rounded-xl p-1 flex items-center justify-center shadow-lg shadow-[#d4ae2a]/20">
+              <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
             </div>
             <div>
               <p className="font-semibold text-white">{user?.full_name}</p>
               <p className="text-slate-500 text-sm flex items-center gap-1">
                 <Briefcase className="w-3 h-3" />
-                Staff Member
+                Cherubim Guard
               </p>
             </div>
           </div>
@@ -199,7 +199,7 @@ function StaffPortal() {
           <ClipboardCheck className="w-5 h-5" /> Start Asset Patrol
         </button>
         {/* Live Clock Card */}
-        <div className="bg-gradient-to-br from-violet-600 to-purple-700 rounded-3xl p-6 mb-6 text-center shadow-xl shadow-violet-500/20">
+        <div className="bg-gradient-to-br from-black to-[#4a3d12] rounded-3xl p-6 mb-6 text-center shadow-xl shadow-[#d4ae2a]/20">
           <p className="text-violet-200 text-sm mb-2">
             {currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
