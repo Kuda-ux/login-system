@@ -49,21 +49,21 @@ function LoadingSpinner() {
   );
 }
 
-// Protected Route for Security
+// Protected Route for Security (Supervisors/Managers only)
 function SecurityRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <LoadingSpinner />;
   if (!user) return <Navigate to="/security/login" />;
-  if (!['security', 'supervisor', 'staff', 'admin', 'owner'].includes(user.role)) return <Navigate to="/security/login" />;
+  if (!['security', 'supervisor'].includes(user.role)) return <Navigate to="/security/login" />;
   return children;
 }
 
-// Protected Route for Staff
+// Protected Route for Staff (Guards only)
 function StaffRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <LoadingSpinner />;
   if (!user) return <Navigate to="/staff/login" />;
-  if (!['staff', 'security', 'admin', 'owner'].includes(user.role)) return <Navigate to="/staff/login" />;
+  if (!['staff'].includes(user.role)) return <Navigate to="/staff/login" />;
   return children;
 }
 

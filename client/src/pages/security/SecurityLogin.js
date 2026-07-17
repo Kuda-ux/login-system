@@ -20,11 +20,11 @@ function SecurityLogin() {
     try {
       const result = await login(email, password);
       if (result.success) {
-        // Check if user has security/staff role
-        if (['security', 'supervisor', 'staff', 'admin', 'owner'].includes(result.user.role)) {
+        // Check if user has supervisor/manager role
+        if (['security', 'supervisor'].includes(result.user.role)) {
           navigate('/security');
         } else {
-          setError('Access denied. Security personnel only.');
+          setError('Access denied. Supervisor / Manager portal only.');
         }
       } else {
         setError(result.error || 'Invalid credentials');
