@@ -314,7 +314,7 @@ router.post('/patrols/:id/complete', authenticateToken, async (req, res) => {
 });
 
 // Guard patrol accountability report - compares assigned guards to completed patrols
-router.get('/patrols/report', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
+router.get('/patrol-reports/accountability', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
   try {
     const { date, building_id } = req.query;
     const reportDate = date || new Date().toISOString().split('T')[0];
@@ -406,7 +406,7 @@ router.get('/patrols/report', authenticateToken, authorizeRoles(...managementRol
 });
 
 // Individual guard patrol activity log
-router.get('/patrols/guard/:guardId', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
+router.get('/patrol-reports/guard/:guardId', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
   try {
     const { guardId } = req.params;
     const { start_date, end_date, limit = 50 } = req.query;
@@ -464,7 +464,7 @@ router.get('/patrols/guard/:guardId', authenticateToken, authorizeRoles(...manag
 });
 
 // Missed patrols report
-router.get('/patrols/missed', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
+router.get('/patrol-reports/missed', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
   try {
     const { date, building_id } = req.query;
     const reportDate = date || new Date().toISOString().split('T')[0];

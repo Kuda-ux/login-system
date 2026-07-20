@@ -64,12 +64,12 @@ function Reports() {
 
   const fetchPatrolReport = async () => {
     try {
-      let url = `/operations/patrols/report?date=${reportDate}`;
+      let url = `/operations/patrol-reports/accountability?date=${reportDate}`;
       if (selectedBuilding) url += `&building_id=${selectedBuilding}`;
       const res = await api.get(url);
       setPatrolReport(res.data);
 
-      const missedRes = await api.get(url.replace('/patrols/report', '/patrols/missed'));
+      const missedRes = await api.get(url.replace('/patrols/report', '/patrol-reports/missed'));
       setMissedReport(missedRes.data);
     } catch (err) {
       console.error('Failed to fetch patrol report:', err);
@@ -78,7 +78,7 @@ function Reports() {
 
   const fetchGuardLog = async () => {
     try {
-      let url = `/operations/patrols/guard/${selectedGuard}`;
+      let url = `/operations/patrol-reports/guard/${selectedGuard}`;
       const params = [];
       if (startDate) params.push(`start_date=${startDate}`);
       if (endDate) params.push(`end_date=${endDate}`);
