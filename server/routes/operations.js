@@ -411,10 +411,7 @@ router.get('/patrol-reports/guard/:guardId', authenticateToken, authorizeRoles(.
     const { guardId } = req.params;
     const { start_date, end_date, limit = 50 } = req.query;
 
-    const guard = await getOne("SELECT u.id, u.full_name, u.email, u.phone, u.employee_number, u.building_id, b.name as site_name 
-                                FROM users u 
-                                LEFT JOIN buildings b ON u.building_id = b.id
-                                WHERE u.id = ? AND u.role IN ('staff', 'security')", [guardId]);
+    const guard = await getOne("SELECT u.id, u.full_name, u.email, u.phone, u.employee_number, u.building_id, b.name as site_name FROM users u LEFT JOIN buildings b ON u.building_id = b.id WHERE u.id = ? AND u.role IN ('staff', 'security')", [guardId]);
     if (!guard) return res.status(404).json({ error: 'Guard not found' });
     if (!await requireSiteAccess(req, res, guard.building_id)) return;
 
