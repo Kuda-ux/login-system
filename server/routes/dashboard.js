@@ -24,19 +24,29 @@ router.get('/stats', authenticateToken, authorizeRoles('admin', 'owner'), async 
 async function getAdminStats(buildingId) {
   const buildingFilter = buildingId ? 'AND building_id = ?' : '';
   const params = buildingId ? [buildingId] : [];
+
   const totalBuildings = await getOne('SELECT COUNT(*) as count FROM buildings WHERE is_active = 1', []) || { count: 0 };
   const totalOwners = await getOne("SELECT COUNT(*) as count FROM users WHERE role = 'owner' AND is_active = 1", []) || { count: 0 };
+  const totalStaff = await getOne("SELECT COUNT(*) as count FROM users WHERE role IN ('staff', 'security') AND is_active = 1", []) || { count: 0 };
   const todayVisitors = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE check_in_time::date = CURRENT_DATE ${buildingFilter}`, params) || { count: 0 };
   const activeVisitors = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE status = 'checked_in' ${buildingFilter}`, params) || { count: 0 };
   const totalTenants = await getOne(`SELECT COUNT(*) as count FROM tenants WHERE is_active = 1 ${buildingFilter}`, params) || { count: 0 };
+  const openIncidents = await getOne(`SELECT COUNT(*) as count FROM incident_reports WHERE status IN ('open', 'under_review') ${buildingFilter}`, params) || { count: 0 };
+  const activePatrols = await getOne(`SELECT COUNT(*) as count FROM patrol_rounds WHERE status = 'in_progress' ${buildingFilter}`, params) || { count: 0 };
+  const guardsOnDuty = await getOne(`SELECT COUNT(*) as count FROM staff_entries WHERE status = 'inside' ${buildingFilter}`, params) || { count: 0 };
   const monthlyRevenue = await getOne(`SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'completed' AND TO_CHAR(payment_date, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM') ${buildingFilter}`, params) || { total: 0 };
   const pendingPayments = await getOne(`SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'pending' ${buildingFilter}`, params) || { count: 0, total: 0 };
+
   return {
     total_buildings: parseInt(totalBuildings.count) || 0,
     total_owners: parseInt(totalOwners.count) || 0,
+    total_staff: parseInt(totalStaff.count) || 0,
     today_visitors: parseInt(todayVisitors.count) || 0,
     active_visitors: parseInt(activeVisitors.count) || 0,
     total_tenants: parseInt(totalTenants.count) || 0,
+    open_incidents: parseInt(openIncidents.count) || 0,
+    active_patrols: parseInt(activePatrols.count) || 0,
+    guards_on_duty: parseInt(guardsOnDuty.count) || 0,
     monthly_revenue: parseFloat(monthlyRevenue.total) || 0,
     pending_payments_count: parseInt(pendingPayments.count) || 0,
     pending_payments_total: parseFloat(pendingPayments.total) || 0
@@ -47,22 +57,29 @@ async function getOwnerStats(ownerId, buildingId) {
   const buildings = await getAll('SELECT id FROM buildings WHERE owner_id = ? AND is_active = 1', [ownerId]);
   const buildingIds = buildings.map(b => b.id);
   if (buildingIds.length === 0) {
-    return { total_buildings: 0, today_visitors: 0, active_visitors: 0, total_tenants: 0, total_staff: 0, monthly_revenue: 0, pending_payments_count: 0, pending_payments_total: 0 };
+    return { total_buildings: 0, total_owners: 0, total_staff: 0, today_visitors: 0, active_visitors: 0, total_tenants: 0, open_incidents: 0, active_patrols: 0, guards_on_duty: 0, monthly_revenue: 0, pending_payments_count: 0, pending_payments_total: 0 };
   }
   const filterIds = buildingId ? [buildingId] : buildingIds;
   const placeholders = filterIds.map(() => '?').join(',');
   const todayVisitors = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE check_in_time::date = CURRENT_DATE AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
   const activeVisitors = await getOne(`SELECT COUNT(*) as count FROM visitors WHERE status = 'checked_in' AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
   const totalTenants = await getOne(`SELECT COUNT(*) as count FROM tenants WHERE is_active = 1 AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
-  const totalStaff = await getOne(`SELECT COUNT(*) as count FROM users WHERE role = 'staff' AND is_active = 1 AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
+  const totalStaff = await getOne(`SELECT COUNT(*) as count FROM users WHERE role IN ('staff', 'security') AND is_active = 1 AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
+  const openIncidents = await getOne(`SELECT COUNT(*) as count FROM incident_reports WHERE status IN ('open', 'under_review') AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
+  const activePatrols = await getOne(`SELECT COUNT(*) as count FROM patrol_rounds WHERE status = 'in_progress' AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
+  const guardsOnDuty = await getOne(`SELECT COUNT(*) as count FROM staff_entries WHERE status = 'inside' AND building_id IN (${placeholders})`, filterIds) || { count: 0 };
   const monthlyRevenue = await getOne(`SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'completed' AND TO_CHAR(payment_date, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM') AND building_id IN (${placeholders})`, filterIds) || { total: 0 };
   const pendingPayments = await getOne(`SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'pending' AND building_id IN (${placeholders})`, filterIds) || { count: 0, total: 0 };
   return {
     total_buildings: buildingIds.length,
+    total_owners: 0,
+    total_staff: parseInt(totalStaff.count) || 0,
     today_visitors: parseInt(todayVisitors.count) || 0,
     active_visitors: parseInt(activeVisitors.count) || 0,
     total_tenants: parseInt(totalTenants.count) || 0,
-    total_staff: parseInt(totalStaff.count) || 0,
+    open_incidents: parseInt(openIncidents.count) || 0,
+    active_patrols: parseInt(activePatrols.count) || 0,
+    guards_on_duty: parseInt(guardsOnDuty.count) || 0,
     monthly_revenue: parseFloat(monthlyRevenue.total) || 0,
     pending_payments_count: parseInt(pendingPayments.count) || 0,
     pending_payments_total: parseFloat(pendingPayments.total) || 0

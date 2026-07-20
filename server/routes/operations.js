@@ -187,6 +187,43 @@ router.get('/assets/:buildingId', authenticateToken, async (req, res) => {
   }
 });
 
+// List all patrols (admin view)
+router.get('/patrols', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
+  try {
+    const { building_id, status, date, limit = 50 } = req.query;
+    let query = `SELECT p.*, b.name AS site_name, u.full_name AS guard_name,
+                 (SELECT COUNT(*) FROM patrol_scans WHERE patrol_round_id = p.id) as scans_completed,
+                 (SELECT COUNT(*) FROM assets WHERE building_id = p.building_id AND status = 'active') as total_checkpoints
+                 FROM patrol_rounds p 
+                 JOIN buildings b ON p.building_id = b.id 
+                 JOIN users u ON p.guard_id = u.id WHERE 1=1`;
+    const params = [];
+    
+    if (req.user.role === 'supervisor') {
+      query += ' AND p.building_id = ?';
+      params.push(req.user.building_id);
+    } else if (req.user.role === 'owner') {
+      const sites = await getAll('SELECT id FROM buildings WHERE owner_id = ?', [req.user.id]);
+      if (!sites.length) return res.json({ patrols: [] });
+      query += ` AND p.building_id IN (${sites.map(() => '?').join(',')})`;
+      params.push(...sites.map(s => s.id));
+    }
+    
+    if (building_id) { query += ' AND p.building_id = ?'; params.push(building_id); }
+    if (status) { query += ' AND p.status = ?'; params.push(status); }
+    if (date) { query += ' AND DATE(p.started_at) = ?'; params.push(date); }
+    
+    query += ' ORDER BY p.started_at DESC LIMIT ?';
+    params.push(parseInt(limit));
+    
+    const patrols = await getAll(query, params);
+    res.json({ patrols });
+  } catch (err) {
+    console.error('Patrol list error:', err);
+    res.status(500).json({ error: 'Failed to load patrols' });
+  }
+});
+
 router.post('/patrols', authenticateToken, authorizeRoles('admin', 'owner', 'supervisor', 'security', 'staff'), async (req, res) => {
   try {
     const { building_id, guard_id, notes } = req.body;
@@ -273,6 +310,207 @@ router.post('/patrols/:id/complete', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error('Patrol completion error:', err);
     res.status(500).json({ error: 'Failed to complete patrol' });
+  }
+});
+
+// Guard patrol accountability report - compares assigned guards to completed patrols
+router.get('/patrols/report', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
+  try {
+    const { date, building_id } = req.query;
+    const reportDate = date || new Date().toISOString().split('T')[0];
+    const nextDate = new Date(new Date(reportDate).getTime() + 86400000).toISOString().split('T')[0];
+
+    let buildingFilter = '';
+    const params = [reportDate, nextDate];
+
+    if (req.user.role === 'supervisor') {
+      buildingFilter = ' AND u.building_id = ?';
+      params.push(req.user.building_id);
+    } else if (building_id) {
+      buildingFilter = ' AND u.building_id = ?';
+      params.push(building_id);
+    }
+
+    // Get all active staff/security guards assigned to buildings
+    const guards = await getAll(`SELECT u.id, u.full_name, u.email, u.building_id, b.name as site_name 
+                                 FROM users u 
+                                 LEFT JOIN buildings b ON u.building_id = b.id
+                                 WHERE u.role IN ('staff', 'security') AND u.is_active = 1${buildingFilter}
+                                 ORDER BY b.name, u.full_name`, params.slice(2));
+
+    // Get patrols for the selected date range
+    const patrolParams = [reportDate, nextDate];
+    if (building_id) patrolParams.push(building_id);
+    const patrolBuildingFilter = building_id ? ' AND p.building_id = ?' : '';
+    const patrols = await getAll(`SELECT p.id, p.building_id, p.guard_id, p.status, p.started_at, p.completed_at, p.notes,
+                                         b.name as site_name, u.full_name as guard_name,
+                                         (SELECT COUNT(*) FROM patrol_scans WHERE patrol_round_id = p.id) as scans_completed,
+                                         (SELECT COUNT(*) FROM assets WHERE building_id = p.building_id AND status = 'active') as total_checkpoints
+                                  FROM patrol_rounds p
+                                  JOIN buildings b ON p.building_id = b.id
+                                  JOIN users u ON p.guard_id = u.id
+                                  WHERE p.started_at >= ? AND p.started_at < ?${patrolBuildingFilter}
+                                  ORDER BY p.started_at DESC`, patrolParams);
+
+    // Build guard patrol status
+    const patrolsByGuard = {};
+    patrols.forEach(p => {
+      if (!patrolsByGuard[p.guard_id]) patrolsByGuard[p.guard_id] = [];
+      patrolsByGuard[p.guard_id].push(p);
+    });
+
+    const guardReport = guards.map(g => {
+      const guardPatrols = patrolsByGuard[g.id] || [];
+      const completed = guardPatrols.filter(p => p.status === 'completed');
+      const inProgress = guardPatrols.filter(p => p.status === 'in_progress');
+      return {
+        guard_id: g.id,
+        guard_name: g.full_name,
+        email: g.email,
+        site_name: g.site_name,
+        building_id: g.building_id,
+        status: completed.length > 0 ? 'completed' : inProgress.length > 0 ? 'in_progress' : 'missed',
+        completed_count: completed.length,
+        in_progress_count: inProgress.length,
+        total_patrols: guardPatrols.length,
+        last_patrol_at: guardPatrols.length > 0 ? guardPatrols[0].started_at : null,
+        last_patrol_status: guardPatrols.length > 0 ? guardPatrols[0].status : null,
+        checkpoints_completed: completed.reduce((sum, p) => sum + p.scans_completed, 0),
+        checkpoints_total: completed.reduce((sum, p) => sum + p.total_checkpoints, 0)
+      };
+    });
+
+    // Summary
+    const completedGuards = guardReport.filter(g => g.status === 'completed').length;
+    const inProgressGuards = guardReport.filter(g => g.status === 'in_progress').length;
+    const missedGuards = guardReport.filter(g => g.status === 'missed').length;
+    const totalGuards = guardReport.length;
+
+    res.json({
+      date: reportDate,
+      building_id: building_id || null,
+      guards: guardReport,
+      summary: {
+        total_guards: totalGuards,
+        completed: completedGuards,
+        in_progress: inProgressGuards,
+        missed: missedGuards,
+        completion_rate: totalGuards ? Math.round((completedGuards / totalGuards) * 100) : 0
+      },
+      patrols
+    });
+  } catch (err) {
+    console.error('Patrol report error:', err);
+    res.status(500).json({ error: 'Failed to generate patrol report' });
+  }
+});
+
+// Individual guard patrol activity log
+router.get('/patrols/guard/:guardId', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
+  try {
+    const { guardId } = req.params;
+    const { start_date, end_date, limit = 50 } = req.query;
+
+    const guard = await getOne("SELECT u.id, u.full_name, u.email, u.phone, u.employee_number, u.building_id, b.name as site_name 
+                                FROM users u 
+                                LEFT JOIN buildings b ON u.building_id = b.id
+                                WHERE u.id = ? AND u.role IN ('staff', 'security')", [guardId]);
+    if (!guard) return res.status(404).json({ error: 'Guard not found' });
+    if (!await requireSiteAccess(req, res, guard.building_id)) return;
+
+    let query = `SELECT p.id, p.building_id, p.status, p.started_at, p.completed_at, p.notes,
+                        b.name as site_name,
+                        (SELECT COUNT(*) FROM patrol_scans WHERE patrol_round_id = p.id) as scans_completed,
+                        (SELECT COUNT(*) FROM assets WHERE building_id = p.building_id AND status = 'active') as total_checkpoints
+                 FROM patrol_rounds p
+                 JOIN buildings b ON p.building_id = b.id
+                 WHERE p.guard_id = ?`;
+    const params = [guardId];
+
+    if (start_date) { query += ' AND p.started_at >= ?'; params.push(start_date); }
+    if (end_date) { query += ' AND p.started_at < ?'; params.push(new Date(new Date(end_date).getTime() + 86400000).toISOString()); }
+
+    query += ' ORDER BY p.started_at DESC LIMIT ?';
+    params.push(parseInt(limit));
+
+    const patrols = await getAll(query, params);
+    const patrolIds = patrols.map(p => `'${p.id}'`).join(',');
+    let scans = [];
+    if (patrolIds.length) {
+      scans = await getAll(`SELECT ps.id, ps.patrol_round_id, ps.asset_id, ps.scanned_at, ps.condition_status, ps.notes,
+                                  a.name as asset_name, a.asset_code, a.location
+                           FROM patrol_scans ps
+                           LEFT JOIN assets a ON ps.asset_id = a.id
+                           WHERE ps.patrol_round_id IN (${patrolIds})
+                           ORDER BY ps.scanned_at DESC`);
+    }
+
+    res.json({
+      guard,
+      patrols,
+      scans,
+      summary: {
+        total_patrols: patrols.length,
+        completed: patrols.filter(p => p.status === 'completed').length,
+        in_progress: patrols.filter(p => p.status === 'in_progress').length,
+        total_scans: scans.length,
+        average_completion: patrols.length ? Math.round((patrols.filter(p => p.status === 'completed').length / patrols.length) * 100) : 0
+      }
+    });
+  } catch (err) {
+    console.error('Guard patrol log error:', err);
+    res.status(500).json({ error: 'Failed to fetch guard patrol log' });
+  }
+});
+
+// Missed patrols report
+router.get('/patrols/missed', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
+  try {
+    const { date, building_id } = req.query;
+    const reportDate = date || new Date().toISOString().split('T')[0];
+    const nextDate = new Date(new Date(reportDate).getTime() + 86400000).toISOString().split('T')[0];
+
+    let buildingFilter = '';
+    const params = [];
+
+    if (req.user.role === 'supervisor') {
+      buildingFilter = ' AND u.building_id = ?';
+      params.push(req.user.building_id);
+    } else if (building_id) {
+      buildingFilter = ' AND u.building_id = ?';
+      params.push(building_id);
+    }
+
+    const guards = await getAll(`SELECT u.id, u.full_name, u.email, u.building_id, b.name as site_name 
+                                 FROM users u 
+                                 LEFT JOIN buildings b ON u.building_id = b.id
+                                 WHERE u.role IN ('staff', 'security') AND u.is_active = 1${buildingFilter}
+                                 ORDER BY b.name, u.full_name`, params);
+
+    const guardIds = guards.map(g => `'${g.id}'`).join(',');
+    let patrolParams = [reportDate, nextDate];
+    let patrolBuildingFilter = '';
+    if (building_id) { patrolBuildingFilter = ' AND building_id = ?'; patrolParams.push(building_id); }
+    if (req.user.role === 'supervisor') { patrolBuildingFilter += ' AND building_id = ?'; patrolParams.push(req.user.building_id); }
+
+    const completedPatrols = guardIds.length ? await getAll(`SELECT DISTINCT guard_id 
+                                                              FROM patrol_rounds 
+                                                              WHERE started_at >= ? AND started_at < ? AND status = 'completed'${patrolBuildingFilter} AND guard_id IN (${guardIds})`, patrolParams) : [];
+    const completedGuardIds = new Set(completedPatrols.map(p => p.guard_id));
+
+    const missedGuards = guards.filter(g => !completedGuardIds.has(g.id));
+
+    res.json({
+      date: reportDate,
+      building_id: building_id || null,
+      missed_count: missedGuards.length,
+      missed_guards: missedGuards,
+      total_guards: guards.length,
+      completion_rate: guards.length ? Math.round(((guards.length - missedGuards.length) / guards.length) * 100) : 0
+    });
+  } catch (err) {
+    console.error('Missed patrols report error:', err);
+    res.status(500).json({ error: 'Failed to generate missed patrols report' });
   }
 });
 

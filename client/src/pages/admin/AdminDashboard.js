@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Building2, Users, UserCheck, DollarSign, TrendingUp, Clock, 
   Calendar, Bell, Settings, LogOut, Menu, X, ChevronRight,
-  Home, CreditCard, UserPlus, BarChart3, FileText, Shield, ClipboardCheck, AlertTriangle, PackageCheck, Car, Crosshair
+  Home, CreditCard, UserPlus, BarChart3, FileText, Shield, ShieldCheck, ClipboardCheck, AlertTriangle, PackageCheck, Car, Crosshair
 } from 'lucide-react';
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import api from '../../utils/api';
@@ -13,7 +13,7 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const [stats, setStats] = useState(null);
-  const [recentActivity, setRecentActivity] = useState({ visitors: [], payments: [] });
+  const [recentActivity, setRecentActivity] = useState({ visitors: [], incidents: [], patrols: [] });
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -23,12 +23,18 @@ function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const [statsRes, activityRes] = await Promise.all([
+      const [statsRes, visitorsRes, incidentsRes, patrolsRes] = await Promise.all([
         api.get('/dashboard/stats'),
-        api.get('/dashboard/activity?limit=5')
+        api.get('/visitors/all?date=today&limit=5'),
+        api.get('/operations/incidents?limit=5'),
+        api.get('/operations/patrols?limit=5')
       ]);
       setStats(statsRes.data);
-      setRecentActivity(activityRes.data);
+      setRecentActivity({
+        visitors: visitorsRes.data.visitors || [],
+        incidents: incidentsRes.data.incidents || [],
+        patrols: patrolsRes.data.patrols || []
+      });
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
     } finally {
@@ -209,36 +215,41 @@ function AdminDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
                   <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-slate-700 transition">
                     <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4">
                       <Building2 className="w-6 h-6 text-blue-400" />
                     </div>
                     <p className="text-3xl font-bold text-white">{stats?.total_buildings || 0}</p>
-                    <p className="text-slate-500 text-sm">Total Buildings</p>
+                    <p className="text-slate-500 text-sm">Client Sites</p>
+                  </div>
+                  <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-slate-700 transition">
+                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4">
+                      <Users className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <p className="text-3xl font-bold text-white">{stats?.total_staff || 0}</p>
+                    <p className="text-slate-500 text-sm">Guards/Staff</p>
                   </div>
                   <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-slate-700 transition">
                     <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4">
                       <UserCheck className="w-6 h-6 text-emerald-400" />
                     </div>
                     <p className="text-3xl font-bold text-white">{stats?.active_visitors || 0}</p>
-                    <p className="text-slate-500 text-sm">Active Visitors</p>
+                    <p className="text-slate-500 text-sm">Visitors On Site</p>
                   </div>
                   <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-slate-700 transition">
-                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4">
-                      <Users className="w-6 h-6 text-purple-400" />
+                    <div className="w-12 h-12 bg-indigo-500/20 rounded-xl flex items-center justify-center mb-4">
+                      <ClipboardCheck className="w-6 h-6 text-indigo-400" />
                     </div>
-                    <p className="text-3xl font-bold text-white">{stats?.total_tenants || 0}</p>
-                    <p className="text-slate-500 text-sm">Total Tenants</p>
+                    <p className="text-3xl font-bold text-white">{stats?.active_patrols || 0}</p>
+                    <p className="text-slate-500 text-sm">Active Patrols</p>
                   </div>
                   <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-slate-700 transition">
                     <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center mb-4">
-                      <DollarSign className="w-6 h-6 text-amber-400" />
+                      <AlertTriangle className="w-6 h-6 text-amber-400" />
                     </div>
-                    <p className="text-3xl font-bold text-white">
-                      ${(stats?.monthly_revenue || 0).toLocaleString()}
-                    </p>
-                    <p className="text-slate-500 text-sm">Monthly Revenue</p>
+                    <p className="text-3xl font-bold text-white">{stats?.open_incidents || 0}</p>
+                    <p className="text-slate-500 text-sm">Open Incidents</p>
                   </div>
                 </div>
               )}
@@ -246,36 +257,36 @@ function AdminDashboard() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <Link
-                  to="/admin/buildings"
-                  className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl p-6 hover:shadow-lg hover:shadow-blue-500/20 transition group border border-blue-500/20"
+                  to="/admin/operations"
+                  className="bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-2xl p-6 hover:shadow-lg hover:shadow-indigo-500/20 transition group border border-indigo-500/20"
                 >
-                  <Building2 className="w-8 h-8 mb-3 group-hover:scale-110 transition" />
-                  <p className="font-semibold">Manage Buildings</p>
-                  <p className="text-blue-200 text-sm">Add or edit buildings</p>
+                  <ShieldCheck className="w-8 h-8 mb-3 group-hover:scale-110 transition" />
+                  <p className="font-semibold">Operations Center</p>
+                  <p className="text-indigo-200 text-sm">Patrols, incidents, attendance</p>
                 </Link>
                 <Link
                   to="/admin/visitors"
                   className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white rounded-2xl p-6 hover:shadow-lg hover:shadow-emerald-500/20 transition group border border-emerald-500/20"
                 >
                   <UserCheck className="w-8 h-8 mb-3 group-hover:scale-110 transition" />
-                  <p className="font-semibold">View Visitors</p>
-                  <p className="text-emerald-200 text-sm">Today's visitor log</p>
+                  <p className="font-semibold">Visitor Logs</p>
+                  <p className="text-emerald-200 text-sm">Check-ins and check-outs</p>
                 </Link>
                 <Link
-                  to="/admin/tenants"
-                  className="bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-2xl p-6 hover:shadow-lg hover:shadow-purple-500/20 transition group border border-purple-500/20"
+                  to="/admin/vehicles"
+                  className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl p-6 hover:shadow-lg hover:shadow-blue-500/20 transition group border border-blue-500/20"
                 >
-                  <UserPlus className="w-8 h-8 mb-3 group-hover:scale-110 transition" />
-                  <p className="font-semibold">Add Tenant</p>
-                  <p className="text-purple-200 text-sm">Register new tenant</p>
+                  <Car className="w-8 h-8 mb-3 group-hover:scale-110 transition" />
+                  <p className="font-semibold">Vehicle Tracking</p>
+                  <p className="text-blue-200 text-sm">Fleet GPS & assignments</p>
                 </Link>
                 <Link
-                  to="/admin/payments"
+                  to="/admin/weapons"
                   className="bg-gradient-to-br from-amber-600 to-orange-700 text-white rounded-2xl p-6 hover:shadow-lg hover:shadow-amber-500/20 transition group border border-amber-500/20"
                 >
-                  <CreditCard className="w-8 h-8 mb-3 group-hover:scale-110 transition" />
-                  <p className="font-semibold">Payments</p>
-                  <p className="text-amber-200 text-sm">View & collect rent</p>
+                  <Crosshair className="w-8 h-8 mb-3 group-hover:scale-110 transition" />
+                  <p className="font-semibold">Weapons</p>
+                  <p className="text-amber-200 text-sm">Issuance & clearance</p>
                 </Link>
               </div>
 
@@ -317,33 +328,37 @@ function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Recent Payments */}
+                {/* Recent Incidents */}
                 <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
                   <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-                    <h2 className="font-semibold text-white">Recent Payments</h2>
-                    <Link to="/admin/payments" className="text-indigo-400 text-sm hover:text-indigo-300 flex items-center gap-1">
+                    <h2 className="font-semibold text-white">Recent Incidents</h2>
+                    <Link to="/admin/incidents" className="text-indigo-400 text-sm hover:text-indigo-300 flex items-center gap-1">
                       View all <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>
                   <div className="divide-y divide-slate-800">
-                    {recentActivity.recent_payments?.length === 0 ? (
-                      <div className="p-6 text-center text-slate-500">No recent payments</div>
+                    {recentActivity.incidents?.length === 0 ? (
+                      <div className="p-6 text-center text-slate-500">No recent incidents</div>
                     ) : (
-                      recentActivity.recent_payments?.slice(0, 5).map((payment) => (
-                        <div key={payment.id} className="p-4 flex items-center gap-4 hover:bg-slate-800/50 transition">
-                          <div className="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center">
-                            <DollarSign className="w-5 h-5 text-amber-400" />
+                      recentActivity.incidents?.slice(0, 5).map((incident) => (
+                        <div key={incident.id} className="p-4 flex items-center gap-4 hover:bg-slate-800/50 transition">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            incident.severity === 'high' ? 'bg-red-500/20' : incident.severity === 'medium' ? 'bg-amber-500/20' : 'bg-slate-700'
+                          }`}>
+                            <AlertTriangle className={`w-5 h-5 ${
+                              incident.severity === 'high' ? 'text-red-400' : incident.severity === 'medium' ? 'text-amber-400' : 'text-slate-300'
+                            }`} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-white truncate">{payment.tenant_name}</p>
-                            <p className="text-sm text-slate-500">{payment.rent_month}</p>
+                            <p className="font-medium text-white truncate">{incident.title}</p>
+                            <p className="text-sm text-slate-500">{incident.site_name} · {incident.category}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold text-white">${payment.amount}</p>
+                            <p className="font-semibold text-white text-xs uppercase">{incident.severity}</p>
                             <span className={`text-xs ${
-                              payment.payment_status === 'completed' ? 'text-emerald-400' : 'text-amber-400'
+                              incident.status === 'resolved' ? 'text-emerald-400' : 'text-amber-400'
                             }`}>
-                              {payment.payment_status}
+                              {incident.status}
                             </span>
                           </div>
                         </div>
