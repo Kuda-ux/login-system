@@ -321,7 +321,7 @@ function SecurityDashboard() {
               <ScanLine className="w-5 h-5" />
               Scan Guard QR
             </button>
-            {user?.role === 'supervisor' && <button onClick={() => navigate('/security/incidents')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-300 hover:bg-slate-800 transition"><FileText className="w-5 h-5" />Report Incident</button>}
+            {['supervisor', 'security'].includes(user?.role) && <button onClick={() => navigate('/security/incidents')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-300 hover:bg-slate-800 transition"><FileText className="w-5 h-5" />Report Incident</button>}
           </nav>
 
           <button

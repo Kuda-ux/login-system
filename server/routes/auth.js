@@ -107,7 +107,7 @@ router.get('/me', authenticateToken, async (req, res) => {
   }
 });
 
-// Update password
+// Update password (self)
 router.put('/password', authenticateToken, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -134,12 +134,38 @@ router.put('/password', authenticateToken, async (req, res) => {
   }
 });
 
+// Admin reset password for any employee
+router.put('/users/:id/password', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    }
+
+    const user = await getOne('SELECT id, role FROM users WHERE id = ?', [id]);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const now = new Date().toISOString();
+    await runQuery('UPDATE users SET password = ?, updated_at = ? WHERE id = ?', [hashedPassword, now, id]);
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (err) {
+    console.error('Admin password reset error:', err);
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
 // Verify token
 router.get('/verify', authenticateToken, (req, res) => {
   res.json({ valid: true, user: req.user });
 });
 
-// Get users by role (admin/owner only)
+// Get all users (admin/owner only) - includes supervisor role for staff list
 router.get('/users', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
   try {
     const { role } = req.query;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Users, Plus, Search, Filter, MoreVertical, Mail, Phone, Building2,
-  Edit2, Trash2, UserCheck, UserX, Shield, Clock, Calendar, X, QrCode, Download
+  Edit2, Trash2, UserCheck, UserX, Shield, Clock, Calendar, X, QrCode, Download, Key
 } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -18,6 +18,8 @@ function StaffManagement() {
   });
   const [qrModal, setQrModal] = useState(null); // { id, full_name, qr_code }
   const [qrGenerating, setQrGenerating] = useState(false);
+  const [passwordModal, setPasswordModal] = useState(null); // { id, full_name }
+  const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -87,6 +89,22 @@ function StaffManagement() {
       fetchData();
     } catch (err) {
       alert('Failed to deactivate staff member');
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    try {
+      await api.put(`/auth/users/${passwordModal.id}/password`, { newPassword });
+      alert(`Password reset successfully for ${passwordModal.full_name}`);
+      setPasswordModal(null);
+      setNewPassword('');
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to reset password');
     }
   };
 
@@ -198,10 +216,13 @@ function StaffManagement() {
                   <button onClick={() => handleGenerateQR(member)} className="p-1.5 hover:bg-indigo-50 rounded-lg" title="Generate QR Code">
                     <QrCode className="w-4 h-4 text-indigo-500" />
                   </button>
-                  <button onClick={() => handleEdit(member)} className="p-1.5 hover:bg-gray-100 rounded-lg">
+                  <button onClick={() => setPasswordModal({ id: member.id, full_name: member.full_name })} className="p-1.5 hover:bg-amber-50 rounded-lg" title="Reset Password">
+                    <Key className="w-4 h-4 text-amber-500" />
+                  </button>
+                  <button onClick={() => handleEdit(member)} className="p-1.5 hover:bg-gray-100 rounded-lg" title="Edit">
                     <Edit2 className="w-4 h-4 text-gray-500" />
                   </button>
-                  <button onClick={() => handleDelete(member.id)} className="p-1.5 hover:bg-red-50 rounded-lg">
+                  <button onClick={() => handleDelete(member.id)} className="p-1.5 hover:bg-red-50 rounded-lg" title="Deactivate">
                     <Trash2 className="w-4 h-4 text-red-500" />
                   </button>
                 </div>
@@ -375,6 +396,53 @@ function StaffManagement() {
                 Print
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Reset Modal */}
+      {passwordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => { setPasswordModal(null); setNewPassword(''); }} />
+          <div className="relative bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Reset Password</h2>
+              <button onClick={() => { setPasswordModal(null); setNewPassword(''); }} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <p className="text-gray-600 mb-4">
+              Set a new password for <strong>{passwordModal.full_name}</strong>
+            </p>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Minimum 6 characters"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setPasswordModal(null); setNewPassword(''); }}
+                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2.5 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition font-medium"
+                >
+                  Reset Password
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

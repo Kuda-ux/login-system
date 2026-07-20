@@ -232,9 +232,19 @@ router.post('/patrols/:id/scans', authenticateToken, authorizeRoles('admin', 'ow
     if (!patrol) return res.status(404).json({ error: 'Active patrol not found' });
     if (!await requireSiteAccess(req, res, patrol.building_id)) return;
     if (['security', 'staff'].includes(req.user.role) && patrol.guard_id !== req.user.id) return res.status(403).json({ error: 'Guards can only scan for their own patrol' });
-    const assetId = String(asset_qr || '').replace(/^asset:/, '');
-    const asset = await getOne("SELECT id FROM assets WHERE id = ? AND building_id = ? AND status = 'active'", [assetId, patrol.building_id]);
+    
+    // Support multiple QR formats: "asset:<uuid>", "<uuid>", or "<asset_code>"
+    const rawValue = String(asset_qr || '').trim();
+    const assetId = rawValue.replace(/^asset:/, '');
+    
+    // Try to find asset by ID first, then by asset_code
+    let asset = await getOne("SELECT id FROM assets WHERE id = ? AND building_id = ? AND status = 'active'", [assetId, patrol.building_id]);
+    if (!asset) {
+      // Try matching by asset_code (case-insensitive)
+      asset = await getOne("SELECT id FROM assets WHERE LOWER(asset_code) = LOWER(?) AND building_id = ? AND status = 'active'", [assetId, patrol.building_id]);
+    }
     if (!asset) return res.status(400).json({ error: 'This asset does not belong to the patrol site or is inactive' });
+    
     const scan = await getOne('SELECT id FROM patrol_scans WHERE patrol_round_id = ? AND asset_id = ?', [patrol.id, asset.id]);
     if (scan) return res.status(400).json({ error: 'This asset has already been verified on this patrol' });
     await runQuery('INSERT INTO patrol_scans (id, patrol_round_id, asset_id, scanned_by, scanned_at, condition_status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)', [uuidv4(), patrol.id, asset.id, req.user.id, new Date().toISOString(), condition_status || 'verified', notes || null]);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Building2, Users, UserCheck, DollarSign, TrendingUp, Clock, 
   Calendar, Bell, Settings, LogOut, Menu, X, ChevronRight,
-  Home, CreditCard, UserPlus, BarChart3, FileText, Shield, ClipboardCheck, AlertTriangle, PackageCheck
+  Home, CreditCard, UserPlus, BarChart3, FileText, Shield, ClipboardCheck, AlertTriangle, PackageCheck, Car, Crosshair
 } from 'lucide-react';
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import api from '../../utils/api';
@@ -47,11 +47,11 @@ function AdminDashboard() {
     { path: '/admin/guards', icon: Shield, label: 'Guard E-Files' },
     { path: '/admin/incidents', icon: AlertTriangle, label: 'Incidents' },
     { path: '/admin/assets', icon: PackageCheck, label: 'Asset Tags' },
+    { path: '/admin/vehicles', icon: Car, label: 'Vehicles' },
+    { path: '/admin/weapons', icon: Crosshair, label: 'Weapons' },
     { path: '/admin/buildings', icon: Building2, label: 'Client Sites' },
     { path: '/admin/visitors', icon: UserCheck, label: 'Visitors' },
-    { path: '/admin/tenants', icon: Users, label: 'Tenants' },
-    { path: '/admin/payments', icon: CreditCard, label: 'Payments' },
-    { path: '/admin/staff', icon: Shield, label: 'Staff' },
+    { path: '/admin/staff', icon: Users, label: 'Staff' },
     { path: '/admin/reports', icon: BarChart3, label: 'Reports' },
     { path: '/admin/settings', icon: Settings, label: 'Settings' },
   ];

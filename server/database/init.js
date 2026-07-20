@@ -187,6 +187,34 @@ if (process.env.DATABASE_URL) {
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )`);
 
+    // Vehicle tracking tables
+    db.run(`CREATE TABLE IF NOT EXISTS vehicles (
+      id TEXT PRIMARY KEY, registration_number TEXT UNIQUE NOT NULL,
+      make TEXT, model TEXT, color TEXT, assigned_driver_id TEXT, building_id TEXT,
+      status TEXT DEFAULT 'active', last_latitude REAL, last_longitude REAL,
+      last_location_update TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS vehicle_tracking (
+      id TEXT PRIMARY KEY, vehicle_id TEXT NOT NULL, driver_id TEXT,
+      latitude REAL NOT NULL, longitude REAL NOT NULL, speed REAL, heading REAL,
+      recorded_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Weapons management tables
+    db.run(`CREATE TABLE IF NOT EXISTS weapons (
+      id TEXT PRIMARY KEY, serial_number TEXT UNIQUE NOT NULL, weapon_type TEXT NOT NULL,
+      make TEXT, model TEXT, caliber TEXT, status TEXT DEFAULT 'available',
+      building_id TEXT, current_holder_id TEXT, issued_at TEXT, returned_at TEXT,
+      condition_notes TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS weapon_assignments (
+      id TEXT PRIMARY KEY, weapon_id TEXT NOT NULL, guard_id TEXT NOT NULL,
+      issued_by TEXT NOT NULL, issued_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      returned_at TEXT, returned_to TEXT, condition_on_issue TEXT, condition_on_return TEXT, notes TEXT
+    )`);
+
     // Check if admin exists
     const adminCheck = getOne("SELECT id FROM users WHERE role = 'admin'");
     if (!adminCheck) {

@@ -25,6 +25,8 @@ import Operations from './pages/admin/Operations';
 import GuardFiles from './pages/admin/GuardFiles';
 import Incidents from './pages/admin/Incidents';
 import Assets from './pages/admin/Assets';
+import Vehicles from './pages/admin/Vehicles';
+import Weapons from './pages/admin/Weapons';
 import Patrol from './pages/staff/Patrol';
 import Buildings from './pages/Buildings';
 import Tenants from './pages/Tenants';
@@ -49,21 +51,21 @@ function LoadingSpinner() {
   );
 }
 
-// Protected Route for Security (Supervisors/Managers only)
+// Protected Route for Security (Supervisors/Managers + Admin)
 function SecurityRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <LoadingSpinner />;
   if (!user) return <Navigate to="/security/login" />;
-  if (!['security', 'supervisor'].includes(user.role)) return <Navigate to="/security/login" />;
+  if (!['security', 'supervisor', 'admin'].includes(user.role)) return <Navigate to="/security/login" />;
   return children;
 }
 
-// Protected Route for Staff (Guards only)
+// Protected Route for Staff (Guards + Admin)
 function StaffRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <LoadingSpinner />;
   if (!user) return <Navigate to="/staff/login" />;
-  if (!['staff'].includes(user.role)) return <Navigate to="/staff/login" />;
+  if (!['staff', 'admin'].includes(user.role)) return <Navigate to="/staff/login" />;
   return children;
 }
 
@@ -127,6 +129,8 @@ function App() {
               <Route path="guards" element={<GuardFiles />} />
               <Route path="incidents" element={<Incidents />} />
               <Route path="assets" element={<Assets />} />
+              <Route path="vehicles" element={<Vehicles />} />
+              <Route path="weapons" element={<Weapons />} />
             </Route>
             
             {/* ========== DEFAULT ROUTES ========== */}

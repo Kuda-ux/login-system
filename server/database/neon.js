@@ -222,6 +222,65 @@ async function initializeDatabase() {
     synced_at TIMESTAMP
   )`);
 
+  // Vehicle tracking table
+  await pool.query(`CREATE TABLE IF NOT EXISTS vehicles (
+    id TEXT PRIMARY KEY,
+    registration_number TEXT UNIQUE NOT NULL,
+    make TEXT,
+    model TEXT,
+    color TEXT,
+    assigned_driver_id TEXT,
+    building_id TEXT,
+    status TEXT DEFAULT 'active',
+    last_latitude REAL,
+    last_longitude REAL,
+    last_location_update TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS vehicle_tracking (
+    id TEXT PRIMARY KEY,
+    vehicle_id TEXT NOT NULL,
+    driver_id TEXT,
+    latitude REAL NOT NULL,
+    longitude REAL NOT NULL,
+    speed REAL,
+    heading REAL,
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  // Weapons management table
+  await pool.query(`CREATE TABLE IF NOT EXISTS weapons (
+    id TEXT PRIMARY KEY,
+    serial_number TEXT UNIQUE NOT NULL,
+    weapon_type TEXT NOT NULL,
+    make TEXT,
+    model TEXT,
+    caliber TEXT,
+    status TEXT DEFAULT 'available',
+    building_id TEXT,
+    current_holder_id TEXT,
+    issued_at TIMESTAMP,
+    returned_at TIMESTAMP,
+    condition_notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS weapon_assignments (
+    id TEXT PRIMARY KEY,
+    weapon_id TEXT NOT NULL,
+    guard_id TEXT NOT NULL,
+    issued_by TEXT NOT NULL,
+    issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    returned_at TIMESTAMP,
+    returned_to TEXT,
+    condition_on_issue TEXT,
+    condition_on_return TEXT,
+    notes TEXT
+  )`);
+
   // Check if admin exists
   const adminCheck = await getOne("SELECT id FROM users WHERE role = $1", ['admin']);
   if (!adminCheck) {

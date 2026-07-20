@@ -20,8 +20,8 @@ function SecurityLogin() {
     try {
       const result = await login(email, password);
       if (result.success) {
-        // Check if user has supervisor/manager role
-        if (['security', 'supervisor'].includes(result.user.role)) {
+        // Check if user has supervisor/manager role or is admin
+        if (['security', 'supervisor', 'admin'].includes(result.user.role)) {
           navigate('/security');
         } else {
           setError('Access denied. Supervisor / Manager portal only.');
