@@ -16,6 +16,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const operationsRoutes = require('./routes/operations');
 const vehicleRoutes = require('./routes/vehicles');
 const weaponRoutes = require('./routes/weapons');
+const exportRoutes = require('./routes/exports');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -121,6 +122,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/operations', operationsRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/weapons', weaponRoutes);
+app.use('/api/exports', exportRoutes);
 
 // Serve static files in production (only if client/build exists)
 // For API-only deployment (Render), this is skipped

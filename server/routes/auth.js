@@ -19,11 +19,17 @@ router.post('/login', async (req, res) => {
     const user = await getOne('SELECT * FROM users WHERE email = ? AND is_active = 1', [email]);
 
     if (!user) {
+      // Log failed login attempt
+      await runQuery('INSERT INTO login_logs (id, user_id, email, full_name, role, ip_address, user_agent, login_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [uuidv4(), 'unknown', email, null, null, req.clientIP || req.ip, req.headers['user-agent'] || '', new Date().toISOString(), 'failed']);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
+      // Log failed login attempt
+      await runQuery('INSERT INTO login_logs (id, user_id, email, full_name, role, ip_address, user_agent, login_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [uuidv4(), user.id, email, user.full_name, user.role, req.clientIP || req.ip, req.headers['user-agent'] || '', new Date().toISOString(), 'failed']);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -32,6 +38,10 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
+
+    // Log successful login
+    await runQuery('INSERT INTO login_logs (id, user_id, email, full_name, role, ip_address, user_agent, login_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [uuidv4(), user.id, user.email, user.full_name, user.role, req.clientIP || req.ip, req.headers['user-agent'] || '', new Date().toISOString(), 'success']);
 
     res.json({
       token,
@@ -246,6 +256,45 @@ router.put('/profile', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error('Profile update error:', err);
     res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// Get login logs (admin only)
+router.get('/login-logs', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+  try {
+    const { page = 1, limit = 50, user_id, status, start_date, end_date } = req.query;
+    const offset = (page - 1) * limit;
+
+    let query = 'SELECT * FROM login_logs WHERE 1=1';
+    const params = [];
+
+    if (user_id) { query += ' AND user_id = ?'; params.push(user_id); }
+    if (status) { query += ' AND status = ?'; params.push(status); }
+    if (start_date) { query += ' AND login_at >= ?'; params.push(start_date); }
+    if (end_date) { query += ' AND login_at <= ?'; params.push(new Date(new Date(end_date).getTime() + 86400000).toISOString()); }
+
+    query += ' ORDER BY login_at DESC LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), offset);
+
+    const logs = await getAll(query, params);
+
+    let countQuery = 'SELECT COUNT(*) as count FROM login_logs WHERE 1=1';
+    const countParams = [];
+    if (user_id) { countQuery += ' AND user_id = ?'; countParams.push(user_id); }
+    if (status) { countQuery += ' AND status = ?'; countParams.push(status); }
+    if (start_date) { countQuery += ' AND login_at >= ?'; countParams.push(start_date); }
+    if (end_date) { countQuery += ' AND login_at <= ?'; countParams.push(new Date(new Date(end_date).getTime() + 86400000).toISOString()); }
+
+    const countResult = await getOne(countQuery, countParams);
+    const total = countResult ? parseInt(countResult.count) : 0;
+
+    res.json({
+      logs,
+      pagination: { total, page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(total / limit) }
+    });
+  } catch (err) {
+    console.error('Login logs error:', err);
+    res.status(500).json({ error: 'Failed to fetch login logs' });
   }
 });
 

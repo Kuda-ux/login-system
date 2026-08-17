@@ -281,6 +281,29 @@ async function initializeDatabase() {
     notes TEXT
   )`);
 
+  // Login logs table for tracking all login events
+  await pool.query(`CREATE TABLE IF NOT EXISTS login_logs (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    email TEXT NOT NULL,
+    full_name TEXT,
+    role TEXT,
+    ip_address TEXT,
+    user_agent TEXT,
+    login_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status TEXT DEFAULT 'success'
+  )`);
+
+  // Create index on login_logs for fast lookups
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_login_logs_login_at ON login_logs(login_at DESC)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_login_logs_user_id ON login_logs(user_id)`);
+
+  // Ensure attendance records are indexed for long-term storage
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_staff_attendance_work_date ON staff_attendance(work_date)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_staff_attendance_staff_id ON staff_attendance(staff_id)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_visitors_check_in_time ON visitors(check_in_time)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_staff_entries_entry_time ON staff_entries(entry_time)`);
+
   // Check if admin exists
   const adminCheck = await getOne("SELECT id FROM users WHERE role = $1", ['admin']);
   if (!adminCheck) {
