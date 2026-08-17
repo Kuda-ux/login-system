@@ -25,8 +25,8 @@ export default function Layout() {
     <div style={{ display: 'flex' }}>
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>Cherubim Security</h1>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{user?.role}</p>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#ffffff' }}>Cherubim Security</h1>
+          <p style={{ fontSize: '0.75rem', color: '#d4ae2a' }}>{user?.role}</p>
         </div>
         <nav className="sidebar-nav">
           {navItems.filter(item => item.roles.includes(user?.role)).map(item => (
@@ -35,7 +35,7 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1rem', borderTop: '1px solid #e2e8f0' }}>
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1rem', borderTop: '1px solid #1f1f1f' }}>
           {pendingSync > 0 && <div style={{ fontSize: '0.75rem', color: 'var(--warning)', marginBottom: '0.5rem' }}>{pendingSync} pending sync</div>}
           <div style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>{user?.full_name}</div>
           <button onClick={handleLogout} className="btn btn-outline" style={{ width: '100%', padding: '0.5rem' }}>

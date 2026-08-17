@@ -122,7 +122,7 @@ function SecurityDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#0a0a0a]">
       {/* Offline Banner */}
       {!isOnline && (
         <div className="bg-amber-500 text-amber-950 px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2">
@@ -132,18 +132,20 @@ function SecurityDashboard() {
       )}
 
       {/* Mobile Header */}
-      <header className="lg:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+      <header className="lg:hidden bg-[#111111] border-b border-[#1f1f1f] px-4 py-3 flex items-center justify-between sticky top-0 z-40">
         <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2">
-          <Menu className="w-6 h-6 text-slate-400" />
+          <Menu className="w-6 h-6 text-[#888]" />
         </button>
         <div className="flex items-center gap-2">
-          <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-7 h-7 rounded-md bg-white object-contain" />
+          <div className="w-7 h-7 rounded-md bg-gradient-to-br from-[#d4ae2a] to-[#b8942a] flex items-center justify-center">
+            <Shield className="w-4 h-4 text-black" />
+          </div>
           <span className="font-bold text-white">Cherubim Security</span>
         </div>
         <button className="p-2 -mr-2 relative">
-          <Bell className="w-6 h-6 text-slate-400" />
+          <Bell className="w-6 h-6 text-[#888]" />
           {stats.checked_in > 0 && (
-            <span className="absolute top-1 right-1 w-4 h-4 bg-cyan-500 rounded-full text-xs flex items-center justify-center text-white font-bold">
+            <span className="absolute top-1 right-1 w-4 h-4 bg-[#d4ae2a] rounded-full text-xs flex items-center justify-center text-black font-bold">
               {stats.checked_in}
             </span>
           )}
@@ -153,65 +155,68 @@ function SecurityDashboard() {
       {/* Mobile Sidebar */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setSidebarOpen(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-72 bg-slate-900 p-6">
+          <div className="absolute inset-0 bg-black/80" onClick={() => setSidebarOpen(false)} />
+          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#111111] p-6">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-xl p-1 flex items-center justify-center">
-                  <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
+                <div className="w-10 h-10 bg-gradient-to-br from-[#d4ae2a] to-[#b8942a] rounded-xl flex items-center justify-center shadow-lg shadow-[#d4ae2a]/10">
+                  <Shield className="w-5 h-5 text-black" />
                 </div>
-                <span className="font-bold text-white text-lg">Cherubim Security</span>
+                <div>
+                  <span className="font-bold text-white text-lg block leading-tight">Cherubim</span>
+                  <span className="text-[#d4ae2a] text-xs font-medium">Security</span>
+                </div>
               </div>
               <button onClick={() => setSidebarOpen(false)}>
-                <X className="w-6 h-6 text-slate-500" />
+                <X className="w-6 h-6 text-[#555]" />
               </button>
             </div>
             
-            <div className="bg-slate-800/50 rounded-xl p-4 mb-6">
-              <p className="text-slate-500 text-sm">Logged in as</p>
+            <div className="bg-[rgba(212,174,42,0.08)] rounded-xl p-4 mb-6 border border-[#1f1f1f]">
+              <p className="text-[#555] text-sm">Logged in as</p>
               <p className="font-medium text-white">{user?.full_name}</p>
-              <p className="text-cyan-400 text-sm capitalize">{user?.role}</p>
+              <p className="text-[#d4ae2a] text-sm capitalize">{user?.role}</p>
             </div>
 
             <nav className="space-y-2">
               <button
                 onClick={() => { setActiveTab('visitors'); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   activeTab === 'visitors' 
-                    ? 'bg-cyan-600/20 text-cyan-400' 
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-[rgba(212,174,42,0.1)] text-[#d4ae2a]' 
+                    : 'text-[#888] hover:bg-[#1a1a1a] hover:text-white'
                 }`}
               >
                 <UserCheck className="w-5 h-5" />
                 Visitors Inside
                 {stats.checked_in > 0 && (
-                  <span className="ml-auto bg-cyan-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                  <span className="ml-auto bg-[#d4ae2a] text-black px-2 py-0.5 rounded-full text-xs font-bold">
                     {stats.checked_in}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => { setActiveTab('staff'); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   activeTab === 'staff' 
-                    ? 'bg-cyan-600/20 text-cyan-400' 
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-[rgba(212,174,42,0.1)] text-[#d4ae2a]' 
+                    : 'text-[#888] hover:bg-[#1a1a1a] hover:text-white'
                 }`}
               >
                 <Briefcase className="w-5 h-5" />
                 Guard Attendance
                 {staffStats.inside > 0 && (
-                  <span className="ml-auto bg-violet-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                  <span className="ml-auto bg-[#d4ae2a] text-black px-2 py-0.5 rounded-full text-xs font-bold">
                     {staffStats.inside}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => { setActiveTab('all'); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   activeTab === 'all' 
-                    ? 'bg-cyan-600/20 text-cyan-400' 
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-[rgba(212,174,42,0.1)] text-[#d4ae2a]' 
+                    : 'text-[#888] hover:bg-[#1a1a1a] hover:text-white'
                 }`}
               >
                 <Clock className="w-5 h-5" />
@@ -219,7 +224,7 @@ function SecurityDashboard() {
               </button>
               <button
                 onClick={() => { setSidebarOpen(false); navigate('/security/scan'); }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition font-medium mt-4"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-black bg-[#d4ae2a] hover:bg-[#e8c847] transition-all duration-200 font-medium mt-4"
               >
                 <ScanLine className="w-5 h-5" />
                 Scan Guard QR
@@ -228,7 +233,7 @@ function SecurityDashboard() {
 
             <button
               onClick={handleLogout}
-              className="absolute bottom-6 left-6 right-6 flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition"
+              className="absolute bottom-6 left-6 right-6 flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all duration-200"
             >
               <LogOut className="w-5 h-5" />
               Logout
@@ -239,76 +244,76 @@ function SecurityDashboard() {
 
       <div className="flex">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex flex-col w-72 min-h-screen bg-slate-900 border-r border-slate-800 p-6 fixed">
+        <aside className="hidden lg:flex flex-col w-72 min-h-screen bg-[#111111] border-r border-[#1f1f1f] p-6 fixed">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
-              <Shield className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-gradient-to-br from-[#d4ae2a] to-[#b8942a] rounded-xl flex items-center justify-center shadow-lg shadow-[#d4ae2a]/15">
+              <Shield className="w-6 h-6 text-black" />
             </div>
             <div>
-              <h1 className="font-bold text-white text-lg">Security Portal</h1>
-              <p className="text-slate-500 text-sm">Access Control</p>
+              <h1 className="font-bold text-white text-lg leading-tight">Cherubim Security</h1>
+              <p className="text-[#d4ae2a] text-sm font-medium">Supervisor Control</p>
             </div>
           </div>
 
           {/* Live Clock */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 rounded-2xl p-4 mb-6 border border-slate-700">
+          <div className="bg-[#0a0a0a] rounded-2xl p-4 mb-6 border border-[#d4ae2a]/20">
             <div className="flex items-center gap-2 mb-2">
-              <Activity className="w-4 h-4 text-cyan-400 animate-pulse" />
-              <span className="text-slate-400 text-xs uppercase tracking-wider">Live</span>
+              <Activity className="w-4 h-4 text-[#d4ae2a] animate-pulse" />
+              <span className="text-[#888] text-xs uppercase tracking-wider">Live</span>
             </div>
             <p className="text-3xl font-bold text-white font-mono">
               {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </p>
-            <p className="text-slate-500 text-sm mt-1">
+            <p className="text-[#555] text-sm mt-1">
               {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </p>
           </div>
 
-          <div className="bg-slate-800/50 rounded-xl p-4 mb-6">
-            <p className="text-slate-500 text-sm">Logged in as</p>
+          <div className="bg-[rgba(212,174,42,0.08)] rounded-xl p-4 mb-6 border border-[#1f1f1f]">
+            <p className="text-[#555] text-sm">Logged in as</p>
             <p className="font-medium text-white">{user?.full_name}</p>
-            <p className="text-cyan-400 text-sm capitalize">{user?.role}</p>
+            <p className="text-[#d4ae2a] text-sm capitalize">{user?.role}</p>
           </div>
 
           <nav className="flex-1 space-y-2">
             <button
               onClick={() => setActiveTab('visitors')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 activeTab === 'visitors' 
-                  ? 'bg-cyan-600/20 text-cyan-400 font-medium' 
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-[rgba(212,174,42,0.1)] text-[#d4ae2a] font-medium' 
+                  : 'text-[#888] hover:bg-[#1a1a1a] hover:text-white'
               }`}
             >
               <UserCheck className="w-5 h-5" />
               Visitors Inside
               {stats.checked_in > 0 && (
-                <span className="ml-auto bg-cyan-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                <span className="ml-auto bg-[#d4ae2a] text-black px-2 py-0.5 rounded-full text-xs font-bold">
                   {stats.checked_in}
                 </span>
               )}
             </button>
             <button
               onClick={() => setActiveTab('staff')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 activeTab === 'staff' 
-                  ? 'bg-cyan-600/20 text-cyan-400 font-medium' 
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-[rgba(212,174,42,0.1)] text-[#d4ae2a] font-medium' 
+                  : 'text-[#888] hover:bg-[#1a1a1a] hover:text-white'
               }`}
             >
               <Briefcase className="w-5 h-5" />
               Guard Attendance
               {staffStats.inside > 0 && (
-                <span className="ml-auto bg-violet-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                <span className="ml-auto bg-[#d4ae2a] text-black px-2 py-0.5 rounded-full text-xs font-bold">
                   {staffStats.inside}
                 </span>
               )}
             </button>
             <button
               onClick={() => setActiveTab('all')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 activeTab === 'all' 
-                  ? 'bg-cyan-600/20 text-cyan-400 font-medium' 
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-[rgba(212,174,42,0.1)] text-[#d4ae2a] font-medium' 
+                  : 'text-[#888] hover:bg-[#1a1a1a] hover:text-white'
               }`}
             >
               <Clock className="w-5 h-5" />
@@ -316,17 +321,17 @@ function SecurityDashboard() {
             </button>
             <button
               onClick={() => navigate('/security/scan')}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition font-medium mt-4"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-black bg-[#d4ae2a] hover:bg-[#e8c847] transition-all duration-200 font-medium mt-4"
             >
               <ScanLine className="w-5 h-5" />
               Scan Guard QR
             </button>
-            {['supervisor', 'security'].includes(user?.role) && <button onClick={() => navigate('/security/incidents')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-300 hover:bg-slate-800 transition"><FileText className="w-5 h-5" />Report Incident</button>}
+            {['supervisor', 'security'].includes(user?.role) && <button onClick={() => navigate('/security/incidents')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#d4ae2a] hover:bg-[#1a1a1a] transition-all duration-200"><FileText className="w-5 h-5" />Report Incident</button>}
           </nav>
 
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition"
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all duration-200"
           >
             <LogOut className="w-5 h-5" />
             Logout
@@ -337,47 +342,47 @@ function SecurityDashboard() {
         <main className="flex-1 lg:ml-72 p-4 lg:p-8">
           {/* Stats Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 hover:border-emerald-500/30 transition group">
+            <div className="bg-[#111111] rounded-2xl p-5 border border-[#1f1f1f] hover:border-emerald-500/30 transition-all duration-300 group">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <UserCheck className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{stats.checked_in}</p>
-                  <p className="text-slate-500 text-xs">Visitors In</p>
+                  <p className="text-[#555] text-xs">Visitors In</p>
                 </div>
               </div>
             </div>
-            <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 hover:border-violet-500/30 transition group">
+            <div className="bg-[#111111] rounded-2xl p-5 border border-[#1f1f1f] hover:border-[#d4ae2a]/30 transition-all duration-300 group">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-violet-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
-                  <Briefcase className="w-5 h-5 text-violet-400" />
+                <div className="w-10 h-10 bg-[rgba(212,174,42,0.15)] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Briefcase className="w-5 h-5 text-[#d4ae2a]" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{staffStats.inside}</p>
-                  <p className="text-slate-500 text-xs">Staff In</p>
+                  <p className="text-[#555] text-xs">Staff In</p>
                 </div>
               </div>
             </div>
-            <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 hover:border-amber-500/30 transition group">
+            <div className="bg-[#111111] rounded-2xl p-5 border border-[#1f1f1f] hover:border-amber-500/30 transition-all duration-300 group">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
+                <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <UserX className="w-5 h-5 text-amber-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{stats.checked_out_today}</p>
-                  <p className="text-slate-500 text-xs">Visitors Out</p>
+                  <p className="text-[#555] text-xs">Visitors Out</p>
                 </div>
               </div>
             </div>
-            <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 hover:border-cyan-500/30 transition group">
+            <div className="bg-[#111111] rounded-2xl p-5 border border-[#1f1f1f] hover:border-[#d4ae2a]/30 transition-all duration-300 group">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition">
-                  <Users className="w-5 h-5 text-cyan-400" />
+                <div className="w-10 h-10 bg-[rgba(212,174,42,0.15)] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Users className="w-5 h-5 text-[#d4ae2a]" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{stats.total_today}</p>
-                  <p className="text-slate-500 text-xs">Total Today</p>
+                  <p className="text-[#555] text-xs">Total Today</p>
                 </div>
               </div>
             </div>
@@ -386,7 +391,7 @@ function SecurityDashboard() {
           {/* Mobile Scan Button */}
           <button
             onClick={() => navigate('/security/scan')}
-            className="lg:hidden w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl font-semibold mb-6 shadow-lg shadow-emerald-500/20"
+            className="lg:hidden w-full flex items-center justify-center gap-2 py-4 bg-[#d4ae2a] hover:bg-[#e8c847] text-black rounded-2xl font-semibold mb-6 shadow-lg shadow-[#d4ae2a]/15 transition-all duration-200"
           >
             <ScanLine className="w-5 h-5" />
             Scan Guard QR Code
@@ -395,18 +400,18 @@ function SecurityDashboard() {
           {/* Search and Actions */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#555]" />
               <input
                 type="text"
                 placeholder={activeTab === 'staff' ? 'Search staff by name...' : 'Search visitors by name, phone, or purpose...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition"
+                className="w-full pl-12 pr-4 py-3 bg-[#111111] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] focus:ring-2 focus:ring-[#d4ae2a] focus:border-transparent transition-all duration-200 outline-none"
               />
             </div>
             <button
               onClick={() => { fetchVisitors(); fetchStaffEntries(); }}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 hover:text-cyan-400 hover:border-cyan-500/50 transition"
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-[#111111] border border-[#2a2a2a] rounded-xl text-[#888] hover:text-[#d4ae2a] hover:border-[#d4ae2a]/50 transition-all duration-200"
             >
               <RefreshCw className="w-5 h-5" />
               <span className="hidden sm:inline">Refresh</span>
@@ -418,51 +423,51 @@ function SecurityDashboard() {
             <h2 className="text-xl font-bold text-white">
               {activeTab === 'visitors' ? 'Visitors Inside' : activeTab === 'staff' ? 'Guard Attendance Today' : "Today's Visitor Log"}
             </h2>
-            <div className="flex items-center gap-2 text-slate-500 text-sm">
-              <Zap className="w-4 h-4 text-cyan-400" />
+            <div className="flex items-center gap-2 text-[#555] text-sm">
+              <Zap className="w-4 h-4 text-[#d4ae2a]" />
               Auto-refresh: 30s
             </div>
           </div>
 
           {/* Guard Attendance List */}
           {activeTab === 'staff' && (
-            <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+            <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] overflow-hidden">
               {staffEntries.length === 0 ? (
                 <div className="p-12 text-center">
-                  <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Briefcase className="w-10 h-10 text-slate-600" />
+                  <div className="w-20 h-20 bg-[#1a1a1a] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Briefcase className="w-10 h-10 text-[#555]" />
                   </div>
-                  <p className="text-slate-400 font-medium">No staff entries today</p>
-                  <p className="text-slate-600 text-sm mt-1">Scan a staff QR code to record entry</p>
+                  <p className="text-[#888] font-medium">No staff entries today</p>
+                  <p className="text-[#555] text-sm mt-1">Scan a staff QR code to record entry</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-800">
+                <div className="divide-y divide-[#1f1f1f]">
                   {staffEntries
                     .filter(e => e.staff_name?.toLowerCase().includes(searchTerm.toLowerCase()))
                     .map((entry) => (
-                    <div key={entry.id} className="p-4 hover:bg-slate-800/50 transition">
+                    <div key={entry.id} className="p-4 hover:bg-[#1a1a1a] transition-all duration-200">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${
                             entry.status === 'inside'
-                              ? 'bg-gradient-to-br from-violet-500 to-purple-600'
-                              : 'bg-slate-700'
+                              ? 'bg-gradient-to-br from-[#d4ae2a] to-[#b8942a] text-black'
+                              : 'bg-[#2a2a2a]'
                           }`}>
                             {entry.staff_name?.charAt(0).toUpperCase()}
                           </div>
                           <div>
                             <h3 className="font-semibold text-white">{entry.staff_name}</h3>
                             <div className="flex items-center gap-3 mt-1">
-                              <span className="flex items-center gap-1 text-slate-500 text-sm capitalize">
+                              <span className="flex items-center gap-1 text-[#666] text-sm capitalize">
                                 <Shield className="w-3 h-3" />
                                 {entry.staff_role}
                               </span>
-                              <span className="flex items-center gap-1 text-slate-500 text-sm">
+                              <span className="flex items-center gap-1 text-[#666] text-sm">
                                 <LogIn className="w-3 h-3 text-emerald-400" />
                                 {new Date(entry.entry_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </span>
                               {entry.exit_time && (
-                                <span className="flex items-center gap-1 text-slate-500 text-sm">
+                                <span className="flex items-center gap-1 text-[#666] text-sm">
                                   <LogOut className="w-3 h-3 text-amber-400" />
                                   {new Date(entry.exit_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
@@ -473,7 +478,7 @@ function SecurityDashboard() {
                         <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
                           entry.status === 'inside'
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-slate-700 text-slate-400'
+                            : 'bg-[#1a1a1a] text-[#888]'
                         }`}>
                           {entry.status === 'inside' ? '● Inside' : 'Left'}
                         </span>
@@ -487,26 +492,26 @@ function SecurityDashboard() {
 
           {/* Visitors List */}
           {activeTab !== 'staff' && (
-          <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+          <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] overflow-hidden">
             {loading ? (
               <div className="p-12 text-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-2 border-cyan-500 border-t-transparent mx-auto"></div>
-                <p className="text-slate-500 mt-4">Loading visitors...</p>
+                <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#d4ae2a] border-t-transparent mx-auto"></div>
+                <p className="text-[#555] mt-4">Loading visitors...</p>
               </div>
             ) : (activeTab === 'visitors' ? activeVisitors : allVisitors).length === 0 ? (
               <div className="p-12 text-center">
-                <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-10 h-10 text-slate-600" />
+                <div className="w-20 h-20 bg-[#1a1a1a] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-10 h-10 text-[#555]" />
                 </div>
-                <p className="text-slate-400 font-medium">No visitors {activeTab === 'visitors' ? 'currently inside' : 'today'}</p>
-                <p className="text-slate-600 text-sm mt-1">Visitors will appear here when they check in</p>
+                <p className="text-[#888] font-medium">No visitors {activeTab === 'visitors' ? 'currently inside' : 'today'}</p>
+                <p className="text-[#555] text-sm mt-1">Visitors will appear here when they check in</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-800">
+              <div className="divide-y divide-[#1f1f1f]">
                 {(activeTab === 'visitors' ? activeVisitors : allVisitors).map((visitor) => (
                   <div 
                     key={visitor.id} 
-                    className="p-4 hover:bg-slate-800/50 transition cursor-pointer"
+                    className="p-4 hover:bg-[#1a1a1a] transition-all duration-200 cursor-pointer"
                     onClick={() => setSelectedVisitor(visitor)}
                   >
                     <div className="flex items-center justify-between">
@@ -514,18 +519,18 @@ function SecurityDashboard() {
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${
                           visitor.status === 'checked_in' 
                             ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' 
-                            : 'bg-slate-700'
+                            : 'bg-[#2a2a2a]'
                         }`}>
                           {visitor.full_name?.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <h3 className="font-semibold text-white">{visitor.full_name}</h3>
                           <div className="flex items-center gap-3 mt-1">
-                            <span className="flex items-center gap-1 text-slate-500 text-sm">
+                            <span className="flex items-center gap-1 text-[#666] text-sm">
                               <Phone className="w-3 h-3" />
                               {visitor.phone}
                             </span>
-                            <span className="flex items-center gap-1 text-slate-500 text-sm">
+                            <span className="flex items-center gap-1 text-[#666] text-sm">
                               <Clock className="w-3 h-3" />
                               {new Date(visitor.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
@@ -536,11 +541,11 @@ function SecurityDashboard() {
                         <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
                           visitor.status === 'checked_in' 
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                            : 'bg-slate-700 text-slate-400'
+                            : 'bg-[#1a1a1a] text-[#888]'
                         }`}>
                           {visitor.status === 'checked_in' ? '● Inside' : 'Left'}
                         </span>
-                        <ChevronRight className="w-5 h-5 text-slate-600" />
+                        <ChevronRight className="w-5 h-5 text-[#555]" />
                       </div>
                     </div>
                   </div>
@@ -555,11 +560,11 @@ function SecurityDashboard() {
       {/* Visitor Detail Modal */}
       {selectedVisitor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setSelectedVisitor(null)} />
-          <div className="relative bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-800 shadow-2xl">
+          <div className="absolute inset-0 bg-black/80" onClick={() => setSelectedVisitor(null)} />
+          <div className="relative bg-[#111111] rounded-3xl p-6 max-w-md w-full border border-[#2a2a2a] shadow-2xl shadow-black/50">
             <button 
               onClick={() => setSelectedVisitor(null)}
-              className="absolute top-4 right-4 p-2 text-slate-500 hover:text-white transition"
+              className="absolute top-4 right-4 p-2 text-[#555] hover:text-white transition-all duration-200"
             >
               <X className="w-5 h-5" />
             </button>
@@ -568,7 +573,7 @@ function SecurityDashboard() {
               <div className={`w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 ${
                 selectedVisitor.status === 'checked_in' 
                   ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' 
-                  : 'bg-slate-700'
+                  : 'bg-[#2a2a2a]'
               }`}>
                 {selectedVisitor.full_name?.charAt(0).toUpperCase()}
               </div>
@@ -576,39 +581,39 @@ function SecurityDashboard() {
               <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${
                 selectedVisitor.status === 'checked_in' 
                   ? 'bg-emerald-500/20 text-emerald-400' 
-                  : 'bg-slate-700 text-slate-400'
+                  : 'bg-[#1a1a1a] text-[#888]'
               }`}>
                 {selectedVisitor.status === 'checked_in' ? '● Currently Inside' : 'Checked Out'}
               </span>
             </div>
 
             <div className="space-y-4 mb-6">
-              <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl">
-                <Phone className="w-5 h-5 text-cyan-400" />
+              <div className="flex items-center gap-3 p-3 bg-[#0a0a0a] rounded-xl border border-[#1f1f1f]">
+                <Phone className="w-5 h-5 text-[#d4ae2a]" />
                 <div>
-                  <p className="text-slate-500 text-xs">Phone</p>
+                  <p className="text-[#555] text-xs">Phone</p>
                   <p className="text-white">{selectedVisitor.phone}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl">
-                <FileText className="w-5 h-5 text-cyan-400" />
+              <div className="flex items-center gap-3 p-3 bg-[#0a0a0a] rounded-xl border border-[#1f1f1f]">
+                <FileText className="w-5 h-5 text-[#d4ae2a]" />
                 <div>
-                  <p className="text-slate-500 text-xs">Purpose</p>
+                  <p className="text-[#555] text-xs">Purpose</p>
                   <p className="text-white">{selectedVisitor.purpose}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl">
-                <Clock className="w-5 h-5 text-cyan-400" />
+              <div className="flex items-center gap-3 p-3 bg-[#0a0a0a] rounded-xl border border-[#1f1f1f]">
+                <Clock className="w-5 h-5 text-[#d4ae2a]" />
                 <div>
-                  <p className="text-slate-500 text-xs">Check-in Time</p>
+                  <p className="text-[#555] text-xs">Check-in Time</p>
                   <p className="text-white">{new Date(selectedVisitor.check_in_time).toLocaleString()}</p>
                 </div>
               </div>
               {selectedVisitor.check_out_time && (
-                <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl">
+                <div className="flex items-center gap-3 p-3 bg-[#0a0a0a] rounded-xl border border-[#1f1f1f]">
                   <LogOut className="w-5 h-5 text-amber-400" />
                   <div>
-                    <p className="text-slate-500 text-xs">Check-out Time</p>
+                    <p className="text-[#555] text-xs">Check-out Time</p>
                     <p className="text-white">{new Date(selectedVisitor.check_out_time).toLocaleString()}</p>
                   </div>
                 </div>
@@ -618,7 +623,7 @@ function SecurityDashboard() {
             {selectedVisitor.status === 'checked_in' && (
               <button
                 onClick={() => handleManualCheckOut(selectedVisitor.id)}
-                className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center gap-2"
+                className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all duration-200 flex items-center justify-center gap-2"
               >
                 <LogOut className="w-5 h-5" />
                 Check Out Visitor

@@ -169,12 +169,12 @@ function Reports() {
   };
 
   const StatCard = ({ icon: Icon, label, value, color, prefix = '' }) => (
-    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+    <div className="bg-[#111111] rounded-2xl p-6 border border-[#1f1f1f]">
       <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center mb-4`}>
         <Icon className="w-6 h-6" />
       </div>
-      <p className="text-3xl font-bold text-gray-900">{prefix}{typeof value === 'number' ? value.toLocaleString() : value}</p>
-      <p className="text-gray-500 text-sm mt-1">{label}</p>
+      <p className="text-3xl font-bold text-white">{prefix}{typeof value === 'number' ? value.toLocaleString() : value}</p>
+      <p className="text-[#888] text-sm mt-1">{label}</p>
     </div>
   );
 
@@ -184,27 +184,27 @@ function Reports() {
     <div className="space-y-6">
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => <div key={i} className="bg-white rounded-2xl p-6 animate-pulse"><div className="w-12 h-12 bg-gray-200 rounded-xl mb-4" /><div className="h-8 bg-gray-200 rounded w-20 mb-2" /><div className="h-4 bg-gray-200 rounded w-32" /></div>)}
+          {[1, 2, 3, 4].map(i => <div key={i} className="bg-[#111111] rounded-2xl p-6 animate-pulse border border-[#1f1f1f]"><div className="w-12 h-12 bg-[#1f1f1f] rounded-xl mb-4" /><div className="h-8 bg-[#1f1f1f] rounded w-20 mb-2" /><div className="h-4 bg-[#1f1f1f] rounded w-32" /></div>)}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={Building2} label="Client Sites" value={stats?.total_buildings || 0} color="bg-blue-100 text-blue-600" />
-          <StatCard icon={UserCheck} label="Visitors On Site" value={stats?.active_visitors || 0} color="bg-green-100 text-green-600" />
-          <StatCard icon={Users} label="Guards/Staff" value={stats?.total_staff || 0} color="bg-purple-100 text-purple-600" />
-          <StatCard icon={AlertTriangle} label="Open Incidents" value={stats?.open_incidents || 0} color="bg-amber-100 text-amber-600" />
+          <StatCard icon={Building2} label="Client Sites" value={stats?.total_buildings || 0} color="bg-[rgba(212,174,42,0.15)] text-[#d4ae2a]" />
+          <StatCard icon={UserCheck} label="Visitors On Site" value={stats?.active_visitors || 0} color="bg-emerald-500/15 text-emerald-400" />
+          <StatCard icon={Users} label="Guards/Staff" value={stats?.total_staff || 0} color="bg-[rgba(212,174,42,0.15)] text-[#e8c847]" />
+          <StatCard icon={AlertTriangle} label="Open Incidents" value={stats?.open_incidents || 0} color="bg-amber-500/15 text-amber-400" />
         </div>
       )}
 
-      <div className="bg-white rounded-2xl p-6 border border-gray-100">
-        <h3 className="font-semibold text-gray-900 mb-4">Visitor Trend (30 days)</h3>
+      <div className="bg-[#111111] rounded-2xl p-6 border border-[#1f1f1f]">
+        <h3 className="font-semibold text-white mb-4">Visitor Trend (30 days)</h3>
         {visitorData.length === 0 ? (
-          <div className="h-48 flex flex-col items-center justify-center text-gray-400"><BarChart3 className="w-12 h-12 mb-2 opacity-50" /><p>No visitor data</p></div>
+          <div className="h-48 flex flex-col items-center justify-center text-[#555]"><BarChart3 className="w-12 h-12 mb-2 opacity-50" /><p>No visitor data</p></div>
         ) : (
           <div className="h-48 flex items-end gap-1">
             {visitorData.map((d, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <div className="w-full bg-gradient-to-t from-indigo-500 to-indigo-400 rounded-t-lg transition-all" style={{ height: `${(d.count / maxVisitors) * 100}%`, minHeight: d.count > 0 ? '8px' : '2px' }} title={`${d.date}: ${d.count} visitors`} />
-                {i % 3 === 0 && <span className="text-[10px] text-gray-400 truncate w-full text-center">{new Date(d.date).toLocaleDateString('en', { month: 'short', day: 'numeric' })}</span>}
+                <div className="w-full bg-gradient-to-t from-[#d4ae2a] to-[#e8c847] rounded-t-lg transition-all" style={{ height: `${(d.count / maxVisitors) * 100}%`, minHeight: d.count > 0 ? '8px' : '2px' }} title={`${d.date}: ${d.count} visitors`} />
+                {i % 3 === 0 && <span className="text-[10px] text-[#555] truncate w-full text-center">{new Date(d.date).toLocaleDateString('en', { month: 'short', day: 'numeric' })}</span>}
               </div>
             ))}
           </div>
@@ -217,12 +217,12 @@ function Reports() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Guard Patrol Accountability</h2>
-          <p className="text-gray-500 mt-1">Track completed, in-progress, and missed patrols by guard.</p>
+          <h2 className="text-xl font-bold text-white">Guard Patrol Accountability</h2>
+          <p className="text-[#888] mt-1">Track completed, in-progress, and missed patrols by guard.</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <input type="date" className="px-3 py-2 border border-gray-200 rounded-xl text-sm" value={reportDate} onChange={e => setReportDate(e.target.value)} />
-          <select className="px-3 py-2 border border-gray-200 rounded-xl text-sm" value={selectedBuilding} onChange={e => setSelectedBuilding(e.target.value)}>
+          <input type="date" className="px-3 py-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-sm text-white focus:border-[#d4ae2a] focus:outline-none" value={reportDate} onChange={e => setReportDate(e.target.value)} />
+          <select className="px-3 py-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-sm text-white focus:border-[#d4ae2a] focus:outline-none" value={selectedBuilding} onChange={e => setSelectedBuilding(e.target.value)}>
             <option value="">All Sites</option>
             {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
           </select>
@@ -231,15 +231,15 @@ function Reports() {
 
       {patrolReport?.summary && (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={Users} label="Total Guards" value={patrolReport.summary.total_guards} color="bg-blue-100 text-blue-600" />
-          <StatCard icon={CheckCircle2} label="Completed" value={patrolReport.summary.completed} color="bg-emerald-100 text-emerald-600" />
-          <StatCard icon={Clock} label="In Progress" value={patrolReport.summary.in_progress} color="bg-indigo-100 text-indigo-600" />
-          <StatCard icon={XCircle} label="Missed" value={patrolReport.summary.missed} color="bg-red-100 text-red-600" />
+          <StatCard icon={Users} label="Total Guards" value={patrolReport.summary.total_guards} color="bg-[rgba(212,174,42,0.15)] text-[#d4ae2a]" />
+          <StatCard icon={CheckCircle2} label="Completed" value={patrolReport.summary.completed} color="bg-emerald-500/15 text-emerald-400" />
+          <StatCard icon={Clock} label="In Progress" value={patrolReport.summary.in_progress} color="bg-[rgba(212,174,42,0.15)] text-[#e8c847]" />
+          <StatCard icon={XCircle} label="Missed" value={patrolReport.summary.missed} color="bg-red-500/15 text-red-400" />
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-gray-100 grid grid-cols-12 text-xs font-semibold text-gray-500 uppercase bg-gray-50">
+      <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] overflow-hidden">
+        <div className="p-4 border-b border-[#1f1f1f] grid grid-cols-12 text-xs font-semibold text-[#666] uppercase bg-[#0a0a0a]">
           <div className="col-span-3">Guard</div>
           <div className="col-span-2">Site</div>
           <div className="col-span-2">Status</div>
@@ -248,33 +248,33 @@ function Reports() {
           <div className="col-span-1">Action</div>
         </div>
         {patrolReport?.guards?.length ? patrolReport.guards.map(g => (
-          <div key={g.guard_id} className="p-4 border-b border-gray-50 last:border-0 grid grid-cols-12 text-sm items-center hover:bg-gray-50 transition">
-            <div className="col-span-3 font-medium text-gray-900">{g.guard_name}</div>
-            <div className="col-span-2 text-gray-500 text-xs">{g.site_name || '-'}</div>
+          <div key={g.guard_id} className="p-4 border-b border-[#1f1f1f] last:border-0 grid grid-cols-12 text-sm items-center hover:bg-[#1a1a1a] transition">
+            <div className="col-span-3 font-medium text-white">{g.guard_name}</div>
+            <div className="col-span-2 text-[#888] text-xs">{g.site_name || '-'}</div>
             <div className="col-span-2">
-              <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${g.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : g.status === 'in_progress' ? 'bg-indigo-100 text-indigo-700' : 'bg-red-100 text-red-700'}`}>
+              <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${g.status === 'completed' ? 'bg-emerald-500/15 text-emerald-400' : g.status === 'in_progress' ? 'bg-[rgba(212,174,42,0.15)] text-[#d4ae2a]' : 'bg-red-500/15 text-red-400'}`}>
                 {g.status === 'completed' ? <CheckCircle2 className="w-3 h-3" /> : g.status === 'in_progress' ? <Clock className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                 {g.status.replace('_', ' ')}
               </span>
             </div>
-            <div className="col-span-2 text-gray-600 font-mono text-xs">{g.completed_count} / {g.total_patrols}</div>
-            <div className="col-span-2 text-gray-500 text-xs">{g.last_patrol_at ? new Date(g.last_patrol_at).toLocaleString() : '-'}</div>
+            <div className="col-span-2 text-[#888] font-mono text-xs">{g.completed_count} / {g.total_patrols}</div>
+            <div className="col-span-2 text-[#888] text-xs">{g.last_patrol_at ? new Date(g.last_patrol_at).toLocaleString() : '-'}</div>
             <div className="col-span-1">
-              <button onClick={() => { setSelectedGuard(g.guard_id); setActiveTab('guards'); }} className="text-indigo-600 hover:text-indigo-800 flex items-center gap-1 text-xs font-medium">
+              <button onClick={() => { setSelectedGuard(g.guard_id); setActiveTab('guards'); }} className="text-[#d4ae2a] hover:text-[#e8c847] flex items-center gap-1 text-xs font-medium">
                 View <ChevronRight className="w-3 h-3" />
               </button>
             </div>
           </div>
-        )) : <div className="p-8 text-center text-gray-500">No guard patrol data for the selected date.</div>}
+        )) : <div className="p-8 text-center text-[#888]">No guard patrol data for the selected date.</div>}
       </div>
 
       {missedReport?.missed_guards?.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
-          <h3 className="font-semibold text-red-900 flex items-center gap-2"><AlertTriangle className="w-5 h-5" />Missed Patrols ({missedReport.missed_count})</h3>
-          <p className="text-red-700 text-sm mt-2">Completion rate: {missedReport.completion_rate}%</p>
+        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6">
+          <h3 className="font-semibold text-red-400 flex items-center gap-2"><AlertTriangle className="w-5 h-5" />Missed Patrols ({missedReport.missed_count})</h3>
+          <p className="text-red-300 text-sm mt-2">Completion rate: {missedReport.completion_rate}%</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {missedReport.missed_guards.map(g => (
-              <span key={g.id} className="bg-white text-red-700 px-3 py-1.5 rounded-full text-sm border border-red-200 font-medium">{g.full_name} ({g.site_name || 'No site'})</span>
+              <span key={g.id} className="bg-[#111111] text-red-400 px-3 py-1.5 rounded-full text-sm border border-red-500/30 font-medium">{g.full_name} ({g.site_name || 'No site'})</span>
             ))}
           </div>
         </div>
@@ -286,31 +286,31 @@ function Reports() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Individual Guard Activity Log</h2>
-          <p className="text-gray-500 mt-1">Detailed patrol history, timestamps, and scan activity per guard.</p>
+          <h2 className="text-xl font-bold text-white">Individual Guard Activity Log</h2>
+          <p className="text-[#888] mt-1">Detailed patrol history, timestamps, and scan activity per guard.</p>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-        <select className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm" value={selectedGuard} onChange={e => setSelectedGuard(e.target.value)}>
+      <div className="flex flex-col sm:flex-row gap-4 bg-[#111111] p-4 rounded-2xl border border-[#1f1f1f]">
+        <select className="flex-1 px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-sm text-white focus:border-[#d4ae2a] focus:outline-none" value={selectedGuard} onChange={e => setSelectedGuard(e.target.value)}>
           <option value="">Select a guard</option>
           {guards.map(g => <option key={g.id} value={g.id}>{g.full_name} — {g.site_name || 'No Site'}</option>)}
         </select>
-        <input type="date" className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm" value={startDate} onChange={e => setStartDate(e.target.value)} />
-        <input type="date" className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm" value={endDate} onChange={e => setEndDate(e.target.value)} />
+        <input type="date" className="px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-sm text-white focus:border-[#d4ae2a] focus:outline-none" value={startDate} onChange={e => setStartDate(e.target.value)} />
+        <input type="date" className="px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-sm text-white focus:border-[#d4ae2a] focus:outline-none" value={endDate} onChange={e => setEndDate(e.target.value)} />
       </div>
 
       {selectedGuard && guardLog && (
         <>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard icon={ClipboardCheck} label="Total Patrols" value={guardLog.summary.total_patrols} color="bg-blue-100 text-blue-600" />
-            <StatCard icon={CheckCircle2} label="Completed" value={guardLog.summary.completed} color="bg-emerald-100 text-emerald-600" />
-            <StatCard icon={Clock} label="In Progress" value={guardLog.summary.in_progress} color="bg-indigo-100 text-indigo-600" />
-            <StatCard icon={Activity} label="Total Scans" value={guardLog.summary.total_scans} color="bg-purple-100 text-purple-600" />
+            <StatCard icon={ClipboardCheck} label="Total Patrols" value={guardLog.summary.total_patrols} color="bg-[rgba(212,174,42,0.15)] text-[#d4ae2a]" />
+            <StatCard icon={CheckCircle2} label="Completed" value={guardLog.summary.completed} color="bg-emerald-500/15 text-emerald-400" />
+            <StatCard icon={Clock} label="In Progress" value={guardLog.summary.in_progress} color="bg-[rgba(212,174,42,0.15)] text-[#e8c847]" />
+            <StatCard icon={Activity} label="Total Scans" value={guardLog.summary.total_scans} color="bg-[rgba(212,174,42,0.10)] text-[#d4ae2a]" />
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-            <div className="p-4 border-b border-gray-100 grid grid-cols-12 text-xs font-semibold text-gray-500 uppercase bg-gray-50">
+          <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] overflow-hidden">
+            <div className="p-4 border-b border-[#1f1f1f] grid grid-cols-12 text-xs font-semibold text-[#666] uppercase bg-[#0a0a0a]">
               <div className="col-span-2">Started</div>
               <div className="col-span-2">Completed</div>
               <div className="col-span-2">Site</div>
@@ -319,25 +319,25 @@ function Reports() {
               <div className="col-span-2">Notes</div>
             </div>
             {guardLog.patrols.length ? guardLog.patrols.map(p => (
-              <div key={p.id} className="p-4 border-b border-gray-50 last:border-0 grid grid-cols-12 text-sm items-center">
-                <div className="col-span-2 text-gray-500 text-xs">{new Date(p.started_at).toLocaleString()}</div>
-                <div className="col-span-2 text-gray-500 text-xs">{p.completed_at ? new Date(p.completed_at).toLocaleString() : '-'}</div>
-                <div className="col-span-2 text-gray-900 font-medium text-xs">{p.site_name}</div>
+              <div key={p.id} className="p-4 border-b border-[#1f1f1f] last:border-0 grid grid-cols-12 text-sm items-center hover:bg-[#1a1a1a] transition">
+                <div className="col-span-2 text-[#888] text-xs">{new Date(p.started_at).toLocaleString()}</div>
+                <div className="col-span-2 text-[#888] text-xs">{p.completed_at ? new Date(p.completed_at).toLocaleString() : '-'}</div>
+                <div className="col-span-2 text-white font-medium text-xs">{p.site_name}</div>
                 <div className="col-span-2">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}`}>{p.status}</span>
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.status === 'completed' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-[rgba(212,174,42,0.15)] text-[#d4ae2a]'}`}>{p.status}</span>
                 </div>
-                <div className="col-span-2 text-gray-600 font-mono text-xs">{p.scans_completed}/{p.total_checkpoints}</div>
-                <div className="col-span-2 text-gray-500 text-xs truncate" title={p.notes}>{p.notes || '-'}</div>
+                <div className="col-span-2 text-[#888] font-mono text-xs">{p.scans_completed}/{p.total_checkpoints}</div>
+                <div className="col-span-2 text-[#888] text-xs truncate" title={p.notes}>{p.notes || '-'}</div>
               </div>
-            )) : <div className="p-8 text-center text-gray-500">No patrol activity for this guard in the selected range.</div>}
+            )) : <div className="p-8 text-center text-[#888]">No patrol activity for this guard in the selected range.</div>}
           </div>
 
           {guardLog.scans.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-              <div className="p-4 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-900">Scan Activity ({guardLog.scans.length})</h3>
+            <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] overflow-hidden">
+              <div className="p-4 border-b border-[#1f1f1f]">
+                <h3 className="font-semibold text-white">Scan Activity ({guardLog.scans.length})</h3>
               </div>
-              <div className="p-4 border-b border-gray-100 grid grid-cols-12 text-xs font-semibold text-gray-500 uppercase bg-gray-50">
+              <div className="p-4 border-b border-[#1f1f1f] grid grid-cols-12 text-xs font-semibold text-[#666] uppercase bg-[#0a0a0a]">
                 <div className="col-span-3">Asset/Checkpoint</div>
                 <div className="col-span-3">Location</div>
                 <div className="col-span-2">Condition</div>
@@ -345,12 +345,12 @@ function Reports() {
                 <div className="col-span-2">Notes</div>
               </div>
               {guardLog.scans.map(s => (
-                <div key={s.id} className="p-4 border-b border-gray-50 last:border-0 grid grid-cols-12 text-sm items-center">
-                  <div className="col-span-3 text-gray-900 font-medium text-xs">{s.asset_name} <span className="text-gray-400">({s.asset_code})</span></div>
-                  <div className="col-span-3 text-gray-500 text-xs">{s.location || '-'}</div>
-                  <div className="col-span-2"><span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium">{s.condition_status}</span></div>
-                  <div className="col-span-2 text-gray-500 text-xs">{new Date(s.scanned_at).toLocaleString()}</div>
-                  <div className="col-span-2 text-gray-500 text-xs truncate" title={s.notes}>{s.notes || '-'}</div>
+                <div key={s.id} className="p-4 border-b border-[#1f1f1f] last:border-0 grid grid-cols-12 text-sm items-center hover:bg-[#1a1a1a] transition">
+                  <div className="col-span-3 text-white font-medium text-xs">{s.asset_name} <span className="text-[#555]">({s.asset_code})</span></div>
+                  <div className="col-span-3 text-[#888] text-xs">{s.location || '-'}</div>
+                  <div className="col-span-2"><span className="text-xs px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">{s.condition_status}</span></div>
+                  <div className="col-span-2 text-[#888] text-xs">{new Date(s.scanned_at).toLocaleString()}</div>
+                  <div className="col-span-2 text-[#888] text-xs truncate" title={s.notes}>{s.notes || '-'}</div>
                 </div>
               ))}
             </div>
@@ -363,31 +363,31 @@ function Reports() {
   const renderAttendanceExports = () => (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-gray-900">Attendance & Log Sheet Exports</h2>
-        <p className="text-gray-500 mt-1">Export visitor logs, staff attendance, and guard log sheets to Excel.</p>
+        <h2 className="text-xl font-bold text-white">Attendance & Log Sheet Exports</h2>
+        <p className="text-[#888] mt-1">Export visitor logs, staff attendance, and guard log sheets to Excel.</p>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
-        <h3 className="font-semibold text-gray-900">Export Filters</h3>
+      <div className="bg-[#111111] rounded-2xl p-6 border border-[#1f1f1f] space-y-4">
+        <h3 className="font-semibold text-white">Export Filters</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Start Date</label>
-            <input type="date" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm" value={startDate} onChange={e => setStartDate(e.target.value)} />
+            <label className="block text-xs font-medium text-[#888] mb-1">Start Date</label>
+            <input type="date" className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-sm text-white focus:border-[#d4ae2a] focus:outline-none" value={startDate} onChange={e => setStartDate(e.target.value)} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">End Date</label>
-            <input type="date" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm" value={endDate} onChange={e => setEndDate(e.target.value)} />
+            <label className="block text-xs font-medium text-[#888] mb-1">End Date</label>
+            <input type="date" className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-sm text-white focus:border-[#d4ae2a] focus:outline-none" value={endDate} onChange={e => setEndDate(e.target.value)} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Client Site</label>
-            <select className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm" value={selectedBuilding} onChange={e => setSelectedBuilding(e.target.value)}>
+            <label className="block text-xs font-medium text-[#888] mb-1">Client Site</label>
+            <select className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-sm text-white focus:border-[#d4ae2a] focus:outline-none" value={selectedBuilding} onChange={e => setSelectedBuilding(e.target.value)}>
               <option value="">All Sites</option>
               {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
           </div>
           <div className="flex items-end">
-            <p className="text-xs text-gray-400 italic">Records are kept permanently. Adjust date range to filter.</p>
+            <p className="text-xs text-[#555] italic">Records are kept permanently. Adjust date range to filter.</p>
           </div>
         </div>
       </div>
@@ -395,15 +395,15 @@ function Reports() {
       {/* Export Cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Visitor Log Export */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition">
-          <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4">
-            <UserCheck className="w-7 h-7 text-emerald-600" />
+        <div className="bg-[#111111] rounded-2xl p-6 border border-[#1f1f1f] hover:border-[#d4ae2a]/50 transition">
+          <div className="w-14 h-14 bg-emerald-500/15 rounded-2xl flex items-center justify-center mb-4">
+            <UserCheck className="w-7 h-7 text-emerald-400" />
           </div>
-          <h3 className="font-bold text-gray-900 text-lg">Visitor Log</h3>
-          <p className="text-gray-500 text-sm mt-1 mb-6">Full visitor check-in/out records with names, IDs, timestamps, duration, and site info.</p>
+          <h3 className="font-bold text-white text-lg">Visitor Log</h3>
+          <p className="text-[#888] text-sm mt-1 mb-6">Full visitor check-in/out records with names, IDs, timestamps, duration, and site info.</p>
           <button
             onClick={exportVisitorLog}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition font-medium"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition font-medium"
           >
             <Download className="w-5 h-5" />
             Export to Excel
@@ -411,15 +411,15 @@ function Reports() {
         </div>
 
         {/* Staff Attendance Export */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition">
-          <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
-            <Clock className="w-7 h-7 text-blue-600" />
+        <div className="bg-[#111111] rounded-2xl p-6 border border-[#1f1f1f] hover:border-[#d4ae2a]/50 transition">
+          <div className="w-14 h-14 bg-[rgba(212,174,42,0.15)] rounded-2xl flex items-center justify-center mb-4">
+            <Clock className="w-7 h-7 text-[#d4ae2a]" />
           </div>
-          <h3 className="font-bold text-gray-900 text-lg">Staff Attendance</h3>
-          <p className="text-gray-500 text-sm mt-1 mb-6">Clock-in/out records for all staff with hours worked, site name, and notes.</p>
+          <h3 className="font-bold text-white text-lg">Staff Attendance</h3>
+          <p className="text-[#888] text-sm mt-1 mb-6">Clock-in/out records for all staff with hours worked, site name, and notes.</p>
           <button
             onClick={exportStaffAttendance}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition font-medium"
           >
             <Download className="w-5 h-5" />
             Export to Excel
@@ -427,15 +427,15 @@ function Reports() {
         </div>
 
         {/* Guard Log Sheet Export */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition">
-          <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-4">
-            <Shield className="w-7 h-7 text-purple-600" />
+        <div className="bg-[#111111] rounded-2xl p-6 border border-[#1f1f1f] hover:border-[#d4ae2a]/50 transition">
+          <div className="w-14 h-14 bg-[rgba(212,174,42,0.15)] rounded-2xl flex items-center justify-center mb-4">
+            <Shield className="w-7 h-7 text-[#e8c847]" />
           </div>
-          <h3 className="font-bold text-gray-900 text-lg">Guard Log Sheet</h3>
-          <p className="text-gray-500 text-sm mt-1 mb-6">Guard summary: Name, Site, Timestamps, Days Worked (30-day), and Status.</p>
+          <h3 className="font-bold text-white text-lg">Guard Log Sheet</h3>
+          <p className="text-[#888] text-sm mt-1 mb-6">Guard summary: Name, Site, Timestamps, Days Worked (30-day), and Status.</p>
           <button
             onClick={exportGuardLogSheet}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition font-medium"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition font-medium"
           >
             <Download className="w-5 h-5" />
             Export to Excel
@@ -444,12 +444,12 @@ function Reports() {
       </div>
 
       {/* Info Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
+      <div className="bg-[rgba(212,174,42,0.08)] border border-[#d4ae2a]/20 rounded-2xl p-5">
         <div className="flex items-start gap-3">
-          <FileText className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <FileText className="w-5 h-5 text-[#d4ae2a] mt-0.5 flex-shrink-0" />
           <div>
-            <h4 className="font-semibold text-blue-900">Long-Term Record Keeping</h4>
-            <p className="text-blue-700 text-sm mt-1">All attendance, visitor, and patrol records are stored permanently in the system. No records are ever automatically deleted. Use the date filters above to export specific periods.</p>
+            <h4 className="font-semibold text-[#d4ae2a]">Long-Term Record Keeping</h4>
+            <p className="text-[#888] text-sm mt-1">All attendance, visitor, and patrol records are stored permanently in the system. No records are ever automatically deleted. Use the date filters above to export specific periods.</p>
           </div>
         </div>
       </div>
@@ -460,12 +460,12 @@ function Reports() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Login Activity</h2>
-          <p className="text-gray-500 mt-1">Track who logged into the system, when, and from where.</p>
+          <h2 className="text-xl font-bold text-white">Login Activity</h2>
+          <p className="text-[#888] mt-1">Track who logged into the system, when, and from where.</p>
         </div>
         <button
           onClick={exportLoginActivity}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-medium text-sm"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition font-medium text-sm"
         >
           <Download className="w-4 h-4" />
           Export to Excel
@@ -478,7 +478,7 @@ function Reports() {
           <button
             key={f}
             onClick={() => setLoginFilter(f)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${loginFilter === f ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${loginFilter === f ? 'bg-[#d4ae2a] text-black' : 'bg-[#111111] text-[#888] border border-[#1f1f1f] hover:bg-[#1a1a1a]'}`}
           >
             {f === 'all' ? 'All Logins' : f === 'success' ? 'Successful' : 'Failed'}
           </button>
@@ -486,8 +486,8 @@ function Reports() {
       </div>
 
       {/* Login Logs Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-gray-100 grid grid-cols-12 text-xs font-semibold text-gray-500 uppercase bg-gray-50">
+      <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] overflow-hidden">
+        <div className="p-4 border-b border-[#1f1f1f] grid grid-cols-12 text-xs font-semibold text-[#666] uppercase bg-[#0a0a0a]">
           <div className="col-span-3">User</div>
           <div className="col-span-2">Role</div>
           <div className="col-span-3">Login Time</div>
@@ -495,43 +495,43 @@ function Reports() {
           <div className="col-span-2">Status</div>
         </div>
         {loginLogs.length ? loginLogs.map((log, i) => (
-          <div key={log.id || i} className="p-4 border-b border-gray-50 last:border-0 grid grid-cols-12 text-sm items-center hover:bg-gray-50 transition">
+          <div key={log.id || i} className="p-4 border-b border-[#1f1f1f] last:border-0 grid grid-cols-12 text-sm items-center hover:bg-[#1a1a1a] transition">
             <div className="col-span-3">
-              <p className="font-medium text-gray-900 text-xs">{log.full_name || 'Unknown'}</p>
-              <p className="text-gray-400 text-[11px]">{log.email}</p>
+              <p className="font-medium text-white text-xs">{log.full_name || 'Unknown'}</p>
+              <p className="text-[#555] text-[11px]">{log.email}</p>
             </div>
             <div className="col-span-2">
-              <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-600 capitalize">{log.role || 'N/A'}</span>
+              <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-[#1f1f1f] text-[#888] capitalize">{log.role || 'N/A'}</span>
             </div>
-            <div className="col-span-3 text-gray-600 text-xs">{log.login_at ? new Date(log.login_at).toLocaleString() : ''}</div>
-            <div className="col-span-2 text-gray-500 text-xs font-mono">{log.ip_address || '-'}</div>
+            <div className="col-span-3 text-[#888] text-xs">{log.login_at ? new Date(log.login_at).toLocaleString() : ''}</div>
+            <div className="col-span-2 text-[#888] text-xs font-mono">{log.ip_address || '-'}</div>
             <div className="col-span-2">
-              <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${log.status === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+              <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${log.status === 'success' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
                 {log.status === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                 {log.status}
               </span>
             </div>
           </div>
-        )) : <div className="p-8 text-center text-gray-500">No login activity recorded yet.</div>}
+        )) : <div className="p-8 text-center text-[#888]">No login activity recorded yet.</div>}
       </div>
 
       {/* Pagination */}
       {loginPagination.pages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">Showing {loginLogs.length} of {loginPagination.total} records</p>
+          <p className="text-sm text-[#888]">Showing {loginLogs.length} of {loginPagination.total} records</p>
           <div className="flex gap-2">
             <button
               disabled={loginPagination.page <= 1}
               onClick={() => fetchLoginLogs(loginPagination.page - 1)}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-50"
+              className="px-3 py-1.5 text-sm bg-[#1a1a1a] text-[#888] border border-[#2a2a2a] rounded-lg disabled:opacity-50 hover:bg-[#2a2a2a]"
             >
               Previous
             </button>
-            <span className="px-3 py-1.5 text-sm text-gray-600">Page {loginPagination.page} of {loginPagination.pages}</span>
+            <span className="px-3 py-1.5 text-sm text-[#888]">Page {loginPagination.page} of {loginPagination.pages}</span>
             <button
               disabled={loginPagination.page >= loginPagination.pages}
               onClick={() => fetchLoginLogs(loginPagination.page + 1)}
-              className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-50"
+              className="px-3 py-1.5 text-sm bg-[#1a1a1a] text-[#888] border border-[#2a2a2a] rounded-lg disabled:opacity-50 hover:bg-[#2a2a2a]"
             >
               Next
             </button>
@@ -545,14 +545,14 @@ function Reports() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports & Analytics</h1>
-          <p className="text-gray-500 mt-1">Comprehensive reporting, patrol accountability, and exportable logs.</p>
+          <h1 className="text-2xl font-bold text-white">Reports & Analytics</h1>
+          <p className="text-[#888] mt-1">Comprehensive reporting, patrol accountability, and exportable logs.</p>
         </div>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-2">
         {TABS.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition ${activeTab === tab.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}>
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition ${activeTab === tab.id ? 'bg-[#d4ae2a] text-black shadow-lg shadow-[#d4ae2a]/20' : 'bg-[#111111] text-[#888] border border-[#1f1f1f] hover:bg-[#1a1a1a]'}`}>
             <tab.icon className="w-4 h-4" />{tab.label}
           </button>
         ))}

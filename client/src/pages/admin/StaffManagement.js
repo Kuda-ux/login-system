@@ -117,12 +117,12 @@ function StaffManagement() {
 
   const getRoleBadge = (role) => {
     const styles = {
-      staff: 'bg-blue-100 text-blue-700',
-      security: 'bg-purple-100 text-purple-700',
-      admin: 'bg-red-100 text-red-700',
-      owner: 'bg-amber-100 text-amber-700'
+      staff: 'bg-[rgba(212,174,42,0.08)] text-[#d4ae2a]',
+      security: 'bg-purple-500/20 text-purple-400',
+      admin: 'bg-red-500/20 text-red-400',
+      owner: 'bg-amber-500/20 text-amber-400'
     };
-    return styles[role] || 'bg-gray-100 text-gray-700';
+    return styles[role] || 'bg-[#1f1f1f] text-[#888]';
   };
 
   return (
@@ -130,12 +130,12 @@ function StaffManagement() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Staff Management</h1>
-          <p className="text-gray-500 mt-1">Manage your staff and security personnel</p>
+          <h1 className="text-2xl font-bold text-white">Staff Management</h1>
+          <p className="text-[#888] mt-1">Manage your staff and security personnel</p>
         </div>
         <button
           onClick={() => { setEditingStaff(null); setFormData({ email: '', password: '', full_name: '', phone: '', role: 'staff', building_id: '' }); setShowModal(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-medium"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition font-medium"
         >
           <Plus className="w-5 h-5" />
           Add Staff Member
@@ -145,19 +145,19 @@ function StaffManagement() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#666]" />
           <input
             type="text"
             placeholder="Search by name or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
           />
         </div>
         <select
           value={filterBuilding}
           onChange={(e) => setFilterBuilding(e.target.value)}
-          className="px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          className="px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
         >
           <option value="">All Client Sites</option>
           {buildings.map(b => (
@@ -170,27 +170,27 @@ function StaffManagement() {
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="bg-white rounded-2xl p-6 animate-pulse">
+            <div key={i} className="bg-[#111111] rounded-2xl p-6 animate-pulse border border-[#1f1f1f]">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-full" />
+                <div className="w-12 h-12 bg-[#1f1f1f] rounded-full" />
                 <div className="flex-1">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  <div className="h-4 bg-[#1f1f1f] rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-[#1f1f1f] rounded w-1/2" />
                 </div>
               </div>
-              <div className="h-3 bg-gray-200 rounded w-full mb-2" />
-              <div className="h-3 bg-gray-200 rounded w-2/3" />
+              <div className="h-3 bg-[#1f1f1f] rounded w-full mb-2" />
+              <div className="h-3 bg-[#1f1f1f] rounded w-2/3" />
             </div>
           ))}
         </div>
       ) : filteredStaff.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center">
-          <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">No Staff Members Found</h3>
-          <p className="text-gray-500 mb-6">Get started by adding your first staff member</p>
+        <div className="bg-[#111111] rounded-2xl p-12 text-center border border-[#1f1f1f]">
+          <Users className="w-16 h-16 text-[#555] mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-white mb-2">No Staff Members Found</h3>
+          <p className="text-[#888] mb-6">Get started by adding your first staff member</p>
           <button
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition"
           >
             <Plus className="w-5 h-5" />
             Add Staff Member
@@ -199,58 +199,58 @@ function StaffManagement() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStaff.map(member => (
-            <div key={member.id} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition group">
+            <div key={member.id} className="bg-[#111111] rounded-2xl p-6 border border-[#1f1f1f] hover:border-[#2a2a2a] transition group">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#d4ae2a] to-[#b8941f] rounded-full flex items-center justify-center text-black font-semibold text-lg">
                     {member.full_name?.charAt(0)}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{member.full_name}</h3>
+                    <h3 className="font-semibold text-white">{member.full_name}</h3>
                     <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${getRoleBadge(member.role)}`}>
                       {member.role}
                     </span>
                   </div>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                  <button onClick={() => handleGenerateQR(member)} className="p-1.5 hover:bg-indigo-50 rounded-lg" title="Generate QR Code">
-                    <QrCode className="w-4 h-4 text-indigo-500" />
+                  <button onClick={() => handleGenerateQR(member)} className="p-1.5 hover:bg-[rgba(212,174,42,0.08)] rounded-lg" title="Generate QR Code">
+                    <QrCode className="w-4 h-4 text-[#d4ae2a]" />
                   </button>
-                  <button onClick={() => setPasswordModal({ id: member.id, full_name: member.full_name })} className="p-1.5 hover:bg-amber-50 rounded-lg" title="Reset Password">
+                  <button onClick={() => setPasswordModal({ id: member.id, full_name: member.full_name })} className="p-1.5 hover:bg-amber-500/10 rounded-lg" title="Reset Password">
                     <Key className="w-4 h-4 text-amber-500" />
                   </button>
-                  <button onClick={() => handleEdit(member)} className="p-1.5 hover:bg-gray-100 rounded-lg" title="Edit">
-                    <Edit2 className="w-4 h-4 text-gray-500" />
+                  <button onClick={() => handleEdit(member)} className="p-1.5 hover:bg-[#1a1a1a] rounded-lg" title="Edit">
+                    <Edit2 className="w-4 h-4 text-[#888]" />
                   </button>
-                  <button onClick={() => handleDelete(member.id)} className="p-1.5 hover:bg-red-50 rounded-lg" title="Deactivate">
+                  <button onClick={() => handleDelete(member.id)} className="p-1.5 hover:bg-red-500/10 rounded-lg" title="Deactivate">
                     <Trash2 className="w-4 h-4 text-red-500" />
                   </button>
                 </div>
               </div>
               <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2 text-[#888]">
                   <Mail className="w-4 h-4" />
                   <span className="truncate">{member.email}</span>
                 </div>
                 {member.phone && (
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-[#888]">
                     <Phone className="w-4 h-4" />
                     <span>{member.phone}</span>
                   </div>
                 )}
                 {member.building_name && (
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-[#888]">
                     <Building2 className="w-4 h-4" />
                     <span>{member.building_name}</span>
                   </div>
                 )}
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+              <div className="mt-4 pt-4 border-t border-[#1f1f1f] flex items-center justify-between text-xs text-[#666]">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5" />
                   Joined {new Date(member.created_at).toLocaleDateString()}
                 </span>
-                <span className={`flex items-center gap-1 ${member.is_active ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`flex items-center gap-1 ${member.is_active ? 'text-green-500' : 'text-red-500'}`}>
                   {member.is_active ? <UserCheck className="w-3.5 h-3.5" /> : <UserX className="w-3.5 h-3.5" />}
                   {member.is_active ? 'Active' : 'Inactive'}
                 </span>
@@ -263,64 +263,64 @@ function StaffManagement() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowModal(false)} />
-          <div className="relative bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+          <div className="absolute inset-0 bg-black/70" onClick={() => setShowModal(false)} />
+          <div className="relative bg-[#111111] rounded-2xl w-full max-w-md p-6 shadow-2xl border border-[#1f1f1f]">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-white">
                 {editingStaff ? 'Edit Staff Member' : 'Add Staff Member'}
               </h2>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X className="w-5 h-5 text-gray-500" />
+              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-[#1a1a1a] rounded-lg">
+                <X className="w-5 h-5 text-[#888]" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label className="block text-sm font-medium text-[#888] mb-1">Full Name</label>
                 <input
                   type="text"
                   required
                   value={formData.full_name}
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-[#888] mb-1">Email</label>
                 <input
                   type="email"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                 />
               </div>
               {!editingStaff && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  <label className="block text-sm font-medium text-[#888] mb-1">Password</label>
                   <input
                     type="password"
                     required={!editingStaff}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                   />
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <label className="block text-sm font-medium text-[#888] mb-1">Phone</label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <label className="block text-sm font-medium text-[#888] mb-1">Role</label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                 >
                   <option value="staff">Staff</option>
                   <option value="security">Guard</option>
@@ -328,11 +328,11 @@ function StaffManagement() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Assigned Building</label>
+                <label className="block text-sm font-medium text-[#888] mb-1">Assigned Building</label>
                 <select
                   value={formData.building_id}
                   onChange={(e) => setFormData({ ...formData, building_id: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                 >
                   <option value="">Select Building</option>
                   {buildings.map(b => (
@@ -344,13 +344,13 @@ function StaffManagement() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
+                  className="flex-1 px-4 py-2.5 border border-[#2a2a2a] text-[#888] rounded-xl hover:bg-[#1a1a1a] transition font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-medium"
+                  className="flex-1 px-4 py-2.5 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition font-medium"
                 >
                   {editingStaff ? 'Update' : 'Add'} Staff
                 </button>
@@ -363,23 +363,23 @@ function StaffManagement() {
       {/* QR Code Modal */}
       {qrModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setQrModal(null)} />
-          <div className="relative bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl text-center">
-            <button onClick={() => setQrModal(null)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg">
-              <X className="w-5 h-5 text-gray-500" />
+          <div className="absolute inset-0 bg-black/70" onClick={() => setQrModal(null)} />
+          <div className="relative bg-[#111111] rounded-2xl w-full max-w-sm p-6 shadow-2xl text-center border border-[#1f1f1f]">
+            <button onClick={() => setQrModal(null)} className="absolute top-4 right-4 p-2 hover:bg-[#1a1a1a] rounded-lg">
+              <X className="w-5 h-5 text-[#888]" />
             </button>
-            <QrCode className="w-10 h-10 text-indigo-600 mx-auto mb-3" />
-            <h2 className="text-lg font-bold text-gray-900 mb-1">Staff QR Code</h2>
-            <p className="text-gray-500 text-sm mb-4">{qrModal.full_name}</p>
-            <div className="bg-gray-50 rounded-xl p-4 inline-block mb-4">
+            <QrCode className="w-10 h-10 text-[#d4ae2a] mx-auto mb-3" />
+            <h2 className="text-lg font-bold text-white mb-1">Staff QR Code</h2>
+            <p className="text-[#888] text-sm mb-4">{qrModal.full_name}</p>
+            <div className="bg-white rounded-xl p-4 inline-block mb-4">
               <img src={qrModal.qr_code} alt="Staff QR Code" className="w-56 h-56 mx-auto" />
             </div>
-            <p className="text-gray-400 text-xs mb-4">Security guards scan this code to record staff entry/exit</p>
+            <p className="text-[#555] text-xs mb-4">Security guards scan this code to record staff entry/exit</p>
             <div className="flex gap-3">
               <a
                 href={qrModal.qr_code}
                 download={`staff-qr-${qrModal.full_name.replace(/\s/g, '-')}.png`}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-medium"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition font-medium"
               >
                 <Download className="w-4 h-4" />
                 Download
@@ -391,7 +391,7 @@ function StaffManagement() {
                   w.document.close();
                   w.print();
                 }}
-                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
+                className="flex-1 px-4 py-2.5 border border-[#2a2a2a] text-[#888] rounded-xl hover:bg-[#1a1a1a] transition font-medium"
               >
                 Print
               </button>
@@ -403,20 +403,20 @@ function StaffManagement() {
       {/* Password Reset Modal */}
       {passwordModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => { setPasswordModal(null); setNewPassword(''); }} />
-          <div className="relative bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+          <div className="absolute inset-0 bg-black/70" onClick={() => { setPasswordModal(null); setNewPassword(''); }} />
+          <div className="relative bg-[#111111] rounded-2xl w-full max-w-md p-6 shadow-2xl border border-[#1f1f1f]">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Reset Password</h2>
-              <button onClick={() => { setPasswordModal(null); setNewPassword(''); }} className="p-2 hover:bg-gray-100 rounded-lg">
-                <X className="w-5 h-5 text-gray-500" />
+              <h2 className="text-xl font-bold text-white">Reset Password</h2>
+              <button onClick={() => { setPasswordModal(null); setNewPassword(''); }} className="p-2 hover:bg-[#1a1a1a] rounded-lg">
+                <X className="w-5 h-5 text-[#888]" />
               </button>
             </div>
-            <p className="text-gray-600 mb-4">
-              Set a new password for <strong>{passwordModal.full_name}</strong>
+            <p className="text-[#888] mb-4">
+              Set a new password for <strong className="text-white">{passwordModal.full_name}</strong>
             </p>
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                <label className="block text-sm font-medium text-[#888] mb-1">New Password</label>
                 <input
                   type="password"
                   required
@@ -424,14 +424,14 @@ function StaffManagement() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Minimum 6 characters"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                 />
               </div>
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => { setPasswordModal(null); setNewPassword(''); }}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
+                  className="flex-1 px-4 py-2.5 border border-[#2a2a2a] text-[#888] rounded-xl hover:bg-[#1a1a1a] transition font-medium"
                 >
                   Cancel
                 </button>

@@ -87,22 +87,22 @@ function Settings() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-500 mt-1">Manage your account and preferences</p>
+        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <p className="text-[#888] mt-1">Manage your account and preferences</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar */}
         <div className="lg:w-64 flex-shrink-0">
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="p-4 border-b border-gray-100">
+          <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] overflow-hidden">
+            <div className="p-4 border-b border-[#1f1f1f]">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#d4ae2a] to-[#b8941f] rounded-full flex items-center justify-center text-black font-semibold text-lg">
                   {user?.full_name?.charAt(0)}
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">{user?.full_name}</p>
-                  <p className="text-sm text-gray-500 capitalize">{user?.role}</p>
+                  <p className="font-semibold text-white">{user?.full_name}</p>
+                  <p className="text-sm text-[#888] capitalize">{user?.role}</p>
                 </div>
               </div>
             </div>
@@ -113,8 +113,8 @@ function Settings() {
                   onClick={() => { setActiveTab(tab.id); setMessage({ type: '', text: '' }); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-left ${
                     activeTab === tab.id
-                      ? 'bg-indigo-50 text-indigo-600 font-medium'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? 'bg-[rgba(212,174,42,0.08)] text-[#d4ae2a] font-medium'
+                      : 'text-[#888] hover:bg-[#1a1a1a]'
                   }`}
                 >
                   <tab.icon className="w-5 h-5" />
@@ -130,8 +130,8 @@ function Settings() {
           {message.text && (
             <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${
               message.type === 'success' 
-                ? 'bg-green-50 text-green-700 border border-green-200' 
-                : 'bg-red-50 text-red-700 border border-red-200'
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' 
+                : 'bg-red-500/10 text-red-400 border border-red-500/30'
             }`}>
               {message.type === 'success' ? <Check className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
               {message.text}
@@ -140,41 +140,41 @@ function Settings() {
 
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Profile Information</h2>
+            <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] p-6">
+              <h2 className="text-lg font-semibold text-white mb-6">Profile Information</h2>
               <form onSubmit={handleProfileSave} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <label className="block text-sm font-medium text-[#888] mb-2">Full Name</label>
                   <input
                     type="text"
                     value={profileData.full_name}
                     onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                  <label className="block text-sm font-medium text-[#888] mb-2">Email Address</label>
                   <input
                     type="email"
                     value={profileData.email}
                     onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                  <label className="block text-sm font-medium text-[#888] mb-2">Phone Number</label>
                   <input
                     type="tel"
                     value={profileData.phone}
                     onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                   />
                 </div>
                 <div className="pt-4">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-medium disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-3 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition font-medium disabled:opacity-50"
                   >
                     <Save className="w-5 h-5" />
                     {saving ? 'Saving...' : 'Save Changes'}
@@ -186,58 +186,58 @@ function Settings() {
 
           {/* Security Tab */}
           {activeTab === 'security' && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Change Password</h2>
+            <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] p-6">
+              <h2 className="text-lg font-semibold text-white mb-6">Change Password</h2>
               <form onSubmit={handlePasswordChange} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                  <label className="block text-sm font-medium text-[#888] mb-2">Current Password</label>
                   <div className="relative">
                     <input
                       type={showPasswords.current ? 'text' : 'password'}
                       value={passwordData.currentPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                      className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-3 pr-12 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[#666] hover:text-[#888]"
                     >
                       {showPasswords.current ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                  <label className="block text-sm font-medium text-[#888] mb-2">New Password</label>
                   <div className="relative">
                     <input
                       type={showPasswords.new ? 'text' : 'password'}
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                      className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-3 pr-12 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[#666] hover:text-[#888]"
                     >
                       {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                  <label className="block text-sm font-medium text-[#888] mb-2">Confirm New Password</label>
                   <div className="relative">
                     <input
                       type={showPasswords.confirm ? 'text' : 'password'}
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                      className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-3 pr-12 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[#666] hover:text-[#888]"
                     >
                       {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -247,7 +247,7 @@ function Settings() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-medium disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-3 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition font-medium disabled:opacity-50"
                   >
                     <Lock className="w-5 h-5" />
                     {saving ? 'Updating...' : 'Update Password'}
@@ -255,16 +255,16 @@ function Settings() {
                 </div>
               </form>
 
-              <div className="mt-8 pt-8 border-t border-gray-100">
-                <h3 className="font-semibold text-gray-900 mb-4">Security Information</h3>
+              <div className="mt-8 pt-8 border-t border-[#1f1f1f]">
+                <h3 className="font-semibold text-white mb-4">Security Information</h3>
                 <div className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                    <span className="text-gray-600">Role</span>
-                    <span className="font-medium text-gray-900 capitalize">{user?.role}</span>
+                  <div className="flex items-center justify-between p-4 bg-[#0a0a0a] rounded-xl">
+                    <span className="text-[#888]">Role</span>
+                    <span className="font-medium text-white capitalize">{user?.role}</span>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                    <span className="text-gray-600">Account Status</span>
-                    <span className="flex items-center gap-2 font-medium text-green-600">
+                  <div className="flex items-center justify-between p-4 bg-[#0a0a0a] rounded-xl">
+                    <span className="text-[#888]">Account Status</span>
+                    <span className="flex items-center gap-2 font-medium text-green-500">
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                       Active
                     </span>
@@ -276,8 +276,8 @@ function Settings() {
 
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Notification Preferences</h2>
+            <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] p-6">
+              <h2 className="text-lg font-semibold text-white mb-6">Notification Preferences</h2>
               <div className="space-y-4">
                 {[
                   { key: 'emailAlerts', label: 'Email Alerts', desc: 'Receive important updates via email' },
@@ -285,15 +285,15 @@ function Settings() {
                   { key: 'paymentReminders', label: 'Payment Reminders', desc: 'Reminders for pending rent payments' },
                   { key: 'weeklyReports', label: 'Weekly Reports', desc: 'Receive weekly summary reports' }
                 ].map(item => (
-                  <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                  <div key={item.key} className="flex items-center justify-between p-4 bg-[#0a0a0a] rounded-xl">
                     <div>
-                      <p className="font-medium text-gray-900">{item.label}</p>
-                      <p className="text-sm text-gray-500">{item.desc}</p>
+                      <p className="font-medium text-white">{item.label}</p>
+                      <p className="text-sm text-[#888]">{item.desc}</p>
                     </div>
                     <button
                       onClick={() => setNotifications({ ...notifications, [item.key]: !notifications[item.key] })}
                       className={`relative w-12 h-6 rounded-full transition ${
-                        notifications[item.key] ? 'bg-indigo-600' : 'bg-gray-300'
+                        notifications[item.key] ? 'bg-[#d4ae2a]' : 'bg-[#2a2a2a]'
                       }`}
                     >
                       <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
@@ -303,7 +303,7 @@ function Settings() {
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-gray-500 mt-6">
+              <p className="text-sm text-[#555] mt-6">
                 Note: Notification settings are stored locally and will be synced when backend support is available.
               </p>
             </div>
@@ -311,44 +311,44 @@ function Settings() {
 
           {/* Appearance Tab */}
           {activeTab === 'appearance' && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Appearance Settings</h2>
+            <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] p-6">
+              <h2 className="text-lg font-semibold text-white mb-6">Appearance Settings</h2>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Theme</label>
+                  <label className="block text-sm font-medium text-[#888] mb-3">Theme</label>
                   <div className="grid grid-cols-3 gap-3">
                     {['Light', 'Dark', 'System'].map(theme => (
                       <button
                         key={theme}
                         className={`p-4 rounded-xl border-2 transition ${
-                          theme === 'Light' 
-                            ? 'border-indigo-500 bg-indigo-50' 
-                            : 'border-gray-200 hover:border-gray-300'
+                          theme === 'Dark' 
+                            ? 'border-[#d4ae2a] bg-[rgba(212,174,42,0.08)]' 
+                            : 'border-[#2a2a2a] hover:border-[#555]'
                         }`}
                       >
                         <div className={`w-full h-8 rounded-lg mb-2 ${
-                          theme === 'Dark' ? 'bg-gray-800' : theme === 'System' ? 'bg-gradient-to-r from-white to-gray-800' : 'bg-white border'
+                          theme === 'Dark' ? 'bg-[#0a0a0a]' : theme === 'System' ? 'bg-gradient-to-r from-[#333] to-[#0a0a0a]' : 'bg-white border border-[#2a2a2a]'
                         }`} />
-                        <span className="text-sm font-medium">{theme}</span>
+                        <span className="text-sm font-medium text-white">{theme}</span>
                       </button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Accent Color</label>
+                  <label className="block text-sm font-medium text-[#888] mb-3">Accent Color</label>
                   <div className="flex gap-3">
-                    {['indigo', 'blue', 'purple', 'emerald', 'rose'].map(color => (
+                    {['gold', 'blue', 'purple', 'emerald', 'rose'].map(color => (
                       <button
                         key={color}
-                        className={`w-10 h-10 rounded-full bg-${color}-500 ${
-                          color === 'indigo' ? 'ring-2 ring-offset-2 ring-indigo-500' : ''
+                        className={`w-10 h-10 rounded-full ${
+                          color === 'gold' ? 'ring-2 ring-offset-2 ring-offset-[#111111] ring-[#d4ae2a]' : ''
                         }`}
-                        style={{ backgroundColor: color === 'indigo' ? '#6366f1' : color === 'blue' ? '#3b82f6' : color === 'purple' ? '#a855f7' : color === 'emerald' ? '#10b981' : '#f43f5e' }}
+                        style={{ backgroundColor: color === 'gold' ? '#d4ae2a' : color === 'blue' ? '#3b82f6' : color === 'purple' ? '#a855f7' : color === 'emerald' ? '#10b981' : '#f43f5e' }}
                       />
                     ))}
                   </div>
                 </div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-[#555]">
                   Theme customization will be available in a future update.
                 </p>
               </div>

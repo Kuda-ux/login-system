@@ -42,63 +42,82 @@ export default function Visitors() {
     const a = document.createElement('a'); a.href = url; a.download = `visitors-${filters.date || 'all'}.csv`; a.click();
   };
 
-  if (loading) return <div className="loading"><div className="spinner"></div></div>;
+  if (loading) return (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-8 h-8 border-2 border-[#d4ae2a] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Visitor Logs</h1>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <select className="form-input form-select" value={selectedBuilding} onChange={(e) => setSelectedBuilding(e.target.value)} style={{ width: 'auto' }}>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl font-bold text-white">Visitor Logs</h1>
+        <div className="flex gap-2 items-center flex-wrap">
+          <select className="px-3 py-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white text-sm focus:border-[#d4ae2a] focus:outline-none" value={selectedBuilding} onChange={(e) => setSelectedBuilding(e.target.value)}>
             {buildings.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
           </select>
-          <input type="date" className="form-input" value={filters.date} onChange={(e) => setFilters({...filters, date: e.target.value})} style={{ width: 'auto' }} />
-          <select className="form-input form-select" value={filters.status} onChange={(e) => setFilters({...filters, status: e.target.value})} style={{ width: 'auto' }}>
+          <input type="date" className="px-3 py-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white text-sm focus:border-[#d4ae2a] focus:outline-none" value={filters.date} onChange={(e) => setFilters({...filters, date: e.target.value})} />
+          <select className="px-3 py-2 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white text-sm focus:border-[#d4ae2a] focus:outline-none" value={filters.status} onChange={(e) => setFilters({...filters, status: e.target.value})}>
             <option value="">All Status</option>
             <option value="checked_in">Checked In</option>
             <option value="checked_out">Checked Out</option>
           </select>
-          <button onClick={exportCSV} className="btn btn-outline"><Download size={16} /> Export</button>
+          <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] font-medium text-sm">
+            <Download size={16} /> Export
+          </button>
         </div>
       </div>
 
-      <div className="card">
-        <div className="table-container">
-          <table className="table">
-            <thead><tr><th>Name</th><th>Phone</th><th>Purpose</th><th>Check In</th><th>Check Out</th><th>Duration</th><th>Status</th><th>IP</th></tr></thead>
+      <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-[#0a0a0a] border-b border-[#1f1f1f]">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#666] uppercase">Name</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#666] uppercase">Phone</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#666] uppercase">Purpose</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#666] uppercase">Check In</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#666] uppercase">Check Out</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#666] uppercase">Duration</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#666] uppercase">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#666] uppercase">IP</th>
+              </tr>
+            </thead>
             <tbody>
               {visitors.length === 0 ? (
-                <tr><td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>No visitors found</td></tr>
+                <tr><td colSpan="8" className="text-center text-[#888] py-8">No visitors found</td></tr>
               ) : visitors.map((v) => {
                 const checkIn = new Date(v.check_in_time);
                 const checkOut = v.check_out_time ? new Date(v.check_out_time) : null;
                 const duration = checkOut ? Math.round((checkOut - checkIn) / 60000) : null;
                 return (
-                  <tr key={v.id}>
-                    <td style={{ fontWeight: 500 }}>{v.full_name}</td>
-                    <td>{v.phone}</td>
-                    <td><span className="badge badge-primary">{v.purpose}</span></td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <LogIn size={14} color="var(--success)" />
+                  <tr key={v.id} className="border-b border-[#1f1f1f] hover:bg-[#1a1a1a] transition">
+                    <td className="px-4 py-3 text-sm font-medium text-white">{v.full_name}</td>
+                    <td className="px-4 py-3 text-sm text-[#888]">{v.phone}</td>
+                    <td className="px-4 py-3 text-sm">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[rgba(212,174,42,0.08)] text-[#d4ae2a] border border-[#d4ae2a]/20">{v.purpose}</span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-[#888]">
+                      <div className="flex items-center gap-1">
+                        <LogIn size={14} className="text-emerald-400" />
                         {checkIn.toLocaleString()}
                       </div>
                     </td>
-                    <td>
+                    <td className="px-4 py-3 text-sm text-[#888]">
                       {checkOut ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <LogOut size={14} color="var(--danger)" />
+                        <div className="flex items-center gap-1">
+                          <LogOut size={14} className="text-red-400" />
                           {checkOut.toLocaleString()}
                         </div>
                       ) : '-'}
                     </td>
-                    <td>{duration ? `${duration} min` : '-'}</td>
-                    <td>
-                      <span className={`badge ${v.status === 'checked_in' ? 'badge-success' : 'badge-secondary'}`}>
+                    <td className="px-4 py-3 text-sm text-[#888]">{duration ? `${duration} min` : '-'}</td>
+                    <td className="px-4 py-3 text-sm">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${v.status === 'checked_in' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-[#1f1f1f] text-[#888]'}`}>
                         {v.status === 'checked_in' ? 'In' : 'Out'}
                       </span>
                     </td>
-                    <td style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{v.ip_address || '-'}</td>
+                    <td className="px-4 py-3 text-xs text-[#555]">{v.ip_address || '-'}</td>
                   </tr>
                 );
               })}
@@ -107,10 +126,10 @@ export default function Visitors() {
         </div>
 
         {pagination.pages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
-            <button onClick={() => setPagination({...pagination, page: pagination.page - 1})} disabled={pagination.page <= 1} className="btn btn-outline" style={{ padding: '0.5rem 1rem' }}>Previous</button>
-            <span style={{ padding: '0.5rem 1rem', color: 'var(--text-secondary)' }}>Page {pagination.page} of {pagination.pages}</span>
-            <button onClick={() => setPagination({...pagination, page: pagination.page + 1})} disabled={pagination.page >= pagination.pages} className="btn btn-outline" style={{ padding: '0.5rem 1rem' }}>Next</button>
+          <div className="flex items-center justify-center gap-3 p-4 border-t border-[#1f1f1f]">
+            <button onClick={() => setPagination({...pagination, page: pagination.page - 1})} disabled={pagination.page <= 1} className="px-3 py-1.5 text-sm bg-[#1a1a1a] text-[#888] rounded-lg border border-[#2a2a2a] hover:bg-[#2a2a2a] disabled:opacity-50">Previous</button>
+            <span className="text-sm text-[#888]">Page {pagination.page} of {pagination.pages}</span>
+            <button onClick={() => setPagination({...pagination, page: pagination.page + 1})} disabled={pagination.page >= pagination.pages} className="px-3 py-1.5 text-sm bg-[#1a1a1a] text-[#888] rounded-lg border border-[#2a2a2a] hover:bg-[#2a2a2a] disabled:opacity-50">Next</button>
           </div>
         )}
       </div>

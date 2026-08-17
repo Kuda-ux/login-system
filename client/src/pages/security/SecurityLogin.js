@@ -20,7 +20,6 @@ function SecurityLogin() {
     try {
       const result = await login(email, password);
       if (result.success) {
-        // Check if user has supervisor/manager role or is admin
         if (['security', 'supervisor', 'admin'].includes(result.user.role)) {
           navigate('/security');
         } else {
@@ -37,23 +36,31 @@ function SecurityLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-900 to-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/3 rounded-full blur-[150px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#d4ae2a]/3 rounded-full blur-[150px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(212,174,42,0.012)_1px,transparent_1px),linear-gradient(90deg,rgba(212,174,42,0.012)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-white rounded-2xl p-1 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#d4ae2a]/30">
+        <div className="text-center mb-10">
+          <div className="w-24 h-24 bg-white rounded-3xl p-2 flex items-center justify-center mx-auto mb-5 shadow-xl shadow-[#d4ae2a]/15 gold-glow">
             <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Cherubim Security</h1>
-          <p className="text-[#d4ae2a]">Supervisor & Guard Control</p>
+          <h1 className="text-3xl font-bold text-white mb-1.5 tracking-tight">Cherubim Security</h1>
+          <p className="text-[#d4ae2a] text-sm font-medium uppercase tracking-[0.15em]">Supervisor & Guard Control</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/10">
-          <h2 className="text-xl font-semibold text-white mb-6">Sign In</h2>
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-3xl p-8 shadow-2xl shadow-black/50">
+          <h2 className="text-xl font-semibold text-white mb-1">Supervisor Sign In</h2>
+          <p className="text-[#555] text-sm mb-7">Access the security control portal</p>
 
           {error && (
-            <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-xl mb-6 flex items-center gap-3">
+            <div className="bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] text-red-400 px-4 py-3 rounded-xl mb-6 flex items-center gap-3">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
@@ -61,36 +68,36 @@ function SecurityLogin() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-[#888] mb-2">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#555]" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  placeholder="security@building.com"
+                  className="w-full pl-12 pr-4 py-3.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#444] focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)] focus:outline-none transition-all"
+                  placeholder="supervisor@cherubim.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+              <label className="block text-sm font-medium text-[#888] mb-2">Password</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#555]" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full pl-12 pr-12 py-3.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#444] focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)] focus:outline-none transition-all"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#555] hover:text-[#d4ae2a] transition"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -100,10 +107,10 @@ function SecurityLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-[#d4ae2a] text-black rounded-xl font-semibold hover:bg-[#e5c25a] transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-[#d4ae2a] text-black rounded-xl font-bold text-base hover:bg-[#e8c847] transition-all disabled:opacity-50 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-[#d4ae2a]/20 mt-2"
             >
               {loading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-black/30 border-t-black"></div>
               ) : (
                 <>
                   <Shield className="w-5 h-5" />
@@ -114,8 +121,8 @@ function SecurityLogin() {
           </form>
         </div>
 
-        <p className="text-center text-gray-500 text-sm mt-6">
-          Authorized personnel only. All access is logged.
+        <p className="text-center text-[#444] text-xs mt-8 tracking-wide">
+          AUTHORIZED PERSONNEL ONLY &middot; ALL ACCESS IS LOGGED
         </p>
       </div>
     </div>
