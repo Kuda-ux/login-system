@@ -218,13 +218,13 @@ if (process.env.DATABASE_URL) {
     // Check if admin exists
     const adminCheck = getOne("SELECT id FROM users WHERE role = 'admin'");
     if (!adminCheck) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const hashedPassword = await bcrypt.hash('Cherubim@2026', 10);
       const id = uuidv4();
       const now = new Date().toISOString();
       db.run(`INSERT INTO users (id, email, password, full_name, role, phone, created_at, updated_at, is_active)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [id, 'admin@buildingms.com', hashedPassword, 'System Administrator', 'admin', '+263000000000', now, now, 1]);
-      console.log('✅ Default admin created: admin@buildingms.com / admin123');
+        [id, 'admin@cherubimsecurity.co.zw', hashedPassword, 'System Administrator', 'admin', '+263000000000', now, now, 1]);
+      console.log('✅ Default admin created');
     }
 
     saveDatabase();

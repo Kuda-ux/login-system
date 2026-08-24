@@ -1,51 +1,73 @@
-# Building Management & Visitor Tracking System
+# Cherubim Security Management System
 
-An **Offline-First Progressive Web App (PWA)** for building security, visitor management, staff attendance, and tenant rent collection.
+A comprehensive **security operations platform** for managing buildings, visitors, staff, patrols, incidents, assets, vehicles, and weapons. Built for professional security companies operating across multiple sites.
 
 ## Features
 
-### 🚪 Visitor Management
+### Building & Site Management
+- Multi-building management from a single admin dashboard
+- QR code generation for visitor entry at each building
+- Building-specific staff assignments
+
+### Visitor Management
 - QR code-based check-in/check-out at building entrances
-- Automatic IP address capture for security auditing
-- Device fingerprinting for seamless check-out (no data re-entry)
-- Offline capability - data syncs when connection restored
+- No app required - visitors use their smartphone camera
+- Device fingerprinting for seamless check-out
+- ID number encryption for data security
+- IP address logging for audit trail
+- Offline capability with automatic sync
 
-### 👷 Staff Attendance
-- Digital clock-in/clock-out system
-- Working hours calculation
+### Staff & Attendance
+- Digital clock-in/clock-out with automatic hour calculation
+- QR badge scanning for staff entry/exit tracking
 - Attendance history and reports
+- Guard personnel files (e-files) with document management
 
-### 💰 Rent Collection
-- Payment QR code generation
-- Support for EcoCash, InBucks, Mastercard, and cash
-- Payment tracking and status management
-- Monthly revenue reports
+### Patrol Management
+- Create patrol rounds with asset checkpoints
+- Guards scan QR codes on assets to verify patrol completion
+- Accountability reports: completed vs missed patrols
+- Individual guard patrol logs
 
-### 🏢 Multi-Building Support
-- Manage multiple buildings from single admin dashboard
-- Building-specific QR codes for visitor entry
-- Role-based access (Admin, Owner, Staff)
+### Incident Reporting
+- Log incidents with severity levels (low, medium, high, critical)
+- Track incident status (open, under review, resolved, closed)
+- Resolution notes and audit trail
 
-### 📱 Offline-First Architecture
-- Progressive Web App (PWA) - installable on mobile
-- IndexedDB for local data storage
-- Automatic sync when online
-- Works without internet connection
+### Asset Management
+- Register and track building assets
+- QR code-based asset verification during patrols
+- Asset condition tracking
+
+### Vehicle Tracking
+- Register company vehicles with driver assignments
+- GPS location tracking with speed and heading
+- Map view for real-time vehicle positions
+
+### Weapons Management
+- Weapon registry with serial number tracking
+- Issue/return workflow with guard clearance validation
+- Complete assignment history and audit trail
+
+### Reporting & Exports
+- Dashboard analytics with charts and statistics
+- Excel export for visitors, attendance, guard logs, and login activity
+- Patrol accountability reports
+- Revenue and payment tracking
 
 ## Tech Stack
 
+- **Frontend**: React 18, Tailwind CSS, Lucide Icons
 - **Backend**: Node.js, Express.js
-- **Database**: SQLite (better-sqlite3)
-- **Frontend**: React 18, React Router v6
-- **PWA**: Service Workers, IndexedDB (idb)
-- **Security**: JWT, bcrypt, AES encryption
-- **UI**: Custom CSS, Lucide Icons
+- **Database**: Neon PostgreSQL (production) / SQLite (development)
+- **Security**: JWT authentication, bcrypt password hashing, AES encryption
+- **Hosting**: Vercel (frontend) + Render (backend API)
 
 ## Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+- Node.js 18+
+- npm
 
 ### Installation
 
@@ -57,96 +79,56 @@ npm run install-all
 npm run dev
 ```
 
-### Default Login
-- **Email**: admin@buildingms.com
-- **Password**: admin123
-
 ## Project Structure
 
 ```
 ├── server/                 # Backend API
-│   ├── database/          # SQLite initialization
-│   ├── middleware/        # Auth middleware
-│   ├── routes/            # API routes
+│   ├── database/          # Database initialization (Neon + SQLite)
+│   ├── middleware/        # JWT authentication middleware
+│   ├── routes/            # API route handlers
+│   ├── scripts/           # Database reset & utilities
 │   └── utils/             # Encryption, QR generation
-├── client/                 # React PWA frontend
-│   ├── public/            # Static files, service worker
+├── client/                 # React frontend
+│   ├── public/            # Static files, PWA manifest
 │   └── src/
-│       ├── components/    # Reusable components
+│       ├── components/    # Reusable components (Layout)
 │       ├── context/       # Auth & Offline contexts
-│       ├── pages/         # Page components
-│       └── utils/         # API utilities
-└── data/                   # SQLite database (auto-created)
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - Register new user (admin/owner)
-- `GET /api/auth/me` - Get current user profile
-
-### Visitors
-- `POST /api/visitors/check-in` - Visitor check-in (public)
-- `POST /api/visitors/check-out` - Visitor check-out (public)
-- `POST /api/visitors/status` - Check visitor status
-- `GET /api/visitors/building/:id` - Get building visitors
-
-### Staff
-- `POST /api/staff/clock-in` - Staff clock-in
-- `POST /api/staff/clock-out` - Staff clock-out
-- `GET /api/staff/status` - Get attendance status
-- `GET /api/staff/history` - Get attendance history
-
-### Tenants & Payments
-- `POST /api/tenants` - Create tenant
-- `GET /api/tenants/building/:id` - Get building tenants
-- `POST /api/payments/generate` - Generate payment QR
-- `POST /api/payments/manual` - Record manual payment
-- `GET /api/payments/building/:id` - Get building payments
-
-### Buildings
-- `POST /api/buildings` - Create building
-- `GET /api/buildings` - List buildings
-- `GET /api/buildings/:id/public` - Public building info
-
-## Security Features
-
-- **JWT Authentication** - Secure token-based auth
-- **Password Hashing** - bcrypt with salt rounds
-- **Data Encryption** - AES encryption for sensitive data (ID numbers)
-- **IP Logging** - Automatic capture for security auditing
-- **Rate Limiting** - Protection against abuse
-- **Helmet.js** - Security headers
-
-## Payment Integration
-
-The system includes placeholders for payment gateway integration:
-
-- **EcoCash** - Mobile money (Zimbabwe)
-- **InBucks** - Mobile payments
-- **Mastercard** - Card payments
-
-To integrate actual payment gateways, update `/server/routes/payments.js`:
-
-```javascript
-// Replace simulatePaymentGateway() with actual API calls
-async function processEcoCash(amount, phone) {
-  // EcoCash API integration
-}
+│       ├── pages/         # Page components by portal
+│       │   ├── admin/     # Admin portal pages
+│       │   ├── security/  # Security portal pages
+│       │   ├── staff/     # Staff portal pages
+│       │   └── visitor/   # Visitor check-in
+│       └── utils/         # API client utilities
+└── docs/                   # Documentation
 ```
 
 ## Environment Variables
 
-Create `.env` file in root:
-
-```env
-PORT=5000
-JWT_SECRET=your-secret-key
-ENCRYPTION_KEY=your-32-char-encryption-key
-NODE_ENV=development
+### Server (.env)
 ```
+PORT=5000
+NODE_ENV=production
+JWT_SECRET=<random-32-char-string>
+ENCRYPTION_KEY=<random-32-char-string>
+DATABASE_URL=<neon-postgresql-connection-string>
+FRONTEND_URL=<vercel-deployment-url>
+```
+
+### Client (.env)
+```
+REACT_APP_API_URL=<render-backend-url>/api
+```
+
+## Security Features
+
+- **JWT Authentication** with 24-hour token expiry
+- **bcrypt Password Hashing** (10 salt rounds)
+- **AES Encryption** for sensitive data (visitor ID numbers)
+- **IP Logging** on all login attempts and visitor check-ins
+- **Rate Limiting** (100 requests per 15 minutes per IP)
+- **Helmet.js** security headers
+- **Role-Based Access Control** (admin, owner, supervisor, security, staff)
 
 ## License
 
-MIT License
+Proprietary - Cherubim Security (Pvt) Ltd.

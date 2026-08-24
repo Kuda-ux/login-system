@@ -11,7 +11,7 @@ BuildingMS is a complete **Building Access Platform** with 4 distinct interfaces
 ### Step 1: Initial Setup (Admin)
 
 1. **Admin logs into** → `http://localhost:3000/admin/login`
-   - Default credentials: `admin@buildingms.com` / `admin123`
+   - Use the administrator credentials provided to you
 
 2. **Admin creates a building**
    - Navigate to Buildings → Add Building
@@ -270,7 +270,7 @@ npm run build
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@buildingms.com | admin123 |
+| Admin | admin@cherubimsecurity.co.zw | (provided separately) |
 
 ---
 
@@ -298,4 +298,4 @@ npm run build
 
 ---
 
-*BuildingMS v1.0 - Built for Zimbabwe 🇿🇼*
+*Cherubim Security Management System v2.0*

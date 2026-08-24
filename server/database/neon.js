@@ -307,15 +307,15 @@ async function initializeDatabase() {
   // Check if admin exists
   const adminCheck = await getOne("SELECT id FROM users WHERE role = $1", ['admin']);
   if (!adminCheck) {
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const hashedPassword = await bcrypt.hash('Cherubim@2026', 10);
     const id = uuidv4();
     const now = new Date().toISOString();
     await pool.query(
       `INSERT INTO users (id, email, password, full_name, role, phone, created_at, updated_at, is_active)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [id, 'admin@buildingms.com', hashedPassword, 'System Administrator', 'admin', '+263000000000', now, now, 1]
+      [id, 'admin@cherubimsecurity.co.zw', hashedPassword, 'System Administrator', 'admin', '+263000000000', now, now, 1]
     );
-    console.log('✅ Default admin created: admin@buildingms.com / admin123');
+    console.log('✅ Default admin created');
   }
 
   console.log('✅ Neon PostgreSQL database initialized successfully');

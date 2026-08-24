@@ -76,7 +76,7 @@ You should see a response (or the server should be running).
 ### Test the Frontend
 
 1. Open your Vercel URL
-2. Try logging in with: `admin@buildingms.com` / `admin123`
+2. Try logging in with the administrator credentials provided to you
 3. If login works, the connection is successful!
 
 ---
@@ -152,4 +152,4 @@ No manual action needed!
 
 ---
 
-*BuildingMS v1.0 - Deployment Guide*
+*Cherubim Security Management System - Deployment Guide*

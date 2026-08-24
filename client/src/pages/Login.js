@@ -48,7 +48,7 @@ export default function Login() {
             <label className="form-label">Email</label>
             <div style={{ position: 'relative' }}>
               <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-              <input type="email" className="form-input" style={{ paddingLeft: '40px' }} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@buildingms.com" required />
+              <input type="email" className="form-input" style={{ paddingLeft: '40px' }} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
             </div>
           </div>
 
@@ -66,7 +66,7 @@ export default function Login() {
         </form>
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-          Default: admin@buildingms.com / admin123
+          Cherubim Security Management System
         </p>
       </div>
     </div>

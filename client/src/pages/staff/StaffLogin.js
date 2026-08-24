@@ -76,7 +76,7 @@ function StaffLogin() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-12 pr-4 py-3.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#444] focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)] focus:outline-none transition-all"
-                  placeholder="guard@cherubim.com"
+                  placeholder="Enter your email"
                 />
               </div>
             </div>

@@ -82,31 +82,17 @@ app.use((req, res, next) => {
 // Health check endpoint for monitoring
 app.get('/api/health', async (req, res) => {
   try {
-    const { getOne, runQuery } = require('./database/init');
-    
-    // Test raw query first
-    const testResult = await runQuery("SELECT 1 as test", []);
-    
-    const adminExists = await getOne("SELECT id, email FROM users WHERE role = $1", ['admin']);
-    const userCount = await getOne("SELECT COUNT(*) as count FROM users", []);
+    const { runQuery } = require('./database/init');
+    await runQuery("SELECT 1 as test", []);
     res.json({ 
       status: 'ok', 
-      timestamp: new Date().toISOString(),
-      database: {
-        testQuery: testResult,
-        adminExists: !!adminExists,
-        adminEmail: adminExists?.email || null,
-        totalUsers: userCount?.count || 0,
-        debug: { adminRow: adminExists, countRow: userCount }
-      }
+      timestamp: new Date().toISOString()
     });
   } catch (err) {
     console.error('Health check error:', err);
-    res.json({ 
+    res.status(503).json({ 
       status: 'error', 
-      timestamp: new Date().toISOString(),
-      error: err.message,
-      stack: err.stack
+      timestamp: new Date().toISOString()
     });
   }
 });
@@ -137,19 +123,9 @@ if (process.env.NODE_ENV === 'production' && fs.existsSync(clientBuildPath)) {
   // API-only mode - return JSON for root
   app.get('/', (req, res) => {
     res.json({
-      message: 'Building Management API',
-      version: '1.0.1',
-      deployedAt: '2026-02-03T19:50:00Z',
-      endpoints: {
-        health: '/api/health',
-        auth: '/api/auth',
-        visitors: '/api/visitors',
-        staff: '/api/staff',
-        buildings: '/api/buildings',
-        tenants: '/api/tenants',
-        payments: '/api/payments',
-        dashboard: '/api/dashboard'
-      }
+      message: 'Cherubim Security Management API',
+      version: '2.0.0',
+      status: 'operational'
     });
   });
 }

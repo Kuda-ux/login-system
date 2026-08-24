@@ -1,11 +1,11 @@
-# Building Management System
+# Cherubim Security Management System
 ## Client User Guide
 
 ---
 
-# Welcome to Your Building Management System
+# Welcome to the Cherubim Security Management System
 
-Your vision of a modern, secure, and efficient building management solution is now live and ready to use. This guide will walk you through everything you need to know to operate your system.
+Your comprehensive security operations platform is live and ready to use. This guide will walk you through everything you need to know to operate the system.
 
 ---
 
@@ -21,7 +21,7 @@ This is your system's address on the internet. You can access it from any device
 
 # Understanding Your System
 
-Your Building Management System has **four main areas**, each designed for different users:
+The system has **four main areas**, each designed for different users:
 
 | Portal | Who Uses It | Purpose |
 |--------|-------------|---------|
@@ -236,13 +236,13 @@ A: Yes, all data is encrypted and stored securely in the cloud.
 
 # Support
 
-If you need any assistance with your Building Management System, please contact your system administrator or the development team.
+If you need any assistance with the system, please contact your system administrator or the Cherubim Security operations team.
 
 ---
 
-*Your vision is now live. Welcome to modern building management.*
+*Cherubim Security - Professional Security Management.*
 
 ---
 
-**System Version:** 1.0  
-**Last Updated:** February 2026
+**System Version:** 2.0 - Cherubim Security Edition  
+**Last Updated:** August 2026
