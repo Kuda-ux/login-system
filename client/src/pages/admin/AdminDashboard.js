@@ -88,8 +88,8 @@ function AdminDashboard() {
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-[#111111] shadow-2xl shadow-black/50">
-            <div className="p-6 border-b border-[#1f1f1f] flex items-center justify-between">
+          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-[#111111] shadow-2xl shadow-black/50 flex flex-col overflow-hidden">
+            <div className="shrink-0 p-6 border-b border-[#1f1f1f] flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white rounded-xl p-1 flex items-center justify-center shadow-lg shadow-[#d4ae2a]/20">
                   <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
@@ -100,7 +100,7 @@ function AdminDashboard() {
                 <X className="w-6 h-6 text-[#555555]" />
               </button>
             </div>
-            <nav className="p-4 space-y-1">
+            <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
@@ -117,7 +117,7 @@ function AdminDashboard() {
                 </Link>
               ))}
             </nav>
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#1f1f1f]">
+            <div className="shrink-0 p-4 border-t border-[#1f1f1f] bg-[#111111]">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-[#d4ae2a] to-[#b8941f] rounded-full flex items-center justify-center">
                   <span className="font-semibold text-white">{user?.full_name?.charAt(0)}</span>
@@ -141,8 +141,8 @@ function AdminDashboard() {
 
       <div className="flex">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-[#111111] border-r border-[#1f1f1f] fixed">
-          <div className="p-6 border-b border-[#1f1f1f]">
+        <aside className="hidden lg:flex flex-col w-64 h-screen bg-[#111111] border-r border-[#1f1f1f] fixed top-0 left-0 overflow-hidden">
+          <div className="shrink-0 p-6 border-b border-[#1f1f1f]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-xl p-1 flex items-center justify-center shadow-lg shadow-[#d4ae2a]/20">
                 <img src="/cherubim-security-logo.svg" alt="Cherubim Security" className="w-full h-full object-contain" />
@@ -154,7 +154,7 @@ function AdminDashboard() {
             </div>
           </div>
 
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -171,7 +171,7 @@ function AdminDashboard() {
             ))}
           </nav>
 
-          <div className="p-4 border-t border-[#1f1f1f]">
+          <div className="shrink-0 p-4 border-t border-[#1f1f1f] bg-[#111111]">
             <div className="flex items-center gap-3 mb-4 px-2">
               <div className="w-10 h-10 bg-gradient-to-br from-[#d4ae2a] to-[#b8941f] rounded-full flex items-center justify-center text-white font-semibold shadow-lg shadow-[#d4ae2a]/20">
                 {user?.full_name?.charAt(0)}
