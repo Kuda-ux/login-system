@@ -94,10 +94,37 @@ body {
 }
 .form-input::placeholder { color: var(--cherubim-text-muted); }
 
-.field { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--cherubim-border-light); border-radius: 0.75rem; background: var(--cherubim-black); color: var(--cherubim-text); outline: none; }
+.field { width: 100%; min-height: 3rem; padding: 0.75rem 1rem; border: 1px solid var(--cherubim-border-light); border-radius: 0.75rem; background-color: var(--cherubim-black); color: var(--cherubim-text); outline: none; transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s; }
+.field:hover { border-color: #3a3a3a; }
 .field:focus { border-color: var(--cherubim-gold); box-shadow: 0 0 0 3px rgba(212, 174, 42, 0.15); }
 .field::placeholder { color: var(--cherubim-text-muted); }
-.form-select { appearance: none; background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath stroke='%23888888' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") no-repeat right 0.5rem center/1.5em; padding-right: 2.5rem; }
+select, .form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  color-scheme: dark;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23d4ae2a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.8' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  background-size: 1.125rem;
+  padding-right: 2.75rem !important;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+select:hover { border-color: #3a3a3a !important; }
+select:focus { outline: none; border-color: var(--cherubim-gold) !important; box-shadow: 0 0 0 3px rgba(212, 174, 42, 0.15); }
+select option { background: #171717; color: #ffffff; padding: 0.75rem; }
+select option:checked { background: var(--cherubim-gold); color: #000000; }
+input, textarea {
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+input:hover, textarea:hover { border-color: #3a3a3a; }
+input:focus-visible, textarea:focus-visible { outline: none; border-color: var(--cherubim-gold); box-shadow: 0 0 0 3px rgba(212, 174, 42, 0.15); }
+textarea { resize: vertical; }
+input[type='date'], input[type='time'], input[type='datetime-local'] { color-scheme: dark; }
+input:disabled, select:disabled, textarea:disabled { opacity: 0.55; cursor: not-allowed; }
+@media (max-width: 640px) {
+  input, select, textarea { font-size: 16px !important; }
+}
 
 /* Tables */
 .table { width: 100%; border-collapse: collapse; }

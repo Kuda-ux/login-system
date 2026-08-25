@@ -262,100 +262,70 @@ function StaffManagement() {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setShowModal(false)} />
-          <div className="relative bg-[#111111] rounded-2xl w-full max-w-md p-6 shadow-2xl border border-[#1f1f1f]">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white">
-                {editingStaff ? 'Edit Staff Member' : 'Add Staff Member'}
-              </h2>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-[#1a1a1a] rounded-lg">
-                <X className="w-5 h-5 text-[#888]" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[#888] mb-1">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#888] mb-1">Email</label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
-                />
-              </div>
-              {!editingStaff && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm overflow-y-auto p-3 sm:p-6">
+          <div className="min-h-full flex items-center justify-center">
+            <div className="relative bg-[#111111] rounded-2xl sm:rounded-3xl w-full max-w-2xl shadow-2xl shadow-black/50 border border-[#2a2a2a] overflow-hidden">
+              <div className="flex items-start justify-between gap-4 px-5 py-5 sm:px-7 sm:py-6 border-b border-[#242424] bg-gradient-to-r from-[rgba(212,174,42,0.08)] to-transparent">
                 <div>
-                  <label className="block text-sm font-medium text-[#888] mb-1">Password</label>
-                  <input
-                    type="password"
-                    required={!editingStaff}
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
-                  />
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#d4ae2a] mb-1">Personnel Management</p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">
+                    {editingStaff ? 'Edit Staff Member' : 'Add Staff Member'}
+                  </h2>
+                  <p className="text-sm text-[#777] mt-1">Create secure access and assign the correct operational role.</p>
                 </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-[#888] mb-1">Phone</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#888] mb-1">Role</label>
-                <select
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
-                >
-                  <option value="staff">Staff</option>
-                  <option value="security">Guard</option>
-                  <option value="supervisor">Supervisor</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#888] mb-1">Assigned Building</label>
-                <select
-                  value={formData.building_id}
-                  onChange={(e) => setFormData({ ...formData, building_id: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
-                >
-                  <option value="">Select Building</option>
-                  {buildings.map(b => (
-                    <option key={b.id} value={b.id}>{b.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-[#2a2a2a] text-[#888] rounded-xl hover:bg-[#1a1a1a] transition font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2.5 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] transition font-medium"
-                >
-                  {editingStaff ? 'Update' : 'Add'} Staff
+                <button type="button" onClick={() => setShowModal(false)} className="shrink-0 p-2.5 hover:bg-white/5 rounded-xl transition" aria-label="Close form">
+                  <X className="w-5 h-5 text-[#999]" />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSubmit}>
+                <div className="p-5 sm:p-7 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-[#aaa] mb-2">Full Name <span className="text-[#d4ae2a]">*</span></label>
+                    <input type="text" required autoComplete="name" placeholder="Enter full legal name" value={formData.full_name} onChange={(e) => setFormData({ ...formData, full_name: e.target.value })} className="field" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#aaa] mb-2">Email Address <span className="text-[#d4ae2a]">*</span></label>
+                    <input type="email" required autoComplete="email" placeholder="name@company.com" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="field" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#aaa] mb-2">Phone Number</label>
+                    <input type="tel" autoComplete="tel" placeholder="e.g. +263 77 000 0000" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="field" />
+                  </div>
+                  {!editingStaff && (
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-[#aaa] mb-2">Temporary Password <span className="text-[#d4ae2a]">*</span></label>
+                      <input type="password" required minLength={6} autoComplete="new-password" placeholder="Minimum 6 characters" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="field" />
+                      <p className="text-xs text-[#666] mt-2">The staff member should change this password after their first login.</p>
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-[#aaa] mb-2">Operational Role <span className="text-[#d4ae2a]">*</span></label>
+                    <select value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} className="field">
+                      <option value="staff">Staff Member</option>
+                      <option value="security">Security Guard</option>
+                      <option value="supervisor">Site Supervisor</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#aaa] mb-2">Assigned Client Site</label>
+                    <select value={formData.building_id} onChange={(e) => setFormData({ ...formData, building_id: e.target.value })} className="field">
+                      <option value="">Select a client site</option>
+                      {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 px-5 py-4 sm:px-7 border-t border-[#242424] bg-[#0d0d0d]">
+                  <button type="button" onClick={() => setShowModal(false)} className="w-full sm:w-auto px-6 py-3 border border-[#333] text-[#aaa] rounded-xl hover:bg-[#1a1a1a] hover:text-white transition font-medium">
+                    Cancel
+                  </button>
+                  <button type="submit" className="w-full sm:w-auto px-7 py-3 bg-[#d4ae2a] text-black rounded-xl hover:bg-[#e8c847] shadow-lg shadow-[#d4ae2a]/10 transition font-semibold">
+                    {editingStaff ? 'Save Changes' : 'Add Staff Member'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

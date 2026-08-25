@@ -175,7 +175,7 @@ export default function Vehicles() {
                 value={form.registration_number}
                 onChange={e => setForm({ ...form, registration_number: e.target.value })}
               />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
                   className="px-4 py-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] focus:border-[#d4ae2a] focus:ring-2 focus:ring-[rgba(212,174,42,0.15)]"
                   placeholder="Make"

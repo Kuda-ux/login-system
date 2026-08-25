@@ -270,7 +270,7 @@ export default function Weapons() {
                 <option value="Baton">Baton</option>
                 <option value="Other">Other</option>
               </select>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
                   className="px-4 py-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] focus:border-[#d4ae2a] focus:outline-none"
                   placeholder="Make"
