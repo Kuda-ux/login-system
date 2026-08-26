@@ -23,6 +23,7 @@ function SecurityDashboard() {
   const [selectedVisitor, setSelectedVisitor] = useState(null);
   const [staffEntries, setStaffEntries] = useState([]);
   const [staffStats, setStaffStats] = useState({ inside: 0, exited: 0, total: 0 });
+  const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -80,13 +81,14 @@ function SecurityDashboard() {
     }
   };
 
-  const fetchStaffEntries = async () => {
+  const fetchStaffEntries = async (dateOverride) => {
     try {
+      const d = dateOverride || attendanceDate;
       let res;
       if (user?.building_id) {
-        res = await api.get(`/staff/entries/${user.building_id}`);
+        res = await api.get(`/staff/entries/${user.building_id}?date=${d}`);
       } else if (user?.role === 'admin') {
-        res = await api.get('/staff/entries-all');
+        res = await api.get(`/staff/entries-all?date=${d}`);
       } else {
         return;
       }
@@ -431,6 +433,24 @@ function SecurityDashboard() {
 
           {/* Guard Attendance List */}
           {activeTab === 'staff' && (
+            <>
+            <div className="flex items-center gap-3 mb-4">
+              <label className="text-[#888] text-sm">Date:</label>
+              <input
+                type="date"
+                value={attendanceDate}
+                onChange={(e) => { setAttendanceDate(e.target.value); fetchStaffEntries(e.target.value); }}
+                className="px-3 py-2 bg-[#111111] border border-[#2a2a2a] rounded-xl text-sm text-white focus:border-[#d4ae2a] focus:outline-none"
+              />
+              {attendanceDate !== new Date().toISOString().split('T')[0] && (
+                <button
+                  onClick={() => { const today = new Date().toISOString().split('T')[0]; setAttendanceDate(today); fetchStaffEntries(today); }}
+                  className="text-xs text-[#d4ae2a] hover:text-[#e8c847] font-medium"
+                >
+                  Back to Today
+                </button>
+              )}
+            </div>
             <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] overflow-hidden">
               {staffEntries.length === 0 ? (
                 <div className="p-12 text-center">
@@ -488,6 +508,7 @@ function SecurityDashboard() {
                 </div>
               )}
             </div>
+          </>
           )}
 
           {/* Visitors List */}

@@ -363,13 +363,14 @@ router.get('/entries/:buildingId', authenticateToken, authorizeRoles('security',
     const { buildingId } = req.params;
     const { date, status } = req.query;
     const today = date || new Date().toISOString().split('T')[0];
+    const nextDay = new Date(new Date(today).getTime() + 86400000).toISOString().split('T')[0];
 
     let query = `SELECT se.*, u.full_name as staff_name, u.role as staff_role, u.phone as staff_phone
                  FROM staff_entries se
                  JOIN users u ON se.staff_id = u.id
                  WHERE se.building_id = ?
-                 AND se.entry_time::date = ?::date`;
-    const params = [buildingId, today];
+                 AND se.entry_time >= ? AND se.entry_time < ?`;
+    const params = [buildingId, today, nextDay];
 
     if (status) {
       query += ' AND se.status = ?';
@@ -397,15 +398,16 @@ router.get('/entries-all', authenticateToken, authorizeRoles('admin'), async (re
   try {
     const { date } = req.query;
     const today = date || new Date().toISOString().split('T')[0];
+    const nextDay = new Date(new Date(today).getTime() + 86400000).toISOString().split('T')[0];
 
     const entries = await getAll(
       `SELECT se.*, u.full_name as staff_name, u.role as staff_role, u.phone as staff_phone, b.name as building_name
        FROM staff_entries se
        JOIN users u ON se.staff_id = u.id
        LEFT JOIN buildings b ON se.building_id = b.id
-       WHERE se.entry_time::date = ?::date
+       WHERE se.entry_time >= ? AND se.entry_time < ?
        ORDER BY se.entry_time DESC LIMIT 100`,
-      [today]
+      [today, nextDay]
     );
 
     const inside = entries.filter(e => e.status === 'inside').length;

@@ -51,7 +51,7 @@ router.get('/summary', authenticateToken, authorizeRoles(...managementRoles), as
 
 router.get('/guards', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
   try {
-    let query = "SELECT u.id, u.email, u.full_name, u.phone, u.building_id, u.employee_number, u.date_of_birth, u.address, u.emergency_contact, u.clearance_status, u.profile_photo, u.is_active, b.name AS site_name FROM users u LEFT JOIN buildings b ON u.building_id = b.id WHERE u.role IN ('staff', 'security')";
+    let query = "SELECT u.id, u.email, u.full_name, u.phone, u.role, u.building_id, u.employee_number, u.date_of_birth, u.address, u.emergency_contact, u.clearance_status, u.profile_photo, u.is_active, b.name AS site_name FROM users u LEFT JOIN buildings b ON u.building_id = b.id WHERE u.role IN ('staff', 'security', 'supervisor')";
     const params = [];
     if (req.user.role === 'supervisor') { query += ' AND u.building_id = ?'; params.push(req.user.building_id); }
     if (req.user.role === 'owner') {
@@ -70,7 +70,7 @@ router.get('/guards', authenticateToken, authorizeRoles(...managementRoles), asy
 
 router.get('/guards/:id', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
   try {
-    const guard = await getOne("SELECT u.id, u.email, u.full_name, u.phone, u.building_id, u.employee_number, u.date_of_birth, u.address, u.emergency_contact, u.clearance_status, u.profile_photo, u.is_active, b.name AS site_name FROM users u LEFT JOIN buildings b ON u.building_id = b.id WHERE u.id = ? AND u.role IN ('staff', 'security')", [req.params.id]);
+    const guard = await getOne("SELECT u.id, u.email, u.full_name, u.phone, u.role, u.building_id, u.employee_number, u.date_of_birth, u.address, u.emergency_contact, u.clearance_status, u.profile_photo, u.is_active, b.name AS site_name FROM users u LEFT JOIN buildings b ON u.building_id = b.id WHERE u.id = ? AND u.role IN ('staff', 'security', 'supervisor')", [req.params.id]);
     if (!guard) return res.status(404).json({ error: 'Guard not found' });
     if (!await requireSiteAccess(req, res, guard.building_id)) return;
     const documents = await getAll('SELECT id, document_type, document_name, document_url, expires_at, created_at FROM employee_documents WHERE employee_id = ? ORDER BY created_at DESC', [guard.id]);
@@ -83,7 +83,7 @@ router.get('/guards/:id', authenticateToken, authorizeRoles(...managementRoles),
 
 router.put('/guards/:id', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
   try {
-    const guard = await getOne("SELECT id, building_id FROM users WHERE id = ? AND role IN ('staff', 'security')", [req.params.id]);
+    const guard = await getOne("SELECT id, building_id FROM users WHERE id = ? AND role IN ('staff', 'security', 'supervisor')", [req.params.id]);
     if (!guard) return res.status(404).json({ error: 'Guard not found' });
     if (!await requireSiteAccess(req, res, guard.building_id)) return;
     const { employee_number, date_of_birth, address, emergency_contact, clearance_status, profile_photo } = req.body;
@@ -101,7 +101,7 @@ router.post('/guards/:id/documents', authenticateToken, authorizeRoles('admin', 
   try {
     const { document_type, document_name, document_url, expires_at } = req.body;
     if (!document_type || !document_name || !document_url) return res.status(400).json({ error: 'Document type, name, and secure document URL are required' });
-    const guard = await getOne("SELECT id, building_id FROM users WHERE id = ? AND role IN ('staff', 'security')", [req.params.id]);
+    const guard = await getOne("SELECT id, building_id FROM users WHERE id = ? AND role IN ('staff', 'security', 'supervisor')", [req.params.id]);
     if (!guard) return res.status(404).json({ error: 'Guard not found' });
     if (!await requireSiteAccess(req, res, guard.building_id)) return;
     await runQuery('INSERT INTO employee_documents (id, employee_id, document_type, document_name, document_url, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)', [uuidv4(), guard.id, document_type, document_name, document_url, expires_at || null, new Date().toISOString()]);
@@ -112,7 +112,7 @@ router.post('/guards/:id/documents', authenticateToken, authorizeRoles('admin', 
   }
 });
 
-router.post('/incidents', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
+router.post('/incidents', authenticateToken, authorizeRoles(...managementRoles, 'security'), async (req, res) => {
   try {
     const { building_id, title, category, severity, description, people_involved, actions_taken, occurred_at } = req.body;
     if (!building_id || !title || !category || !severity || !description) return res.status(400).json({ error: 'Site, title, category, severity, and description are required' });
@@ -128,7 +128,7 @@ router.post('/incidents', authenticateToken, authorizeRoles(...managementRoles),
   }
 });
 
-router.get('/incidents', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
+router.get('/incidents', authenticateToken, authorizeRoles(...managementRoles, 'security'), async (req, res) => {
   try {
     const { building_id, status } = req.query;
     let query = 'SELECT i.*, b.name AS site_name, u.full_name AS reporter_name FROM incident_reports i JOIN buildings b ON i.building_id = b.id JOIN users u ON i.reported_by = u.id WHERE 1 = 1';
@@ -144,7 +144,7 @@ router.get('/incidents', authenticateToken, authorizeRoles(...managementRoles), 
   }
 });
 
-router.put('/incidents/:id/status', authenticateToken, authorizeRoles(...managementRoles), async (req, res) => {
+router.put('/incidents/:id/status', authenticateToken, authorizeRoles(...managementRoles, 'security'), async (req, res) => {
   try {
     const { status, resolution_notes } = req.body;
     if (!['open', 'under_review', 'resolved', 'closed'].includes(status)) return res.status(400).json({ error: 'Invalid incident status' });

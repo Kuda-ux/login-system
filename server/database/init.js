@@ -140,6 +140,9 @@ if (process.env.DATABASE_URL) {
     }
 
     try { db.run('ALTER TABLE buildings ADD COLUMN client_id TEXT'); } catch (err) {}
+    for (const col of ['company_name TEXT', 'contact_phone TEXT', 'contact_email TEXT', 'industry TEXT', 'feedback TEXT']) {
+      try { db.run(`ALTER TABLE buildings ADD COLUMN ${col}`); } catch (err) {}
+    }
 
     db.run(`CREATE TABLE IF NOT EXISTS clients (
       id TEXT PRIMARY KEY, name TEXT NOT NULL, contact_name TEXT, contact_phone TEXT,

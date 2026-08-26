@@ -116,11 +116,11 @@ After deployment, your system will be available at:
 
 | Component | URL |
 |-----------|-----|
-| **Frontend** | `https://your-app.vercel.app` |
-| **Backend API** | `https://your-api.onrender.com/api` |
-| **Admin Login** | `https://your-app.vercel.app/admin/login` |
-| **Security Portal** | `https://your-app.vercel.app/security/login` |
-| **Staff Portal** | `https://your-app.vercel.app/staff/login` |
+| **Frontend** | `https://login-system-lime.vercel.app/` |
+| **Backend API** | Configured through the `REACT_APP_API_URL` environment variable |
+| **Admin Login** | `https://login-system-lime.vercel.app/admin/login` |
+| **Security Portal** | `https://login-system-lime.vercel.app/security/login` |
+| **Staff Portal** | `https://login-system-lime.vercel.app/staff/login` |
 
 ---
 

@@ -20,15 +20,16 @@ function StaffManagement() {
   const [qrGenerating, setQrGenerating] = useState(false);
   const [passwordModal, setPasswordModal] = useState(null); // { id, full_name }
   const [newPassword, setNewPassword] = useState('');
+  const [showInactive, setShowInactive] = useState(false);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [showInactive]);
 
   const fetchData = async () => {
     try {
       const [staffRes, buildingsRes] = await Promise.all([
-        api.get('/auth/users?role=staff,security'),
+        api.get(`/auth/users?role=staff,security,supervisor&include_inactive=${showInactive}`),
         api.get('/buildings')
       ]);
       setStaff(staffRes.data.users || []);
@@ -83,12 +84,22 @@ function StaffManagement() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to deactivate this staff member?')) return;
+    if (!window.confirm('Are you sure you want to deactivate this staff member? They will no longer be able to log in.')) return;
     try {
       await api.delete(`/auth/users/${id}`);
       fetchData();
     } catch (err) {
       alert('Failed to deactivate staff member');
+    }
+  };
+
+  const handleReactivate = async (id) => {
+    if (!window.confirm('Reactivate this staff member? They will be able to log in again.')) return;
+    try {
+      await api.put(`/auth/users/${id}/reactivate`);
+      fetchData();
+    } catch (err) {
+      alert('Failed to reactivate staff member');
     }
   };
 
@@ -119,6 +130,7 @@ function StaffManagement() {
     const styles = {
       staff: 'bg-[rgba(212,174,42,0.08)] text-[#d4ae2a]',
       security: 'bg-purple-500/20 text-purple-400',
+      supervisor: 'bg-blue-500/20 text-blue-400',
       admin: 'bg-red-500/20 text-red-400',
       owner: 'bg-amber-500/20 text-amber-400'
     };
@@ -164,6 +176,12 @@ function StaffManagement() {
             <option key={b.id} value={b.id}>{b.name}</option>
           ))}
         </select>
+        <button
+          onClick={() => setShowInactive(!showInactive)}
+          className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition ${showInactive ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-[#0a0a0a] border-[#2a2a2a] text-[#888] hover:border-[#d4ae2a]'}`}
+        >
+          {showInactive ? 'Showing Inactive' : 'Show Inactive'}
+        </button>
       </div>
 
       {/* Staff Grid */}
@@ -199,32 +217,43 @@ function StaffManagement() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredStaff.map(member => (
-            <div key={member.id} className="bg-[#111111] rounded-2xl p-6 border border-[#1f1f1f] hover:border-[#2a2a2a] transition group">
+            <div key={member.id} className={`bg-[#111111] rounded-2xl p-6 border ${member.is_active ? 'border-[#1f1f1f] hover:border-[#2a2a2a]' : 'border-red-500/20 opacity-75'} transition group`}>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#d4ae2a] to-[#b8941f] rounded-full flex items-center justify-center text-black font-semibold text-lg">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold text-lg ${member.is_active ? 'bg-gradient-to-br from-[#d4ae2a] to-[#b8941f] text-black' : 'bg-[#2a2a2a] text-[#666]'}`}>
                     {member.full_name?.charAt(0)}
                   </div>
                   <div>
                     <h3 className="font-semibold text-white">{member.full_name}</h3>
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${getRoleBadge(member.role)}`}>
-                      {member.role}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${getRoleBadge(member.role)}`}>
+                        {member.role}
+                      </span>
+                      {!member.is_active && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/15 text-red-400">Deactivated</span>}
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                  <button onClick={() => handleGenerateQR(member)} className="p-1.5 hover:bg-[rgba(212,174,42,0.08)] rounded-lg" title="Generate QR Code">
-                    <QrCode className="w-4 h-4 text-[#d4ae2a]" />
-                  </button>
-                  <button onClick={() => setPasswordModal({ id: member.id, full_name: member.full_name })} className="p-1.5 hover:bg-amber-500/10 rounded-lg" title="Reset Password">
-                    <Key className="w-4 h-4 text-amber-500" />
-                  </button>
-                  <button onClick={() => handleEdit(member)} className="p-1.5 hover:bg-[#1a1a1a] rounded-lg" title="Edit">
-                    <Edit2 className="w-4 h-4 text-[#888]" />
-                  </button>
-                  <button onClick={() => handleDelete(member.id)} className="p-1.5 hover:bg-red-500/10 rounded-lg" title="Deactivate">
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                  </button>
+                  {member.is_active ? (
+                    <>
+                      <button onClick={() => handleGenerateQR(member)} className="p-1.5 hover:bg-[rgba(212,174,42,0.08)] rounded-lg" title="Generate QR Code">
+                        <QrCode className="w-4 h-4 text-[#d4ae2a]" />
+                      </button>
+                      <button onClick={() => setPasswordModal({ id: member.id, full_name: member.full_name })} className="p-1.5 hover:bg-amber-500/10 rounded-lg" title="Reset Password">
+                        <Key className="w-4 h-4 text-amber-500" />
+                      </button>
+                      <button onClick={() => handleEdit(member)} className="p-1.5 hover:bg-[#1a1a1a] rounded-lg" title="Edit">
+                        <Edit2 className="w-4 h-4 text-[#888]" />
+                      </button>
+                      <button onClick={() => handleDelete(member.id)} className="p-1.5 hover:bg-red-500/10 rounded-lg" title="Deactivate">
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </button>
+                    </>
+                  ) : (
+                    <button onClick={() => handleReactivate(member.id)} className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-xs font-medium hover:bg-emerald-500/20 transition" title="Reactivate">
+                      Reactivate
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="space-y-2 text-sm">

@@ -25,7 +25,7 @@ const COLORS = {
 const LEFT = 55;
 const RIGHT_EDGE = 595.28 - 55; // A4 width minus right margin
 const CONTENT_WIDTH = RIGHT_EDGE - LEFT;
-const PAGE_BOTTOM = 841.89 - 70; // A4 height minus bottom margin
+const PAGE_BOTTOM = 735;
 const TOP_START = 75;
 
 const outputPath = path.join(__dirname, '../../Cherubim_Security_User_Guide.pdf');
@@ -255,7 +255,7 @@ doc.font('Helvetica').fontSize(8).fillColor(COLORS.gold);
 doc.text('CONFIDENTIAL \u2014 For Authorised Personnel Only', 0, 740, { align: 'center', width: 595.28 });
 
 doc.font('Helvetica-Bold').fontSize(9).fillColor(COLORS.gold);
-doc.text('Cherubim Security (Pvt) Ltd', 0, 770, { align: 'center', width: 595.28 });
+doc.text('Cherubim Security (Pvt) Ltd', 0, 755, { align: 'center', width: 595.28, lineBreak: false });
 
 // ============================================================
 // TABLE OF CONTENTS
@@ -274,51 +274,68 @@ doc.restore();
 gap(18);
 
 const tocItems = [
-  ['1', 'System Overview'],
-  ['2', 'Getting Started'],
-  ['3', 'Admin Portal'],
-  ['', '   3.1 Dashboard'],
-  ['', '   3.2 Buildings Management'],
-  ['', '   3.3 Staff Management'],
-  ['', '   3.4 Visitors'],
-  ['', '   3.5 Operations Centre'],
-  ['', '   3.6 Guard Files (E-Files)'],
-  ['', '   3.7 Assets'],
-  ['', '   3.8 Vehicles'],
-  ['', '   3.9 Weapons Management'],
-  ['', '   3.10 Reports'],
-  ['', '   3.11 Settings'],
-  ['4', 'Security / Supervisor Portal'],
-  ['5', 'Staff / Guard Portal'],
-  ['6', 'Visitor Check-in System'],
-  ['7', 'User Roles & Permissions'],
-  ['8', 'Setting Up a New Site'],
-  ['9', 'Daily Operations Guide'],
-  ['10', 'Reporting & Exports'],
-  ['11', 'Troubleshooting'],
-  ['12', 'Security & Data Protection']
+  { number: '1', title: 'System Overview', page: 3 },
+  { number: '2', title: 'Getting Started', page: 4 },
+  { number: '3', title: 'Admin Portal', page: 5 },
+  { title: '3.1  Dashboard', page: 5, child: true },
+  { title: '3.2  Buildings Management', page: 5, child: true },
+  { title: '3.3  Staff Management', page: 6, child: true },
+  { title: '3.4  Visitors', page: 6, child: true },
+  { title: '3.5  Operations Centre', page: 7, child: true },
+  { title: '3.6  Guard Files (E-Files)', page: 7, child: true },
+  { title: '3.7  Assets', page: 7, child: true },
+  { title: '3.8  Vehicles', page: 8, child: true },
+  { title: '3.9  Weapons Management', page: 8, child: true },
+  { title: '3.10  Reports', page: 8, child: true },
+  { title: '3.11  Settings', page: 8, child: true },
+  { number: '4', title: 'Security / Supervisor Portal', page: 9 },
+  { number: '5', title: 'Staff / Guard Portal', page: 10 },
+  { number: '6', title: 'Visitor Check-in System', page: 11 },
+  { number: '7', title: 'User Roles & Permissions', page: 12 },
+  { number: '8', title: 'Setting Up a New Site', page: 13 },
+  { number: '9', title: 'Daily Operations Guide', page: 14 },
+  { number: '10', title: 'Reporting & Exports', page: 15 },
+  { number: '11', title: 'Troubleshooting', page: 16 },
+  { number: '12', title: 'Security & Data Protection', page: 17 }
 ];
 
-tocItems.forEach(([num, title]) => {
-  const y = doc.y;
-  const isMain = num !== '';
-  const fontSize = isMain ? 11 : 9.5;
-  const indent = isMain ? 0 : 15;
+let tocY = doc.y;
+tocItems.forEach((item) => {
+  const rowHeight = item.child ? 18 : 24;
+  const titleX = item.child ? LEFT + 32 : LEFT + 28;
+  const titleWidth = RIGHT_EDGE - titleX - 38;
 
-  if (isMain && num !== '1') gap(3);
-
-  doc.font(isMain ? 'Helvetica-Bold' : 'Helvetica').fontSize(fontSize).fillColor(COLORS.darkGray);
-  if (isMain) {
-    doc.font('Helvetica-Bold').fontSize(fontSize).fillColor(COLORS.gold);
-    doc.text(`${num}.`, LEFT, doc.y, { continued: false, lineBreak: false });
-    doc.moveUp();
-    doc.font('Helvetica-Bold').fontSize(fontSize).fillColor(COLORS.darkGray);
-    doc.text(title, LEFT + 24, doc.y);
-  } else {
-    doc.text(title, LEFT + indent, doc.y, { width: CONTENT_WIDTH });
+  if (!item.child) {
+    doc.font('Helvetica-Bold').fontSize(10.5).fillColor(COLORS.gold);
+    doc.text(`${item.number}.`, LEFT, tocY, { width: 24, lineBreak: false });
   }
-  gap(2);
+
+  doc.font(item.child ? 'Helvetica' : 'Helvetica-Bold')
+    .fontSize(item.child ? 9 : 10.5)
+    .fillColor(item.child ? COLORS.midGray : COLORS.darkGray);
+  doc.text(item.title, titleX, tocY, { width: titleWidth, lineBreak: false });
+
+  const titleMeasure = doc.widthOfString(item.title);
+  const dotsStart = Math.min(titleX + titleMeasure + 9, RIGHT_EDGE - 55);
+  if (dotsStart < RIGHT_EDGE - 35) {
+    doc.save();
+    doc.moveTo(dotsStart, tocY + 8)
+      .lineTo(RIGHT_EDGE - 28, tocY + 8)
+      .dash(1, { space: 3 })
+      .strokeColor('#c7c7c7')
+      .lineWidth(0.5)
+      .stroke();
+    doc.restore();
+  }
+
+  doc.font(item.child ? 'Helvetica' : 'Helvetica-Bold')
+    .fontSize(item.child ? 9 : 10)
+    .fillColor(item.child ? COLORS.midGray : COLORS.gold);
+  doc.text(String(item.page), RIGHT_EDGE - 22, tocY, { width: 22, align: 'right', lineBreak: false });
+
+  tocY += rowHeight;
 });
+setY(tocY);
 
 // ============================================================
 // SECTION 1: SYSTEM OVERVIEW
@@ -351,13 +368,14 @@ bullet('Security: JWT authentication, bcrypt hashing, AES encryption');
 bullet('Offline Support: Progressive Web App with automatic sync');
 
 gap(4);
-heading2('Portal Access URLs');
-para('After deployment, the system is accessible at these URLs (replace "your-domain" with your actual Vercel domain):');
-bullet('Landing Page:  /');
-bullet('Admin Login:  /admin/login');
-bullet('Security Login:  /security/login');
-bullet('Staff Login:  /staff/login');
-bullet('Visitor Check-in:  /checkin/<building-id>');
+heading2('How to Access the System');
+para('Open Google Chrome, Microsoft Edge, Safari, or Firefox on a computer, tablet, or smartphone and visit the official Cherubim Security system address:');
+infoBox('OFFICIAL SYSTEM URL', 'https://login-system-lime.vercel.app/');
+para('Use the appropriate portal address for your role:');
+bullet('Admin Portal:  https://login-system-lime.vercel.app/admin/login');
+bullet('Security Portal:  https://login-system-lime.vercel.app/security/login');
+bullet('Staff Portal:  https://login-system-lime.vercel.app/staff/login');
+bullet('Visitor Check-in: generated automatically for each client site');
 
 // ============================================================
 // SECTION 2: GETTING STARTED
@@ -1005,10 +1023,10 @@ for (let i = 0; i < totalPages; i++) {
   }
 
   // Footer
-  const footY = 841.89 - 35;
+  const footY = 755;
   doc.fontSize(7.5).fillColor(COLORS.gray).font('Helvetica');
   doc.text(`Page ${i + 1} of ${totalPages}`, 0, footY, {
-    align: 'center', width: 595.28
+    align: 'center', width: 595.28, lineBreak: false
   });
 
   // Skip back cover for the confidential footer

@@ -30,6 +30,10 @@ export function AuthProvider({ children }) {
       }
     } catch (error) {
       console.error('Token verification failed:', error);
+      // If server rejects the token (401/403), force logout
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        logout();
+      }
     } finally {
       setLoading(false);
     }
@@ -54,7 +58,13 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Invalidate token server-side
+      await api.post('/auth/logout');
+    } catch (err) {
+      // Continue with local logout even if server call fails
+    }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     delete api.defaults.headers.common['Authorization'];

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Clock, LogIn, LogOut, User, Calendar, Timer, CheckCircle, 
+  Clock, LogIn, LogOut, Calendar, Timer, CheckCircle, 
   AlertCircle, WifiOff, History, Briefcase, TrendingUp, ChevronDown, ChevronUp,
-  QrCode, Download, ClipboardCheck
+  QrCode, Download, ClipboardCheck, UserPlus, ScanLine, X
 } from 'lucide-react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
@@ -24,6 +24,14 @@ function StaffPortal() {
   const [staffQR, setStaffQR] = useState(null);
   const [showQR, setShowQR] = useState(false);
   const [qrLoading, setQrLoading] = useState(false);
+  const [showVisitorForm, setShowVisitorForm] = useState(false);
+  const [visitorForm, setVisitorForm] = useState({ full_name: '', phone: '', id_number: '', purpose: '' });
+  const [visitorLoading, setVisitorLoading] = useState(false);
+  const [visitorMessage, setVisitorMessage] = useState('');
+  const [showAssetScanner, setShowAssetScanner] = useState(false);
+  const [assetCode, setAssetCode] = useState('');
+  const [assetResult, setAssetResult] = useState(null);
+  const [assetLoading, setAssetLoading] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -90,6 +98,53 @@ function StaffPortal() {
       console.error('Failed to generate QR code:', err);
     } finally {
       setQrLoading(false);
+    }
+  };
+
+  const handleVisitorCheckIn = async (e) => {
+    e.preventDefault();
+    if (!visitorForm.full_name || !visitorForm.phone || !visitorForm.id_number || !visitorForm.purpose) {
+      setVisitorMessage('All fields are required');
+      return;
+    }
+    setVisitorLoading(true);
+    setVisitorMessage('');
+    try {
+      await api.post('/visitors/check-in', {
+        ...visitorForm,
+        building_id: user.building_id
+      });
+      setVisitorMessage('Visitor checked in successfully!');
+      setVisitorForm({ full_name: '', phone: '', id_number: '', purpose: '' });
+      setTimeout(() => setVisitorMessage(''), 3000);
+    } catch (err) {
+      setVisitorMessage(err.response?.data?.error || 'Check-in failed');
+    } finally {
+      setVisitorLoading(false);
+    }
+  };
+
+  const handleAssetScan = async (e) => {
+    e.preventDefault();
+    if (!assetCode.trim()) return;
+    setAssetLoading(true);
+    setAssetResult(null);
+    try {
+      // Look up the asset by its QR value or asset code
+      const rawValue = assetCode.trim().replace(/^asset:/, '');
+      const res = await api.get(`/operations/assets/${user.building_id}`);
+      const assets = res.data.assets || [];
+      const found = assets.find(a => a.id === rawValue || a.asset_code.toLowerCase() === rawValue.toLowerCase());
+      if (found) {
+        setAssetResult({ success: true, asset: found });
+      } else {
+        setAssetResult({ success: false, message: 'Asset not found at this site' });
+      }
+    } catch (err) {
+      setAssetResult({ success: false, message: err.response?.data?.error || 'Failed to look up asset' });
+    } finally {
+      setAssetLoading(false);
+      setAssetCode('');
     }
   };
 
@@ -195,9 +250,97 @@ function StaffPortal() {
 
       {/* Main Content */}
       <main className="max-w-lg mx-auto px-4 py-6">
-        <button onClick={() => navigate('/patrol')} className="w-full mb-5 py-3.5 bg-[rgba(212,174,42,0.08)] border border-[rgba(212,174,42,0.2)] text-[#d4ae2a] rounded-xl flex items-center justify-center gap-2 font-semibold hover:bg-[rgba(212,174,42,0.15)] transition-all">
-          <ClipboardCheck className="w-5 h-5" /> Start Asset Patrol
-        </button>
+        {/* Action Buttons */}
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          <button onClick={() => navigate('/patrol')} className="py-3 bg-[rgba(212,174,42,0.08)] border border-[rgba(212,174,42,0.2)] text-[#d4ae2a] rounded-xl flex flex-col items-center justify-center gap-1.5 font-medium hover:bg-[rgba(212,174,42,0.15)] transition-all text-xs">
+            <ClipboardCheck className="w-5 h-5" /> Patrol
+          </button>
+          <button onClick={() => { setShowVisitorForm(!showVisitorForm); setShowAssetScanner(false); }} className="py-3 bg-[rgba(212,174,42,0.08)] border border-[rgba(212,174,42,0.2)] text-[#d4ae2a] rounded-xl flex flex-col items-center justify-center gap-1.5 font-medium hover:bg-[rgba(212,174,42,0.15)] transition-all text-xs">
+            <UserPlus className="w-5 h-5" /> Check-in Visitor
+          </button>
+          <button onClick={() => { setShowAssetScanner(!showAssetScanner); setShowVisitorForm(false); }} className="py-3 bg-[rgba(212,174,42,0.08)] border border-[rgba(212,174,42,0.2)] text-[#d4ae2a] rounded-xl flex flex-col items-center justify-center gap-1.5 font-medium hover:bg-[rgba(212,174,42,0.15)] transition-all text-xs">
+            <ScanLine className="w-5 h-5" /> Scan Asset
+          </button>
+        </div>
+
+        {/* Visitor Check-in Form */}
+        {showVisitorForm && (
+          <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] p-5 mb-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-white flex items-center gap-2"><UserPlus className="w-5 h-5 text-[#d4ae2a]" /> Register Visitor</h3>
+              <button onClick={() => setShowVisitorForm(false)} className="text-[#555] hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            {visitorMessage && (
+              <div className={`p-3 rounded-xl text-sm mb-4 ${visitorMessage.includes('success') ? 'bg-[rgba(34,197,94,0.08)] border border-[rgba(34,197,94,0.2)] text-emerald-400' : 'bg-[rgba(239,68,68,0.08)] border border-[rgba(239,68,68,0.2)] text-red-400'}`}>
+                {visitorMessage}
+              </div>
+            )}
+            <form onSubmit={handleVisitorCheckIn} className="space-y-3">
+              <input
+                type="text" placeholder="Full Name" value={visitorForm.full_name}
+                onChange={e => setVisitorForm({ ...visitorForm, full_name: e.target.value })}
+                className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] focus:border-[#d4ae2a] focus:outline-none"
+              />
+              <input
+                type="tel" placeholder="Phone Number" value={visitorForm.phone}
+                onChange={e => setVisitorForm({ ...visitorForm, phone: e.target.value })}
+                className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] focus:border-[#d4ae2a] focus:outline-none"
+              />
+              <input
+                type="text" placeholder="ID Number" value={visitorForm.id_number}
+                onChange={e => setVisitorForm({ ...visitorForm, id_number: e.target.value })}
+                className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] focus:border-[#d4ae2a] focus:outline-none"
+              />
+              <input
+                type="text" placeholder="Purpose of Visit" value={visitorForm.purpose}
+                onChange={e => setVisitorForm({ ...visitorForm, purpose: e.target.value })}
+                className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] focus:border-[#d4ae2a] focus:outline-none"
+              />
+              <button type="submit" disabled={visitorLoading} className="w-full py-3 bg-[#d4ae2a] text-black rounded-xl font-semibold hover:bg-[#e8c847] transition disabled:opacity-50">
+                {visitorLoading ? 'Checking in...' : 'Check In Visitor'}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Asset QR Scanner */}
+        {showAssetScanner && (
+          <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] p-5 mb-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-white flex items-center gap-2"><ScanLine className="w-5 h-5 text-[#d4ae2a]" /> Scan Asset QR</h3>
+              <button onClick={() => { setShowAssetScanner(false); setAssetResult(null); }} className="text-[#555] hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-[#888] text-sm mb-4">Scan or enter the asset QR code / asset code to look up asset details.</p>
+            <form onSubmit={handleAssetScan} className="flex gap-2">
+              <input
+                autoFocus type="text" placeholder="Scan or enter asset code..." value={assetCode}
+                onChange={e => setAssetCode(e.target.value)}
+                className="flex-1 px-4 py-3 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl text-white placeholder-[#555] focus:border-[#d4ae2a] focus:outline-none"
+              />
+              <button type="submit" disabled={assetLoading} className="px-5 py-3 bg-[#d4ae2a] text-black rounded-xl font-semibold hover:bg-[#e8c847] transition disabled:opacity-50">
+                {assetLoading ? '...' : 'Look Up'}
+              </button>
+            </form>
+            {assetResult && (
+              <div className={`mt-4 p-4 rounded-xl border ${assetResult.success ? 'bg-[rgba(34,197,94,0.08)] border-[rgba(34,197,94,0.2)]' : 'bg-[rgba(239,68,68,0.08)] border-[rgba(239,68,68,0.2)]'}`}>
+                {assetResult.success ? (
+                  <div>
+                    <p className="text-emerald-400 font-semibold flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Asset Found</p>
+                    <div className="mt-2 space-y-1 text-sm">
+                      <p className="text-white"><span className="text-[#888]">Name:</span> {assetResult.asset.name}</p>
+                      <p className="text-white"><span className="text-[#888]">Code:</span> {assetResult.asset.asset_code}</p>
+                      {assetResult.asset.location && <p className="text-white"><span className="text-[#888]">Location:</span> {assetResult.asset.location}</p>}
+                      {assetResult.asset.category && <p className="text-white"><span className="text-[#888]">Category:</span> {assetResult.asset.category}</p>}
+                      <p className="text-white"><span className="text-[#888]">Status:</span> <span className="text-emerald-400">{assetResult.asset.status}</span></p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-red-400 text-sm">{assetResult.message}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Live Clock Card */}
         <div className="bg-[#111111] border border-[rgba(212,174,42,0.15)] rounded-3xl p-6 mb-6 text-center shadow-xl shadow-[#d4ae2a]/5">

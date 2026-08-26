@@ -35,21 +35,35 @@ The Cherubim Security Management System is a web-based platform that manages all
 
 | Page | URL |
 |------|-----|
-| Landing Page | `https://your-domain.vercel.app/` |
-| Admin Login | `https://your-domain.vercel.app/admin/login` |
-| Security Login | `https://your-domain.vercel.app/security/login` |
-| Staff Login | `https://your-domain.vercel.app/staff/login` |
-| Visitor Check-in | `https://your-domain.vercel.app/checkin/<building-id>` |
+| Landing Page | `https://login-system-lime.vercel.app/` |
+| Admin Login | `https://login-system-lime.vercel.app/admin/login` |
+| Security Login | `https://login-system-lime.vercel.app/security/login` |
+| Staff Login | `https://login-system-lime.vercel.app/staff/login` |
+| Visitor Check-in | Generated automatically for each site as `https://login-system-lime.vercel.app/checkin/<building-id>` |
 
 ---
 
 ## 2. Getting Started
 
+### Accessing the System
+
+1. Open **Google Chrome, Microsoft Edge, Safari, or Firefox** on your computer, tablet, or smartphone.
+2. Enter `https://login-system-lime.vercel.app/` in the browser address bar.
+3. The landing page will show the available portals. Select the portal that matches your role:
+   - **Admin Portal** for administrators, company directors, and building owners.
+   - **Security Portal** for supervisors and security control-room personnel.
+   - **Staff Portal** for guards and other operational staff.
+   - Visitors do not log in; they scan the QR code displayed at the client site.
+4. Enter the email address and password issued by your administrator.
+5. Select **Sign In**. You will be taken to the dashboard permitted for your role.
+
 ### First-Time Login
 
-1. Open your browser and go to the **Admin Login** page
-2. Enter the administrator credentials provided to you
-3. After first login, immediately go to **Settings > Change Password** to set your own secure password
+1. Use the temporary credentials provided securely by your administrator.
+2. After signing in, open **Settings > Change Password**.
+3. Enter your current password and choose a strong replacement password.
+4. Do not share your password or save it on a shared/public device.
+5. Always sign out when you finish using the system on a shared computer.
 
 ### Recommended First Steps
 

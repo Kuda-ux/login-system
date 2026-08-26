@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { getOne, getAll, runQuery, saveDatabase } = require('../database/init');
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const { authenticateToken, authorizeRoles, blacklistToken } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -36,7 +36,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, building_id: user.building_id },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '8h' }
     );
 
     // Log successful login
@@ -56,6 +56,17 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Logout - invalidate token server-side
+router.post('/logout', authenticateToken, (req, res) => {
+  try {
+    blacklistToken(req.token);
+    res.json({ message: 'Logged out successfully' });
+  } catch (err) {
+    console.error('Logout error:', err);
+    res.status(500).json({ error: 'Logout failed' });
   }
 });
 
@@ -170,17 +181,27 @@ router.put('/users/:id/password', authenticateToken, authorizeRoles('admin'), as
   }
 });
 
-// Verify token
-router.get('/verify', authenticateToken, (req, res) => {
-  res.json({ valid: true, user: req.user });
+// Verify token - also checks user is still active
+router.get('/verify', authenticateToken, async (req, res) => {
+  try {
+    const user = await getOne('SELECT id, email, full_name, role, phone, building_id, is_active FROM users WHERE id = ?', [req.user.id]);
+    if (!user || user.is_active !== 1) {
+      return res.json({ valid: false, error: 'Account deactivated or not found' });
+    }
+    res.json({ valid: true, user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role, building_id: user.building_id } });
+  } catch (err) {
+    console.error('Verify error:', err);
+    res.json({ valid: false });
+  }
 });
 
 // Get all users (admin/owner only) - includes supervisor role for staff list
 router.get('/users', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
   try {
-    const { role } = req.query;
+    const { role, include_inactive } = req.query;
+    const activeFilter = include_inactive === 'true' ? '' : ' AND u.is_active = 1';
     let query = `SELECT u.id, u.email, u.full_name, u.role, u.phone, u.building_id, u.is_active, u.created_at, b.name as building_name 
-                 FROM users u LEFT JOIN buildings b ON u.building_id = b.id WHERE u.is_active = 1`;
+                 FROM users u LEFT JOIN buildings b ON u.building_id = b.id WHERE 1=1${activeFilter}`;
     const params = [];
     
     if (role) {
@@ -242,6 +263,19 @@ router.delete('/users/:id', authenticateToken, authorizeRoles('admin', 'owner'),
   } catch (err) {
     console.error('Deactivate user error:', err);
     res.status(500).json({ error: 'Failed to deactivate user' });
+  }
+});
+
+// Reactivate user (admin/owner only)
+router.put('/users/:id/reactivate', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const now = new Date().toISOString();
+    await runQuery('UPDATE users SET is_active = 1, updated_at = ? WHERE id = ?', [now, id]);
+    res.json({ message: 'User reactivated successfully' });
+  } catch (err) {
+    console.error('Reactivate user error:', err);
+    res.status(500).json({ error: 'Failed to reactivate user' });
   }
 });
 

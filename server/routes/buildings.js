@@ -9,7 +9,7 @@ const router = express.Router();
 // Create building
 router.post('/', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
   try {
-    const { name, address } = req.body;
+    const { name, address, company_name, contact_phone, contact_email, industry } = req.body;
     let ownerId = req.body.owner_id;
 
     if (!name || !address) {
@@ -28,7 +28,7 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'owner'), async (req
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
     const entryQRCode = await generateEntryQRCode(buildingId, baseUrl);
     const now = new Date().toISOString();
-    await runQuery(`INSERT INTO buildings (id, name, address, owner_id, entry_qr_code, created_at, updated_at, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)`, [buildingId, name, address, ownerId, entryQRCode, now, now]);
+    await runQuery(`INSERT INTO buildings (id, name, address, owner_id, entry_qr_code, company_name, contact_phone, contact_email, industry, created_at, updated_at, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`, [buildingId, name, address, ownerId, entryQRCode, company_name || null, contact_phone || null, contact_email || null, industry || null, now, now]);
     const building = await getOne('SELECT * FROM buildings WHERE id = ?', [buildingId]);
 
     res.status(201).json({
@@ -104,7 +104,7 @@ router.get('/:id/public', async (req, res) => {
 router.put('/:id', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, address } = req.body;
+    const { name, address, company_name, contact_phone, contact_email, industry, feedback } = req.body;
 
     const building = await getOne('SELECT * FROM buildings WHERE id = ?', [id]);
     if (!building) { return res.status(404).json({ error: 'Building not found' }); }
@@ -112,7 +112,7 @@ router.put('/:id', authenticateToken, authorizeRoles('admin', 'owner'), async (r
       return res.status(403).json({ error: 'Not authorized to update this building' });
     }
     const now = new Date().toISOString();
-    await runQuery(`UPDATE buildings SET name = COALESCE(?, name), address = COALESCE(?, address), updated_at = ? WHERE id = ?`, [name, address, now, id]);
+    await runQuery(`UPDATE buildings SET name = COALESCE(?, name), address = COALESCE(?, address), company_name = COALESCE(?, company_name), contact_phone = COALESCE(?, contact_phone), contact_email = COALESCE(?, contact_email), industry = COALESCE(?, industry), feedback = COALESCE(?, feedback), updated_at = ? WHERE id = ?`, [name, address, company_name, contact_phone, contact_email, industry, feedback, now, id]);
     const updatedBuilding = await getOne('SELECT * FROM buildings WHERE id = ?', [id]);
 
     res.json({

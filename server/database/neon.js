@@ -160,6 +160,9 @@ async function initializeDatabase() {
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ${column}`);
   }
   await pool.query('ALTER TABLE buildings ADD COLUMN IF NOT EXISTS client_id TEXT');
+  for (const col of ['company_name TEXT', 'contact_phone TEXT', 'contact_email TEXT', 'industry TEXT', 'feedback TEXT']) {
+    await pool.query(`ALTER TABLE buildings ADD COLUMN IF NOT EXISTS ${col}`);
+  }
 
   await pool.query(`CREATE TABLE IF NOT EXISTS clients (
     id TEXT PRIMARY KEY, name TEXT NOT NULL, contact_name TEXT, contact_phone TEXT,

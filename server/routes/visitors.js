@@ -153,7 +153,7 @@ router.get('/all', authenticateToken, authorizeRoles('admin'), async (req, res) 
     const offset = (page - 1) * limit;
     let query = 'SELECT v.*, b.name as building_name FROM visitors v LEFT JOIN buildings b ON v.building_id = b.id WHERE 1=1';
     const params = [];
-    if (date) { query += " AND v.check_in_time::date = ?"; params.push(date); }
+    if (date) { const nextDay = new Date(new Date(date).getTime() + 86400000).toISOString().split('T')[0]; query += " AND v.check_in_time >= ? AND v.check_in_time < ?"; params.push(date, nextDay); }
     if (status) { query += ' AND v.status = ?'; params.push(status); }
     query += ' ORDER BY v.check_in_time DESC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), offset);
@@ -162,7 +162,7 @@ router.get('/all', authenticateToken, authorizeRoles('admin'), async (req, res) 
     
     let countQuery = 'SELECT COUNT(*) as count FROM visitors WHERE 1=1';
     const countParams = [];
-    if (date) { countQuery += " AND check_in_time::date = ?"; countParams.push(date); }
+    if (date) { const nextDay = new Date(new Date(date).getTime() + 86400000).toISOString().split('T')[0]; countQuery += " AND check_in_time >= ? AND check_in_time < ?"; countParams.push(date, nextDay); }
     if (status) { countQuery += ' AND status = ?'; countParams.push(status); }
     const countResult = await getOne(countQuery, countParams);
     const count = countResult ? parseInt(countResult.count) : 0;
@@ -191,7 +191,7 @@ router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', '
     const offset = (page - 1) * limit;
     let query = 'SELECT v.*, b.name as building_name FROM visitors v LEFT JOIN buildings b ON v.building_id = b.id WHERE v.building_id = ?';
     const params = [buildingId];
-    if (date) { query += " AND date(check_in_time) = ?"; params.push(date); }
+    if (date) { const nextDay = new Date(new Date(date).getTime() + 86400000).toISOString().split('T')[0]; query += " AND check_in_time >= ? AND check_in_time < ?"; params.push(date, nextDay); }
     if (status) { query += ' AND status = ?'; params.push(status); }
     query += ' ORDER BY check_in_time DESC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), offset);
@@ -199,7 +199,7 @@ router.get('/building/:buildingId', authenticateToken, authorizeRoles('admin', '
     const decryptedVisitors = visitors.map(v => ({ ...v, id_number: decrypt(v.id_number_encrypted), id_number_encrypted: undefined }));
     let countQuery = 'SELECT COUNT(*) as count FROM visitors WHERE building_id = ?';
     const countParams = [buildingId];
-    if (date) { countQuery += " AND date(check_in_time) = ?"; countParams.push(date); }
+    if (date) { const nextDay = new Date(new Date(date).getTime() + 86400000).toISOString().split('T')[0]; countQuery += " AND check_in_time >= ? AND check_in_time < ?"; countParams.push(date, nextDay); }
     if (status) { countQuery += ' AND status = ?'; countParams.push(status); }
     const countResult = await getOne(countQuery, countParams);
     const count = countResult ? countResult.count : 0;
