@@ -9,6 +9,7 @@ import VisitorCheckInPage from './pages/visitor/VisitorCheckInPage';
 // Security Interface
 import SecurityLogin from './pages/security/SecurityLogin';
 import SecurityDashboard from './pages/security/SecurityDashboard';
+import SecurityIncidents from './pages/security/SecurityIncidents';
 import StaffQRScanner from './pages/security/StaffQRScanner';
 
 // Staff Interface
@@ -108,7 +109,7 @@ function App() {
             <Route path="/security/login" element={<SecurityLogin />} />
             <Route path="/security" element={<SecurityRoute><SecurityDashboard /></SecurityRoute>} />
             <Route path="/security/scan" element={<SecurityRoute><StaffQRScanner /></SecurityRoute>} />
-            <Route path="/security/incidents" element={<SecurityRoute><Incidents /></SecurityRoute>} />
+            <Route path="/security/incidents" element={<SecurityRoute><SecurityIncidents /></SecurityRoute>} />
             
             {/* ========== STAFF INTERFACE ========== */}
             <Route path="/staff/login" element={<StaffLogin />} />

@@ -12,10 +12,15 @@ export function AuthProvider({ children }) {
     const savedUser = localStorage.getItem('user');
     
     if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
+      // Set the auth header for the verify request, but DO NOT set user yet
+      // User is only set after the server confirms the token is valid
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       verifyToken();
     } else {
+      // No token at all - clear everything and mark loading false
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      delete api.defaults.headers.common['Authorization'];
       setLoading(false);
     }
   }, []);
@@ -24,16 +29,24 @@ export function AuthProvider({ children }) {
     try {
       const response = await api.get('/auth/verify');
       if (response.data.valid) {
+        // Server confirmed token is valid - NOW set the user
         setUser(response.data.user);
+        // Update localStorage with fresh user data from server
+        localStorage.setItem('user', JSON.stringify(response.data.user));
       } else {
-        logout();
+        // Server says token is invalid - force logout
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        delete api.defaults.headers.common['Authorization'];
+        setUser(null);
       }
     } catch (error) {
       console.error('Token verification failed:', error);
-      // If server rejects the token (401/403), force logout
-      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-        logout();
-      }
+      // Any error (including 401/403) means the token is no longer valid
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      delete api.defaults.headers.common['Authorization'];
+      setUser(null);
     } finally {
       setLoading(false);
     }

@@ -32,6 +32,10 @@ function StaffPortal() {
   const [assetCode, setAssetCode] = useState('');
   const [assetResult, setAssetResult] = useState(null);
   const [assetLoading, setAssetLoading] = useState(false);
+  const [showVisitorList, setShowVisitorList] = useState(false);
+  const [activeVisitors, setActiveVisitors] = useState([]);
+  const [visitorsLoading, setVisitorsLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -54,6 +58,32 @@ function StaffPortal() {
     fetchHistory();
     fetchMyQR();
   }, []);
+
+  const fetchActiveVisitors = async () => {
+    if (!user?.building_id) return;
+    setVisitorsLoading(true);
+    try {
+      const res = await api.get(`/visitors/building/${user.building_id}?status=checked_in&limit=50`);
+      setActiveVisitors(res.data.visitors || []);
+    } catch (err) {
+      console.error('Failed to fetch visitors:', err);
+    } finally {
+      setVisitorsLoading(false);
+    }
+  };
+
+  const handleVisitorCheckout = async (visitorId, visitorName) => {
+    if (!window.confirm(`Check out ${visitorName}?`)) return;
+    setCheckoutLoading(visitorId);
+    try {
+      await api.post('/visitors/check-out', { visitor_id: visitorId, building_id: user.building_id });
+      setActiveVisitors(prev => prev.filter(v => v.id !== visitorId));
+    } catch (err) {
+      alert(err.response?.data?.error || 'Checkout failed');
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   const fetchStatus = async () => {
     try {
@@ -251,15 +281,18 @@ function StaffPortal() {
       {/* Main Content */}
       <main className="max-w-lg mx-auto px-4 py-6">
         {/* Action Buttons */}
-        <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="grid grid-cols-2 gap-3 mb-5">
           <button onClick={() => navigate('/patrol')} className="py-3 bg-[rgba(212,174,42,0.08)] border border-[rgba(212,174,42,0.2)] text-[#d4ae2a] rounded-xl flex flex-col items-center justify-center gap-1.5 font-medium hover:bg-[rgba(212,174,42,0.15)] transition-all text-xs">
             <ClipboardCheck className="w-5 h-5" /> Patrol
           </button>
-          <button onClick={() => { setShowVisitorForm(!showVisitorForm); setShowAssetScanner(false); }} className="py-3 bg-[rgba(212,174,42,0.08)] border border-[rgba(212,174,42,0.2)] text-[#d4ae2a] rounded-xl flex flex-col items-center justify-center gap-1.5 font-medium hover:bg-[rgba(212,174,42,0.15)] transition-all text-xs">
+          <button onClick={() => { setShowVisitorForm(!showVisitorForm); setShowAssetScanner(false); setShowVisitorList(false); }} className="py-3 bg-[rgba(212,174,42,0.08)] border border-[rgba(212,174,42,0.2)] text-[#d4ae2a] rounded-xl flex flex-col items-center justify-center gap-1.5 font-medium hover:bg-[rgba(212,174,42,0.15)] transition-all text-xs">
             <UserPlus className="w-5 h-5" /> Check-in Visitor
           </button>
-          <button onClick={() => { setShowAssetScanner(!showAssetScanner); setShowVisitorForm(false); }} className="py-3 bg-[rgba(212,174,42,0.08)] border border-[rgba(212,174,42,0.2)] text-[#d4ae2a] rounded-xl flex flex-col items-center justify-center gap-1.5 font-medium hover:bg-[rgba(212,174,42,0.15)] transition-all text-xs">
+          <button onClick={() => { setShowAssetScanner(!showAssetScanner); setShowVisitorForm(false); setShowVisitorList(false); }} className="py-3 bg-[rgba(212,174,42,0.08)] border border-[rgba(212,174,42,0.2)] text-[#d4ae2a] rounded-xl flex flex-col items-center justify-center gap-1.5 font-medium hover:bg-[rgba(212,174,42,0.15)] transition-all text-xs">
             <ScanLine className="w-5 h-5" /> Scan Asset
+          </button>
+          <button onClick={() => { const next = !showVisitorList; setShowVisitorList(next); setShowVisitorForm(false); setShowAssetScanner(false); if (next) fetchActiveVisitors(); }} className="py-3 bg-[rgba(212,174,42,0.08)] border border-[rgba(212,174,42,0.2)] text-[#d4ae2a] rounded-xl flex flex-col items-center justify-center gap-1.5 font-medium hover:bg-[rgba(212,174,42,0.15)] transition-all text-xs">
+            <LogOut className="w-5 h-5" /> Check-out Visitor
           </button>
         </div>
 
@@ -339,6 +372,51 @@ function StaffPortal() {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Active Visitors - Checkout List */}
+        {showVisitorList && (
+          <div className="bg-[#111111] rounded-2xl border border-[#1f1f1f] p-5 mb-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-white flex items-center gap-2"><LogOut className="w-5 h-5 text-[#d4ae2a]" /> Active Visitors</h3>
+              <button onClick={() => setShowVisitorList(false)} className="text-[#555] hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-[#888] text-sm mb-4">Tap "Check Out" to sign out a visitor from this site.</p>
+            {visitorsLoading ? (
+              <div className="text-center py-6">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#d4ae2a] border-t-transparent mx-auto"></div>
+              </div>
+            ) : activeVisitors.length === 0 ? (
+              <div className="text-center py-6">
+                <UserPlus className="w-10 h-10 mx-auto mb-2 text-[#333]" />
+                <p className="text-[#666] text-sm">No visitors currently checked in</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {activeVisitors.map(v => (
+                  <div key={v.id} className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-3 flex items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-white text-sm truncate">{v.full_name}</p>
+                      <p className="text-xs text-[#666] truncate">{v.purpose}</p>
+                      <p className="text-xs text-[#555] mt-0.5">
+                        In since {v.check_in_time ? new Date(v.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleVisitorCheckout(v.id, v.full_name)}
+                      disabled={checkoutLoading === v.id}
+                      className="flex-shrink-0 px-3 py-2 bg-amber-500/10 text-amber-400 rounded-lg text-xs font-medium hover:bg-amber-500/20 transition disabled:opacity-50"
+                    >
+                      {checkoutLoading === v.id ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-400 border-t-transparent" /> : 'Check Out'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button onClick={fetchActiveVisitors} className="w-full mt-3 py-2 text-xs text-[#888] hover:text-[#d4ae2a] transition">
+              Refresh list
+            </button>
           </div>
         )}
 
