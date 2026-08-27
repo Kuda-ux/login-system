@@ -255,7 +255,7 @@ function SecurityDashboard() {
 
       <div className="flex">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex flex-col w-72 min-h-screen bg-[#111111] border-r border-[#1f1f1f] p-6 fixed">
+        <aside className="hidden lg:flex flex-col w-72 min-h-screen bg-[#111111] border-r border-[#1f1f1f] p-6 fixed overflow-y-auto">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 bg-gradient-to-br from-[#d4ae2a] to-[#b8942a] rounded-xl flex items-center justify-center shadow-lg shadow-[#d4ae2a]/15">
               <Shield className="w-6 h-6 text-black" />
@@ -351,6 +351,23 @@ function SecurityDashboard() {
 
         {/* Main Content */}
         <main className="flex-1 lg:ml-72 p-4 lg:p-8">
+          {/* Top Action Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-white">Security Dashboard</h2>
+              <p className="text-[#888] text-sm mt-0.5">Live overview of visitors, staff, and patrols</p>
+            </div>
+            {['supervisor', 'security'].includes(user?.role) && (
+              <button
+                onClick={() => navigate('/security/incidents')}
+                className="flex items-center justify-center gap-2 px-5 py-3 bg-[#d4ae2a] text-black rounded-xl font-semibold hover:bg-[#e8c847] transition shadow-lg shadow-[#d4ae2a]/15"
+              >
+                <FileText className="w-5 h-5" />
+                Report Incident
+              </button>
+            )}
+          </div>
+
           {/* Stats Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <div className="bg-[#111111] rounded-2xl p-5 border border-[#1f1f1f] hover:border-emerald-500/30 transition-all duration-300 group">
