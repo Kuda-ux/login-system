@@ -14,25 +14,41 @@ export default function SecurityIncidents() {
   const [form, setForm] = useState(blank);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const load = async () => {
+    setError('');
     try {
       const [siteRes, incidentRes] = await Promise.all([
         api.get('/buildings'),
         api.get('/operations/incidents')
       ]);
-      setSites(siteRes.data.buildings || []);
-      setIncidents(incidentRes.data.incidents || []);
-      // Auto-select the supervisor's building if they have one
-      if (user?.building_id && !form.building_id) {
-        setForm(f => ({ ...f, building_id: user.building_id }));
-      }
+      const fetchedSites = siteRes.data.buildings || [];
+      const fetchedIncidents = incidentRes.data.incidents || [];
+      setSites(fetchedSites);
+      setIncidents(fetchedIncidents);
+      // Auto-select the supervisor's building if they have one and it's in the list
+      setForm(f => {
+        if (f.building_id) return f;
+        if (user?.building_id && fetchedSites.some(s => s.id === user.building_id)) {
+          return { ...f, building_id: user.building_id };
+        }
+        // If only one site, auto-select it
+        if (fetchedSites.length === 1) {
+          return { ...f, building_id: fetchedSites[0].id };
+        }
+        return f;
+      });
     } catch (err) {
       console.error('Failed to load incidents:', err);
+      setError(err.response?.data?.error || 'Failed to load data. Please try again.');
+    } finally {
+      setPageLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [user?.id]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -86,7 +102,29 @@ export default function SecurityIncidents() {
       </header>
 
       <main className="max-w-4xl mx-auto p-4 space-y-6">
+        {/* Loading State */}
+        {pageLoading && (
+          <div className="bg-[#111111] border border-[#1f1f1f] rounded-2xl p-12 text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#d4ae2a] border-t-transparent mx-auto mb-4"></div>
+            <p className="text-[#888]">Loading incidents...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !pageLoading && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+            <button onClick={load} className="px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg text-xs font-medium hover:bg-red-500/20 transition">
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* New Incident Form */}
+        {!pageLoading && !error && (
         <form onSubmit={submit} className="bg-[#111111] border border-[#1f1f1f] rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-[#d4ae2a]" />
@@ -177,8 +215,10 @@ export default function SecurityIncidents() {
             {loading ? <div className="animate-spin rounded-full h-5 w-5 border-2 border-black/30 border-t-black" /> : <><AlertTriangle className="w-5 h-5" /> Submit Report</>}
           </button>
         </form>
+        )}
 
         {/* Incident History */}
+        {!pageLoading && !error && (
         <div className="bg-[#111111] border border-[#1f1f1f] rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-4">
             <FileText className="w-5 h-5 text-[#d4ae2a]" />
@@ -233,6 +273,7 @@ export default function SecurityIncidents() {
             </div>
           )}
         </div>
+        )}
       </main>
     </div>
   );

@@ -133,8 +133,8 @@ router.get('/incidents', authenticateToken, authorizeRoles(...managementRoles, '
     const { building_id, status } = req.query;
     let query = 'SELECT i.*, b.name AS site_name, u.full_name AS reporter_name FROM incident_reports i JOIN buildings b ON i.building_id = b.id JOIN users u ON i.reported_by = u.id WHERE 1 = 1';
     const params = [];
-    const requestedSite = building_id || (req.user.role === 'supervisor' ? req.user.building_id : null);
-    if (requestedSite) { if (!await requireSiteAccess(req, res, requestedSite)) return; query += ' AND i.building_id = ?'; params.push(requestedSite); }
+    // Only filter by site if explicitly requested; supervisors see all incidents
+    if (building_id) { if (!await requireSiteAccess(req, res, building_id)) return; query += ' AND i.building_id = ?'; params.push(building_id); }
     if (status) { query += ' AND i.status = ?'; params.push(status); }
     query += ' ORDER BY i.occurred_at DESC LIMIT 100';
     res.json({ incidents: await getAll(query, params) });

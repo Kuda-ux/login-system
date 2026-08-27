@@ -41,7 +41,7 @@ router.post('/', authenticateToken, authorizeRoles('admin', 'owner'), async (req
   }
 });
 
-// Get all buildings (admin sees all, owner sees theirs)
+// Get all buildings (admin sees all, owner sees theirs, supervisor/security see all active sites)
 router.get('/', authenticateToken, async (req, res) => {
   try {
     let buildings;
@@ -49,6 +49,9 @@ router.get('/', authenticateToken, async (req, res) => {
       buildings = await getAll(`SELECT b.*, u.full_name as owner_name, u.email as owner_email FROM buildings b JOIN users u ON b.owner_id = u.id WHERE b.is_active = 1 ORDER BY b.name`, []);
     } else if (req.user.role === 'owner') {
       buildings = await getAll(`SELECT * FROM buildings WHERE owner_id = ? AND is_active = 1 ORDER BY name`, [req.user.id]);
+    } else if (['supervisor', 'security'].includes(req.user.role)) {
+      // Supervisors and security need to see all active sites to report incidents and scan
+      buildings = await getAll(`SELECT id, name, address FROM buildings WHERE is_active = 1 ORDER BY name`, []);
     } else {
       buildings = req.user.building_id ? await getAll(`SELECT id, name, address FROM buildings WHERE id = ? AND is_active = 1`, [req.user.building_id]) : [];
     }
