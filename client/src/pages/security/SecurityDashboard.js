@@ -231,6 +231,15 @@ function SecurityDashboard() {
                 <ScanLine className="w-5 h-5" />
                 Scan Guard QR
               </button>
+              {['supervisor', 'security'].includes(user?.role) && (
+                <button
+                  onClick={() => { setSidebarOpen(false); navigate('/security/incidents'); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#d4ae2a] hover:bg-[#1a1a1a] transition-all duration-200 font-medium"
+                >
+                  <FileText className="w-5 h-5" />
+                  Report Incident
+                </button>
+              )}
             </nav>
 
             <button
@@ -328,7 +337,7 @@ function SecurityDashboard() {
               <ScanLine className="w-5 h-5" />
               Scan Guard QR
             </button>
-            {['supervisor', 'security'].includes(user?.role) && <button onClick={() => navigate('/security/incidents')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#d4ae2a] hover:bg-[#1a1a1a] transition-all duration-200"><FileText className="w-5 h-5" />Report Incident</button>}
+            {['supervisor', 'security'].includes(user?.role) && <button onClick={() => navigate('/security/incidents')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[#d4ae2a] bg-[rgba(212,174,42,0.08)] hover:bg-[rgba(212,174,42,0.15)] transition-all duration-200 font-medium border border-[rgba(212,174,42,0.2)]"><FileText className="w-5 h-5" />Report Incident</button>}
           </nav>
 
           <button
