@@ -396,19 +396,19 @@ router.get('/entries/:buildingId', authenticateToken, authorizeRoles('security',
 // Get all staff entries across buildings (admin only)
 router.get('/entries-all', authenticateToken, authorizeRoles('admin'), async (req, res) => {
   try {
-    const { date } = req.query;
+    const { date, building_id } = req.query;
     const today = date || new Date().toISOString().split('T')[0];
     const nextDay = new Date(new Date(today).getTime() + 86400000).toISOString().split('T')[0];
 
-    const entries = await getAll(
-      `SELECT se.*, u.full_name as staff_name, u.role as staff_role, u.phone as staff_phone, b.name as building_name
+    let query = `SELECT se.*, u.full_name as staff_name, u.role as staff_role, u.phone as staff_phone, b.name as building_name
        FROM staff_entries se
        JOIN users u ON se.staff_id = u.id
        LEFT JOIN buildings b ON se.building_id = b.id
-       WHERE se.entry_time >= ? AND se.entry_time < ?
-       ORDER BY se.entry_time DESC LIMIT 100`,
-      [today, nextDay]
-    );
+       WHERE se.entry_time >= ? AND se.entry_time < ?`;
+    const params = [today, nextDay];
+    if (building_id) { query += ' AND se.building_id = ?'; params.push(building_id); }
+    query += ' ORDER BY se.entry_time DESC LIMIT 200';
+    const entries = await getAll(query, params);
 
     const inside = entries.filter(e => e.status === 'inside').length;
     const exited = entries.filter(e => e.status === 'exited').length;
@@ -420,6 +420,41 @@ router.get('/entries-all', authenticateToken, authorizeRoles('admin'), async (re
   } catch (err) {
     console.error('Fetch all staff entries error:', err);
     res.status(500).json({ error: 'Failed to fetch staff entries' });
+  }
+});
+
+// Get all clock-in/out attendance across all buildings (admin only)
+router.get('/attendance-all', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+  try {
+    const { date, building_id, page = 1, limit = 200 } = req.query;
+    const offset = (page - 1) * limit;
+
+    let query = `SELECT sa.*, u.full_name as staff_name, u.role as staff_role, u.email as staff_email, b.name as building_name
+       FROM staff_attendance sa
+       JOIN users u ON sa.staff_id = u.id
+       LEFT JOIN buildings b ON sa.building_id = b.id
+       WHERE 1=1`;
+    const params = [];
+    if (date) { query += ' AND sa.work_date = ?'; params.push(date); }
+    if (building_id) { query += ' AND sa.building_id = ?'; params.push(building_id); }
+    query += ' ORDER BY sa.work_date DESC, sa.clock_in_time DESC LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), offset);
+    const records = await getAll(query, params);
+
+    let countQuery = 'SELECT COUNT(*) as count FROM staff_attendance WHERE 1=1';
+    const countParams = [];
+    if (date) { countQuery += ' AND work_date = ?'; countParams.push(date); }
+    if (building_id) { countQuery += ' AND building_id = ?'; countParams.push(building_id); }
+    const countResult = await getOne(countQuery, countParams);
+    const count = countResult ? countResult.count : 0;
+
+    res.json({
+      attendance: records,
+      pagination: { total: count, page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(count / limit) }
+    });
+  } catch (err) {
+    console.error('Fetch all attendance error:', err);
+    res.status(500).json({ error: 'Failed to fetch attendance' });
   }
 });
 

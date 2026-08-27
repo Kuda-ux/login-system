@@ -18,12 +18,14 @@ export default function Operations() {
   const [patrols, setPatrols] = useState([]);
   const [incidents, setIncidents] = useState([]);
   const [attendance, setAttendance] = useState([]);
+  const [clockAttendance, setClockAttendance] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [weapons, setWeapons] = useState([]);
   const [buildings, setBuildings] = useState([]);
   const [selectedBuilding, setSelectedBuilding] = useState('');
   const [loading, setLoading] = useState({});
   const [selectedDate, setSelectedDate] = useState('');
+  const [attendanceSubTab, setAttendanceSubTab] = useState('clock');
 
   useEffect(() => { fetchBuildings(); }, []);
   useEffect(() => { loadAll(); }, [selectedBuilding, selectedDate]);
@@ -43,11 +45,12 @@ export default function Operations() {
 
     setLoading({ summary: true, patrols: true, incidents: true, attendance: true, vehicles: true, weapons: true });
     try {
-      const [sum, pat, inc, att, veh, wep] = await Promise.all([
+      const [sum, pat, inc, att, clkAtt, veh, wep] = await Promise.all([
         api.get('/operations/summary'),
         api.get(`/operations/patrols${qs}`),
         api.get('/operations/incidents'),
-        api.get(`/staff/entries-all`),
+        api.get(`/staff/entries-all${qs}`),
+        api.get(`/staff/attendance-all${qs}`),
         api.get('/vehicles'),
         api.get('/weapons')
       ]);
@@ -55,6 +58,7 @@ export default function Operations() {
       setPatrols(pat.data.patrols || []);
       setIncidents(inc.data.incidents || []);
       setAttendance(att.data.entries || []);
+      setClockAttendance(clkAtt.data.attendance || []);
       setVehicles(veh.data.vehicles || []);
       setWeapons(wep.data.weapons || []);
     } catch (err) {
@@ -142,17 +146,72 @@ export default function Operations() {
   );
 
   const renderAttendance = () => (
-    <div className="bg-[#111111] border border-[#1f1f1f] rounded-2xl overflow-hidden">
-      <div className="p-4 border-b border-[#1f1f1f] grid grid-cols-5 text-sm font-medium text-[#666] uppercase"><div>Name</div><div>Site</div><div>Entry</div><div>Exit</div><div>Status</div></div>
-      {attendance.length ? attendance.map(a => (
-        <div key={a.id} className="p-4 border-b border-[#1f1f1f] last:border-0 grid grid-cols-5 text-sm items-center hover:bg-[#1a1a1a]">
-          <div className="text-white font-medium">{a.staff_name}</div>
-          <div className="text-[#888]">{a.building_name || a.building_id}</div>
-          <div className="text-[#888]">{new Date(a.entry_time).toLocaleString()}</div>
-          <div className="text-[#888]">{a.exit_time ? new Date(a.exit_time).toLocaleString() : '-'}</div>
-          <div><span className={`text-xs px-2 py-1 rounded-full ${a.status === 'inside' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-[#1f1f1f] text-[#888]'}`}>{a.status}</span></div>
+    <div className="space-y-4">
+      {/* Sub-tabs for attendance type */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setAttendanceSubTab('clock')}
+          className={`px-4 py-2 rounded-xl text-sm font-medium transition ${attendanceSubTab === 'clock' ? 'bg-[#d4ae2a] text-black' : 'bg-[#111111] text-[#888] border border-[#1f1f1f] hover:bg-[#1a1a1a]'}`}
+        >
+          Clock In/Out Records
+        </button>
+        <button
+          onClick={() => setAttendanceSubTab('entries')}
+          className={`px-4 py-2 rounded-xl text-sm font-medium transition ${attendanceSubTab === 'entries' ? 'bg-[#d4ae2a] text-black' : 'bg-[#111111] text-[#888] border border-[#1f1f1f] hover:bg-[#1a1a1a]'}`}
+        >
+          Gate Scan Entries
+        </button>
+      </div>
+
+      {/* Clock In/Out Records */}
+      {attendanceSubTab === 'clock' && (
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-2xl overflow-hidden">
+          <div className="p-4 border-b border-[#1f1f1f] grid grid-cols-6 text-sm font-medium text-[#666] uppercase">
+            <div>Name</div><div>Site</div><div>Date</div><div>Clock In</div><div>Clock Out</div><div>Hours</div>
+          </div>
+          {clockAttendance.length ? clockAttendance.map(a => (
+            <div key={a.id} className="p-4 border-b border-[#1f1f1f] last:border-0 grid grid-cols-6 text-sm items-center hover:bg-[#1a1a1a]">
+              <div className="text-white font-medium">{a.staff_name}</div>
+              <div className="text-[#888]">{a.building_name || a.building_id}</div>
+              <div className="text-[#888]">{a.work_date ? new Date(a.work_date).toLocaleDateString() : '-'}</div>
+              <div className="text-[#888]">{a.clock_in_time ? new Date(a.clock_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}</div>
+              <div className="text-[#888]">{a.clock_out_time ? new Date(a.clock_out_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}</div>
+              <div className="text-[#888]">{a.total_hours ? `${parseFloat(a.total_hours).toFixed(1)}h` : '-'}</div>
+            </div>
+          )) : <div className="p-8 text-center text-[#555]">No clock-in/out records found for the selected filters.</div>}
         </div>
-      )) : <div className="p-8 text-center text-[#555]">No attendance entries found.</div>}
+      )}
+
+      {/* Gate Scan Entries */}
+      {attendanceSubTab === 'entries' && (
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-2xl overflow-hidden">
+          <div className="p-4 border-b border-[#1f1f1f] grid grid-cols-5 text-sm font-medium text-[#666] uppercase">
+            <div>Name</div><div>Site</div><div>Entry</div><div>Exit</div><div>Status</div>
+          </div>
+          {attendance.length ? attendance.map(a => (
+            <div key={a.id} className="p-4 border-b border-[#1f1f1f] last:border-0 grid grid-cols-5 text-sm items-center hover:bg-[#1a1a1a]">
+              <div className="text-white font-medium">{a.staff_name}</div>
+              <div className="text-[#888]">{a.building_name || a.building_id}</div>
+              <div className="text-[#888]">{new Date(a.entry_time).toLocaleString()}</div>
+              <div className="text-[#888]">{a.exit_time ? new Date(a.exit_time).toLocaleString() : '-'}</div>
+              <div><span className={`text-xs px-2 py-1 rounded-full ${a.status === 'inside' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-[#1f1f1f] text-[#888]'}`}>{a.status}</span></div>
+            </div>
+          )) : <div className="p-8 text-center text-[#555]">No gate scan entries found for the selected filters.</div>}
+        </div>
+      )}
+
+      {/* Info note */}
+      <div className="bg-[rgba(212,174,42,0.08)] border border-[#d4ae2a]/20 rounded-xl p-4 flex items-start gap-3">
+        <Clock className="w-5 h-5 text-[#d4ae2a] flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-[#d4ae2a] text-sm font-medium">Attendance Records</p>
+          <p className="text-[#888] text-xs mt-1">
+            "Clock In/Out Records" show guards who used the staff portal to clock in/out.
+            "Gate Scan Entries" show guards scanned by security at the gate.
+            Use the date filter above to view historical records. All records are stored permanently.
+          </p>
+        </div>
+      </div>
     </div>
   );
 
