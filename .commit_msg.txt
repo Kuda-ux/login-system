@@ -1,0 +1,14 @@
+Security: Lock CORS, add login rate limit, account lockout, privacy notices
+
+- Lock CORS to explicit allow-list (localhost + vercel.app + FRONTEND_URL)
+  instead of wildcard, with logging of blocked origins
+- Add login-specific rate limiter (10 failed attempts per 15 min per IP)
+- Implement account lockout after 5 failed login attempts (30 min lock),
+  with remaining-attempts feedback and admin unlock endpoint
+- Add failed_login_count / locked_until columns (SQLite + Neon)
+- Reset failed login counter on successful login and on reactivate
+- Add privacy notice to admin, security, and staff login pages
+
+Generated with [Devin](https://devin.ai)
+
+Co-Authored-By: Devin <158243242+devin-ai-integration[bot]@users.noreply.github.com>

@@ -120,6 +120,15 @@ function AdminLogin() {
           </form>
         </div>
 
+        <div className="text-center mt-6 px-2">
+          <p className="text-[#555] text-[11px] leading-relaxed">
+            <span className="text-[#888] font-medium">Privacy Notice:</span> By signing in you consent to Cherubim Security
+            collecting, processing, and storing your login credentials, IP address, device information, and activity
+            logs for security, audit, and operational purposes. Access is monitored and recorded. Unauthorized use is
+            prohibited and may be subject to legal action. See our Privacy Policy for full details.
+          </p>
+        </div>
+
         <p className="text-center text-[#444] text-xs mt-8 tracking-wide">
           CHERUBIM SECURITY (PVT) LTD &middot; ALL ACCESS LOGGED
         </p>

@@ -30,7 +30,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-// Rate limiting
+// Rate limiting - general API
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
@@ -38,7 +38,15 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// CORS configuration - allow Vercel frontend and localhost for development
+// Stricter rate limiting for login endpoint - 10 attempts per 15 minutes
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // limit each IP to 10 login attempts per windowMs
+  message: { error: 'Too many login attempts. Please try again in 15 minutes.' },
+  skipSuccessfulRequests: true // only count failed attempts
+});
+
+// CORS configuration - locked down to allowed origins only
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5000',
@@ -48,10 +56,10 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, etc)
+    // Allow requests with no origin (server-to-server, curl, mobile apps)
     if (!origin) return callback(null, true);
     
-    // Check if origin is allowed
+    // Check if origin is in the allowed list
     const isAllowed = allowedOrigins.some(allowed => {
       if (allowed instanceof RegExp) return allowed.test(origin);
       return allowed === origin;
@@ -60,7 +68,8 @@ app.use(cors({
     if (isAllowed) {
       callback(null, true);
     } else {
-      callback(null, true); // Allow all origins for now (can restrict later)
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true
@@ -98,7 +107,7 @@ app.get('/api/health', async (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', loginLimiter, authRoutes);
 app.use('/api/visitors', visitorRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/tenants', tenantRoutes);

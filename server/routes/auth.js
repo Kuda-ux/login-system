@@ -16,7 +16,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = await getOne('SELECT * FROM users WHERE email = ? AND is_active = 1', [email]);
+    const user = await getOne('SELECT * FROM users WHERE email = ?', [email]);
 
     if (!user) {
       // Log failed login attempt
@@ -25,12 +25,58 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // Check if account is locked due to too many failed attempts
+    if (user.locked_until) {
+      const lockedUntil = new Date(user.locked_until);
+      const now = new Date();
+      if (lockedUntil > now) {
+        const minutesLeft = Math.ceil((lockedUntil - now) / 60000);
+        await runQuery('INSERT INTO login_logs (id, user_id, email, full_name, role, ip_address, user_agent, login_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [uuidv4(), user.id, email, user.full_name, user.role, req.clientIP || req.ip, req.headers['user-agent'] || '', new Date().toISOString(), 'failed']);
+        return res.status(423).json({ error: `Account locked due to too many failed attempts. Try again in ${minutesLeft} minutes.` });
+      } else {
+        // Lock period expired - reset counter
+        await runQuery('UPDATE users SET failed_login_count = 0, locked_until = NULL WHERE id = ?', [user.id]);
+        user.failed_login_count = 0;
+        user.locked_until = null;
+      }
+    }
+
+    // Check if account is active
+    if (user.is_active !== 1) {
+      return res.status(403).json({ error: 'Account has been deactivated. Contact your administrator.' });
+    }
+
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      // Log failed login attempt
-      await runQuery('INSERT INTO login_logs (id, user_id, email, full_name, role, ip_address, user_agent, login_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [uuidv4(), user.id, email, user.full_name, user.role, req.clientIP || req.ip, req.headers['user-agent'] || '', new Date().toISOString(), 'failed']);
-      return res.status(401).json({ error: 'Invalid credentials' });
+      // Increment failed login count
+      const failedCount = (user.failed_login_count || 0) + 1;
+      const MAX_FAILED_ATTEMPTS = 5;
+      const LOCK_DURATION_MINUTES = 30;
+
+      if (failedCount >= MAX_FAILED_ATTEMPTS) {
+        // Lock the account
+        const lockUntil = new Date(Date.now() + LOCK_DURATION_MINUTES * 60000).toISOString();
+        await runQuery('UPDATE users SET failed_login_count = ?, locked_until = ? WHERE id = ?', [failedCount, lockUntil, user.id]);
+        
+        await runQuery('INSERT INTO login_logs (id, user_id, email, full_name, role, ip_address, user_agent, login_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [uuidv4(), user.id, email, user.full_name, user.role, req.clientIP || req.ip, req.headers['user-agent'] || '', new Date().toISOString(), 'failed']);
+        
+        return res.status(423).json({ error: `Account locked after ${MAX_FAILED_ATTEMPTS} failed attempts. Try again in ${LOCK_DURATION_MINUTES} minutes or contact your administrator.` });
+      } else {
+        await runQuery('UPDATE users SET failed_login_count = ? WHERE id = ?', [failedCount, user.id]);
+        
+        await runQuery('INSERT INTO login_logs (id, user_id, email, full_name, role, ip_address, user_agent, login_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [uuidv4(), user.id, email, user.full_name, user.role, req.clientIP || req.ip, req.headers['user-agent'] || '', new Date().toISOString(), 'failed']);
+        
+        const attemptsLeft = MAX_FAILED_ATTEMPTS - failedCount;
+        return res.status(401).json({ error: `Invalid credentials. ${attemptsLeft} attempt${attemptsLeft === 1 ? '' : 's'} remaining before account lockout.` });
+      }
+    }
+
+    // Successful login - reset failed attempt counter
+    if (user.failed_login_count > 0) {
+      await runQuery('UPDATE users SET failed_login_count = 0, locked_until = NULL WHERE id = ?', [user.id]);
     }
 
     const token = jwt.sign(
@@ -271,11 +317,23 @@ router.put('/users/:id/reactivate', authenticateToken, authorizeRoles('admin', '
   try {
     const { id } = req.params;
     const now = new Date().toISOString();
-    await runQuery('UPDATE users SET is_active = 1, updated_at = ? WHERE id = ?', [now, id]);
+    await runQuery('UPDATE users SET is_active = 1, failed_login_count = 0, locked_until = NULL, updated_at = ? WHERE id = ?', [now, id]);
     res.json({ message: 'User reactivated successfully' });
   } catch (err) {
     console.error('Reactivate user error:', err);
     res.status(500).json({ error: 'Failed to reactivate user' });
+  }
+});
+
+// Unlock user account (admin/owner only) - clears failed login count and lock
+router.put('/users/:id/unlock', authenticateToken, authorizeRoles('admin', 'owner'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    await runQuery('UPDATE users SET failed_login_count = 0, locked_until = NULL WHERE id = ?', [id]);
+    res.json({ message: 'Account unlocked successfully' });
+  } catch (err) {
+    console.error('Unlock user error:', err);
+    res.status(500).json({ error: 'Failed to unlock account' });
   }
 });
 

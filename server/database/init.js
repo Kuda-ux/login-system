@@ -134,7 +134,8 @@ if (process.env.DATABASE_URL) {
 
     for (const column of [
       'staff_qr_code TEXT', 'employee_number TEXT', 'date_of_birth TEXT', 'address TEXT',
-      'emergency_contact TEXT', "clearance_status TEXT DEFAULT 'not_cleared'", 'profile_photo TEXT', 'client_id TEXT'
+      'emergency_contact TEXT', "clearance_status TEXT DEFAULT 'not_cleared'", 'profile_photo TEXT', 'client_id TEXT',
+      'failed_login_count INTEGER DEFAULT 0', 'locked_until TEXT'
     ]) {
       try { db.run(`ALTER TABLE users ADD COLUMN ${column}`); } catch (err) {}
     }
